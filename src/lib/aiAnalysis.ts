@@ -38,8 +38,18 @@ export async function analyzeProduct(
   analysisType: 'full' | 'quick' = 'full'
 ): Promise<AnalyzeProductResult> {
   try {
+    // Convert blob URLs to base64 data URLs
+    const base64Images = await Promise.all(
+      imageUrls.map(async (url) => {
+        if (url.startsWith('blob:')) {
+          return await blobUrlToBase64(url);
+        }
+        return url;
+      })
+    );
+
     const { data, error } = await supabase.functions.invoke('analyze-product', {
-      body: { imageUrls, analysisType }
+      body: { imageUrls: base64Images, analysisType }
     });
 
     if (error) {
@@ -56,6 +66,20 @@ export async function analyzeProduct(
     console.error('Exception in analyzeProduct:', err);
     return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
   }
+}
+
+/**
+ * Convert blob URL to base64 data URL
+ */
+async function blobUrlToBase64(blobUrl: string): Promise<string> {
+  const response = await fetch(blobUrl);
+  const blob = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
 /**
