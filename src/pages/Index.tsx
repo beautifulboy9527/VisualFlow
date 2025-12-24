@@ -1,211 +1,207 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Hexagon, 
-  Zap, 
-  Image as ImageIcon, 
   Sparkles, 
   ArrowRight, 
   Globe,
   ShoppingBag,
   Store,
   Video,
-  Star,
-  Play,
-  Layers,
   Wand2,
-  Download
+  MousePointer,
+  Zap,
+  Layers,
+  Bot
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const features = [
-  {
-    icon: Sparkles,
-    title: 'AI-Powered Generation',
-    description: 'Multi-agent system analyzes your product and creates perfect marketing visuals in seconds.',
-  },
-  {
-    icon: ImageIcon,
-    title: 'Native Text Rendering',
-    description: '96%+ text accuracy with Nano Banana Pro technology. No more blurry or distorted text.',
-  },
-  {
-    icon: Globe,
-    title: 'Multi-Platform Ready',
-    description: 'Optimized outputs for Amazon A+, Shopify, TikTok Shop, and more e-commerce platforms.',
-  },
-  {
-    icon: Layers,
-    title: 'One-Click Export',
-    description: 'Batch export all assets with proper naming and formats for each platform.',
-  },
-  {
-    icon: Wand2,
-    title: 'Smart Copy Generation',
-    description: 'AI generates compelling product copy, headlines, and CTAs automatically.',
-  },
-  {
-    icon: Download,
-    title: 'Brand Consistency',
-    description: 'Maintain your visual identity across all generated assets with brand presets.',
-  },
-];
-
-const platforms = [
-  { icon: ShoppingBag, name: 'Amazon', color: 'text-warning' },
-  { icon: Store, name: 'Shopify', color: 'text-success' },
-  { icon: Video, name: 'TikTok', color: 'text-destructive' },
-];
-
-const stats = [
-  { value: '20s', label: 'Generation Time' },
-  { value: '96%+', label: 'Text Accuracy' },
-  { value: '99.5%', label: 'Uptime' },
-  { value: '10K+', label: 'Images Generated' },
-];
-
-const testimonials = [
-  {
-    quote: "PixMiller transformed how we create product images. What used to take hours now takes seconds.",
-    author: "Sarah Chen",
-    role: "E-commerce Manager",
-    avatar: "S",
-  },
-  {
-    quote: "The AI understands exactly what makes a great e-commerce image. Incredible results every time.",
-    author: "Mike Johnson",
-    role: "Amazon FBA Seller",
-    avatar: "M",
-  },
-  {
-    quote: "Best investment for our Shopify store. Our conversion rate increased by 40% after using PixMiller.",
-    author: "Emma Davis",
-    role: "DTC Brand Owner",
-    avatar: "E",
-  },
-];
-
 const Index = () => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  const platforms = [
+    { icon: ShoppingBag, name: 'Amazon' },
+    { icon: Store, name: 'Shopify' },
+    { icon: Video, name: 'TikTok' },
+  ];
+
+  const stats = [
+    { value: '20s', label: 'Generation' },
+    { value: '96%', label: 'Accuracy' },
+    { value: '10K+', label: 'Created' },
+  ];
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Spline 3D Background */}
-      <div className="fixed inset-0 z-0">
-        <iframe 
-          src="https://my.spline.design/liquidglass-opk6GesZcTQLlUt0AWYOnQsu-cMM/" 
-          frameBorder="0" 
-          width="100%" 
-          height="100%"
-          style={{ width: '100%', height: '100%' }}
-          title="3D Background"
+      {/* Liquid Glass Background Effect */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        {/* Main gradient orb following mouse */}
+        <div 
+          className="absolute w-[800px] h-[800px] rounded-full transition-all duration-1000 ease-out"
+          style={{
+            left: mousePosition.x - 400,
+            top: mousePosition.y - 400,
+            background: 'radial-gradient(circle, hsl(245 85% 60% / 0.15) 0%, hsl(280 80% 60% / 0.08) 40%, transparent 70%)',
+            filter: 'blur(60px)',
+          }}
         />
-        {/* Gradient overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background pointer-events-none" />
+        
+        {/* Static ambient orbs */}
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-gradient-radial from-primary/10 via-primary/5 to-transparent blur-3xl animate-float" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-gradient-radial from-accent/10 via-transparent to-transparent blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-1/2 left-1/3 w-[400px] h-[400px] rounded-full bg-gradient-radial from-primary/5 to-transparent blur-2xl animate-float" style={{ animationDelay: '3s' }} />
+        
+        {/* Subtle grid overlay */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
       </div>
 
       {/* Content Layer */}
       <div className="relative z-10">
-        {/* Header */}
-        <header className="border-b border-border/30 glass sticky top-0 z-50">
-          <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-gradient-primary shadow-primary">
-                <Hexagon className="h-5 w-5 text-primary-foreground" />
+        {/* Minimal Header */}
+        <header className="fixed top-0 left-0 right-0 z-50">
+          <div className="container mx-auto px-6">
+            <div className="h-20 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center shadow-primary">
+                  <span className="text-primary-foreground font-bold text-sm">P</span>
+                </div>
+                <span className="font-display font-semibold text-foreground tracking-tight">
+                  PixMiller
+                </span>
               </div>
-              <span className="text-lg font-display font-bold text-foreground tracking-tight">
-                PixMiller
-              </span>
-            </div>
-            
-            <nav className="hidden md:flex items-center gap-6">
-              <a href="#features" className="text-sm text-foreground-secondary hover:text-foreground transition-colors">
-                Features
-              </a>
-              <a href="#how-it-works" className="text-sm text-foreground-secondary hover:text-foreground transition-colors">
-                How It Works
-              </a>
-              <a href="#testimonials" className="text-sm text-foreground-secondary hover:text-foreground transition-colors">
-                Reviews
-              </a>
-            </nav>
-            
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" className="hidden sm:flex">
-                Sign In
-              </Button>
+              
               <Link to="/workbench">
-                <Button size="sm" className="bg-gradient-primary hover:opacity-90 shadow-primary">
-                  Get Started
-                  <ArrowRight className="h-4 w-4 ml-1" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-foreground-secondary hover:text-foreground hover:bg-transparent gap-2 group"
+                >
+                  Start
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
             </div>
           </div>
         </header>
 
-        {/* Hero Section */}
-        <section className="relative min-h-[90vh] flex items-center">
-          <div className="container mx-auto px-6 py-24 md:py-32 relative">
-            <div className="max-w-4xl mx-auto text-center">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/30 text-sm text-primary mb-8 animate-fade-in shadow-glow">
-                <Zap className="h-4 w-4 animate-pulse" />
-                <span className="font-medium">AI Visual Generation Workbench</span>
-                <span className="px-2 py-0.5 rounded-full bg-primary/20 text-xs">v2.0</span>
-              </div>
-              
-              {/* Headline */}
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-foreground leading-tight mb-6 animate-slide-up">
-                Create 
-                <span className="text-gradient-primary"> stunning visuals </span>
-                <br />
-                with AI precision
-              </h1>
-              
-              {/* Subheadline */}
-              <p className="text-lg md:text-xl text-foreground-secondary max-w-2xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                Upload your product photo, AI generates complete e-commerce visual solutions —
-                <span className="text-foreground font-medium"> Main KV, Banners, Social, and more</span>. One click, all platforms.
-              </p>
-              
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                <Link to="/workbench">
-                  <Button variant="generate" size="xl" className="group shadow-primary animate-glow-pulse">
-                    <Sparkles className="h-5 w-5 mr-2 group-hover:animate-pulse" />
-                    Start Creating — Free
-                  </Button>
-                </Link>
-                <Button variant="outline" size="lg" className="glass border-border/50 gap-2">
-                  <Play className="h-4 w-4" />
-                  Watch Demo
+        {/* Hero Section - Ultra Minimal */}
+        <section className="min-h-screen flex items-center justify-center px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Floating badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/50 backdrop-blur-xl border border-border/30 text-xs text-foreground-secondary mb-12 animate-fade-in">
+              <Bot className="h-3.5 w-3.5 text-primary" />
+              <span>AI Multi-Agent Visual System</span>
+              <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-medium">v2.0</span>
+            </div>
+            
+            {/* Main headline - Clean typography */}
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-foreground leading-[0.95] mb-8 animate-slide-up tracking-tight">
+              Create
+              <br />
+              <span className="text-gradient-primary">stunning</span>
+              <br />
+              visuals
+            </h1>
+            
+            {/* Subtitle */}
+            <p className="text-lg md:text-xl text-foreground-secondary max-w-lg mx-auto mb-12 animate-slide-up leading-relaxed" style={{ animationDelay: '0.1s' }}>
+              Upload your product. AI handles everything —
+              <span className="text-foreground"> Main KV, Banners, Social</span>, and more.
+            </p>
+            
+            {/* CTA - Single prominent button */}
+            <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+              <Link to="/workbench">
+                <Button 
+                  size="xl" 
+                  className="bg-foreground text-background hover:bg-foreground/90 rounded-full px-10 h-14 text-base font-medium shadow-lg group"
+                  onMouseEnter={() => setIsHovering(true)}
+                  onMouseLeave={() => setIsHovering(false)}
+                >
+                  <Sparkles className={`h-5 w-5 mr-2 transition-all ${isHovering ? 'scale-110' : ''}`} />
+                  Start Creating
+                  <ArrowRight className="h-5 w-5 ml-2 transition-transform group-hover:translate-x-1" />
                 </Button>
-              </div>
-              
-              {/* Platform badges */}
-              <div className="flex items-center justify-center gap-6 mt-12 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                <span className="text-sm text-foreground-muted">Optimized for:</span>
-                {platforms.map(({ icon: Icon, name, color }) => (
-                  <div key={name} className="flex items-center gap-2 px-3 py-1.5 rounded-full glass border border-border/30">
-                    <Icon className={`h-4 w-4 ${color}`} />
-                    <span className="text-sm font-medium text-foreground-secondary">{name}</span>
-                  </div>
-                ))}
-              </div>
+              </Link>
+            </div>
+            
+            {/* Platform indicators - Minimal */}
+            <div className="flex items-center justify-center gap-8 mt-16 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              {platforms.map(({ icon: Icon, name }) => (
+                <div key={name} className="flex items-center gap-2 text-foreground-muted hover:text-foreground-secondary transition-colors">
+                  <Icon className="h-4 w-4" />
+                  <span className="text-sm">{name}</span>
+                </div>
+              ))}
             </div>
           </div>
-
-          {/* Floating elements */}
-          <div className="absolute top-1/4 left-10 w-20 h-20 rounded-full bg-primary/10 blur-2xl animate-float" />
-          <div className="absolute bottom-1/4 right-10 w-32 h-32 rounded-full bg-accent/10 blur-3xl animate-float" style={{ animationDelay: '1s' }} />
         </section>
 
-        {/* Stats Section */}
-        <section className="relative border-y border-border/30 glass">
-          <div className="container mx-auto px-6 py-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {/* Feature Section - Minimal Cards */}
+        <section className="py-32 px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                { 
+                  icon: MousePointer, 
+                  title: 'Upload', 
+                  desc: 'Drop your product image',
+                  gradient: 'from-primary/10 to-primary/5'
+                },
+                { 
+                  icon: Wand2, 
+                  title: 'Configure', 
+                  desc: 'AI generates copy & layout',
+                  gradient: 'from-accent/10 to-accent/5'
+                },
+                { 
+                  icon: Zap, 
+                  title: 'Generate', 
+                  desc: 'Get all platform-ready visuals',
+                  gradient: 'from-primary/10 to-accent/5'
+                },
+              ].map(({ icon: Icon, title, desc, gradient }, index) => (
+                <div 
+                  key={title}
+                  className={cn(
+                    'group relative p-8 rounded-3xl border border-border/30 bg-gradient-to-b',
+                    gradient,
+                    'hover:border-border/50 transition-all duration-500',
+                    'animate-fade-in'
+                  )}
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-card/80 backdrop-blur flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Icon className="h-6 w-6 text-foreground" />
+                  </div>
+                  <h3 className="text-xl font-display font-semibold text-foreground mb-2">{title}</h3>
+                  <p className="text-foreground-muted">{desc}</p>
+                  
+                  {/* Step number */}
+                  <div className="absolute top-6 right-6 w-8 h-8 rounded-full bg-card/50 flex items-center justify-center text-sm font-medium text-foreground-muted">
+                    {String(index + 1).padStart(2, '0')}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Section - Clean horizontal */}
+        <section className="py-20 px-6 border-y border-border/20">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-center gap-16 md:gap-24">
               {stats.map(({ value, label }) => (
-                <div key={label} className="text-center group">
-                  <p className="text-3xl md:text-4xl font-display font-bold text-gradient-primary mb-1 group-hover:scale-110 transition-transform">{value}</p>
+                <div key={label} className="text-center">
+                  <p className="text-4xl md:text-5xl font-display font-bold text-foreground mb-1">{value}</p>
                   <p className="text-sm text-foreground-muted">{label}</p>
                 </div>
               ))}
@@ -213,162 +209,42 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Features Section */}
-        <section id="features" className="py-24 relative">
-          <div className="absolute inset-0 bg-dot-pattern opacity-30" />
-          <div className="container mx-auto px-6 relative">
-            <div className="text-center mb-16">
-              <span className="inline-block px-3 py-1 rounded-full glass border border-primary/20 text-xs text-primary font-medium mb-4">
-                FEATURES
-              </span>
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
-                Everything you need to create
-                <span className="text-gradient-primary"> stunning product visuals</span>
-              </h2>
-              <p className="text-foreground-secondary max-w-2xl mx-auto">
-                Our multi-agent AI system handles everything from product analysis to 
-                final rendering, delivering consistent, brand-ready visuals every time.
-              </p>
+        {/* Final CTA */}
+        <section className="py-32 px-6">
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 mb-8">
+              <Layers className="h-5 w-5 text-primary" />
+              <span className="text-sm text-foreground-secondary">Human-in-the-loop AI</span>
             </div>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {features.map(({ icon: Icon, title, description }, index) => (
-                <div 
-                  key={title}
-                  className="group p-6 rounded-xl glass border border-border/30 hover:border-primary/30 hover:shadow-glow transition-all duration-300 animate-fade-in"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <div className="p-3 rounded-lg bg-gradient-primary w-fit mb-4 shadow-primary group-hover:scale-110 transition-transform">
-                    <Icon className="h-6 w-6 text-primary-foreground" />
-                  </div>
-                  <h3 className="text-lg font-display font-semibold text-foreground mb-2">{title}</h3>
-                  <p className="text-sm text-foreground-secondary leading-relaxed">{description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* How It Works */}
-        <section id="how-it-works" className="py-24 relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-          <div className="container mx-auto px-6 relative">
-            <div className="text-center mb-16">
-              <span className="inline-block px-3 py-1 rounded-full glass border border-primary/20 text-xs text-primary font-medium mb-4">
-                HOW IT WORKS
-              </span>
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
-                Three steps to perfect visuals
-              </h2>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              {[
-                { step: '01', title: 'Upload', desc: 'Drop your product image and let AI analyze it', icon: ImageIcon },
-                { step: '02', title: 'Configure', desc: 'Select modules, review AI-generated copy', icon: Wand2 },
-                { step: '03', title: 'Generate', desc: 'One click to get all platform-ready visuals', icon: Sparkles },
-              ].map(({ step, title, desc, icon: Icon }, index) => (
-                <div key={step} className="text-center group relative">
-                  {index < 2 && (
-                    <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-px bg-gradient-to-r from-primary/50 to-transparent" />
-                  )}
-                  <div className="relative inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-gradient-primary shadow-primary mb-6 group-hover:scale-110 transition-transform">
-                    <Icon className="h-10 w-10 text-primary-foreground" />
-                    <span className="absolute -top-2 -right-2 w-8 h-8 rounded-lg bg-card border border-border flex items-center justify-center text-xs font-bold text-primary">
-                      {step}
-                    </span>
-                  </div>
-                  <h3 className="font-display font-bold text-xl text-foreground mb-2">{title}</h3>
-                  <p className="text-sm text-foreground-secondary">{desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials */}
-        <section id="testimonials" className="py-24">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-16">
-              <span className="inline-block px-3 py-1 rounded-full glass border border-primary/20 text-xs text-primary font-medium mb-4">
-                TESTIMONIALS
-              </span>
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
-                Loved by e-commerce sellers
-              </h2>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {testimonials.map(({ quote, author, role, avatar }, index) => (
-                <div 
-                  key={author}
-                  className="p-6 rounded-xl glass border border-border/30 hover:border-primary/20 transition-all animate-fade-in"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <div className="flex gap-1 mb-4">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className="h-4 w-4 fill-warning text-warning" />
-                    ))}
-                  </div>
-                  <p className="text-foreground mb-6 italic">"{quote}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center text-primary-foreground font-bold shadow-primary">
-                      {avatar}
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{author}</p>
-                      <p className="text-sm text-foreground-muted">{role}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-24 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-primary opacity-90" />
-          <div className="absolute inset-0 bg-grid-pattern opacity-10" />
-          <div className="container mx-auto px-6 text-center relative">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-primary-foreground mb-4">
-              Ready to transform your product images?
+            <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-6 leading-tight">
+              Ready to transform<br />your product visuals?
             </h2>
-            <p className="text-primary-foreground/80 mb-10 max-w-xl mx-auto text-lg">
-              Join thousands of e-commerce sellers creating stunning visuals with PixMiller.
-            </p>
+            
             <Link to="/workbench">
               <Button 
-                size="xl" 
-                className="bg-background text-foreground hover:bg-background/90 shadow-lg font-display font-semibold"
+                size="lg" 
+                className="bg-gradient-primary text-primary-foreground hover:opacity-90 rounded-full px-8 shadow-primary"
               >
-                Start Creating for Free
-                <ArrowRight className="h-5 w-5 ml-2" />
+                Get Started — Free
               </Button>
             </Link>
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="border-t border-border/30 py-12 glass">
-          <div className="container mx-auto px-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-md bg-gradient-primary shadow-primary">
-                  <Hexagon className="h-4 w-4 text-primary-foreground" />
-                </div>
-                <span className="font-display font-bold text-foreground">PixMiller</span>
+        {/* Minimal Footer */}
+        <footer className="py-8 px-6 border-t border-border/20">
+          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded bg-gradient-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-xs">P</span>
               </div>
-              
-              <div className="flex items-center gap-6 text-sm text-foreground-muted">
-                <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-                <a href="#" className="hover:text-foreground transition-colors">Terms</a>
-                <a href="#" className="hover:text-foreground transition-colors">Contact</a>
-              </div>
-              
-              <p className="text-sm text-foreground-muted">
-                © 2025 PixMiller. AI-powered visual generation.
-              </p>
+              <span className="text-sm text-foreground-muted">PixMiller © 2025</span>
+            </div>
+            
+            <div className="flex items-center gap-6 text-sm text-foreground-muted">
+              <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
+              <a href="#" className="hover:text-foreground transition-colors">Terms</a>
             </div>
           </div>
         </footer>
@@ -376,5 +252,10 @@ const Index = () => {
     </div>
   );
 };
+
+// Helper function
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
+}
 
 export default Index;
