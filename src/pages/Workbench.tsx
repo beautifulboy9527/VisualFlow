@@ -2,9 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { Header } from '@/components/layout/Header';
 import { UploadZone } from '@/components/workbench/UploadZone';
 import { EditableAIAnalysis } from '@/components/workbench/EditableAIAnalysis';
-import { OutputModuleSelector, modules } from '@/components/workbench/OutputModuleSelector';
+import { OutputModuleSelector, modules, OutputModuleSize } from '@/components/workbench/OutputModuleSelector';
 import { CopyPreviewCards, CopyPreview } from '@/components/workbench/CopyPreviewCards';
-import { CustomSizeInput, presets } from '@/components/workbench/CustomSizeInput';
 import { GenerationConfirmModal } from '@/components/workbench/GenerationConfirmModal';
 import { CelebrationOverlay } from '@/components/workbench/CelebrationOverlay';
 import { EnhancedResultCard } from '@/components/workbench/EnhancedResultCard';
@@ -28,11 +27,10 @@ const Workbench: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<{ material: string; category: string; recommendedStyle: string; confidence: number } | null>(null);
   const [selectedModules, setSelectedModules] = useState<string[]>(['main_kv', 'banner']);
+  const [moduleSizes, setModuleSizes] = useState<Record<string, OutputModuleSize>>({});
+  const [agentMode, setAgentMode] = useState(false);
   const [copyPreviews, setCopyPreviews] = useState<CopyPreview[]>([]);
   const [isGeneratingCopy, setIsGeneratingCopy] = useState(false);
-  const [outputWidth, setOutputWidth] = useState(1500);
-  const [outputHeight, setOutputHeight] = useState(1500);
-  const [selectedPreset, setSelectedPreset] = useState<string | null>('1:1');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -79,16 +77,14 @@ const Workbench: React.FC = () => {
     );
   };
 
+  const handleSizeChange = (moduleId: string, size: OutputModuleSize) => {
+    setModuleSizes(prev => ({ ...prev, [moduleId]: size }));
+  };
+
   const handleUpdateAnalysis = (updates: Partial<{ material: string; category: string; recommendedStyle: string }>) => {
     if (analysisResult) {
       setAnalysisResult({ ...analysisResult, ...updates });
     }
-  };
-
-  const handlePresetSelect = (preset: { id: string; width: number; height: number }) => {
-    setSelectedPreset(preset.id);
-    setOutputWidth(preset.width);
-    setOutputHeight(preset.height);
   };
 
   const totalCredits = modules.filter(m => selectedModules.includes(m.id)).reduce((sum, m) => sum + m.credits, 0);
@@ -146,10 +142,14 @@ const Workbench: React.FC = () => {
                 {analysisResult && (
                   <>
                     <section>
-                      <OutputModuleSelector selectedModules={selectedModules} onToggleModule={handleToggleModule} />
-                    </section>
-                    <section>
-                      <CustomSizeInput width={outputWidth} height={outputHeight} onWidthChange={setOutputWidth} onHeightChange={setOutputHeight} selectedPreset={selectedPreset} onPresetSelect={handlePresetSelect} />
+                      <OutputModuleSelector 
+                        selectedModules={selectedModules} 
+                        onToggleModule={handleToggleModule}
+                        moduleSizes={moduleSizes}
+                        onSizeChange={handleSizeChange}
+                        agentMode={agentMode}
+                        onAgentModeChange={setAgentMode}
+                      />
                     </section>
                     <section>
                       <CopyPreviewCards previews={copyPreviews} onUpdatePreview={(id, updates) => setCopyPreviews(prev => prev.map(p => p.moduleId === id ? { ...p, ...updates } : p))} onRegenerateCopy={generateCopyPreviews} isGeneratingCopy={isGeneratingCopy} />
