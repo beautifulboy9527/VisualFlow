@@ -102,9 +102,10 @@ const WorkbenchContent: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const analysisTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // AI Analysis when images uploaded (with debounce)
+  // AI Analysis - ONLY trigger when BOTH platform selected AND images uploaded (Agent mode only)
   useEffect(() => {
-    if (uploadedImages.length > 0 && isAgentMode) {
+    // AI analysis requires: platform selected + images uploaded + agent mode
+    if (uploadedImages.length > 0 && selectedPlatform && isAgentMode && !aiAnalysis) {
       // Clear any pending analysis
       if (analysisTimeoutRef.current) {
         clearTimeout(analysisTimeoutRef.current);
@@ -120,7 +121,7 @@ const WorkbenchContent: React.FC = () => {
         clearTimeout(analysisTimeoutRef.current);
       }
     };
-  }, [uploadedImages.length, isAgentMode]);
+  }, [uploadedImages.length, selectedPlatform, isAgentMode]);
 
   // Auto-recommend modules when platform is selected in Agent mode
   useEffect(() => {
@@ -144,6 +145,20 @@ const WorkbenchContent: React.FC = () => {
       }
     }
   }, [selectedPlatform, isAgentMode]);
+
+  // In Manual mode, clear AI-specific defaults
+  useEffect(() => {
+    if (!isAgentMode) {
+      // Manual mode: set to manual selection, not AI auto
+      if (visualStyle === 'ai_auto') {
+        setVisualStyle('magazine'); // Default to first concrete style
+      }
+      if (layoutStyle === 'ai_auto') {
+        setLayoutStyle('magazine_grid'); // Default to first concrete layout
+      }
+      setAiRecommendedStyle(undefined);
+    }
+  }, [isAgentMode]);
 
   const runAIAnalysis = async () => {
     if (uploadedImages.length === 0) return;
@@ -389,16 +404,43 @@ const WorkbenchContent: React.FC = () => {
                     />
                   </ConfigSection>
 
-                  {/* 02 - Product Info */}
+                  {/* 02 - Platform Selection (BEFORE AI Analysis - user must choose platform first) */}
                   {uploadedImages.length > 0 && (
                     <ConfigSection 
                       number="02" 
+                      title={language === 'zh' ? '平台配置' : 'Platform'}
+                      icon={<Layers className="h-3.5 w-3.5" />}
+                      isComplete={selectedModules.length > 0}
+                      isAgentMode={isAgentMode}
+                    >
+                      <PlatformConfig
+                        selectedPlatform={selectedPlatform}
+                        onSelectPlatform={setSelectedPlatform}
+                        selectedModules={selectedModules}
+                        onUpdateModules={setSelectedModules}
+                        isAgentMode={isAgentMode}
+                      />
+                    </ConfigSection>
+                  )}
+
+                  {/* 03 - Product Info (AI fills after platform selected in Agent mode) */}
+                  {uploadedImages.length > 0 && selectedPlatform && (
+                    <ConfigSection 
+                      number="03" 
                       title={language === 'zh' ? '商品信息' : 'Product Info'}
                       icon={<Package className="h-3.5 w-3.5" />}
                       isComplete={!!productName}
                       isProcessing={isAIProcessing}
                       isAgentMode={isAgentMode}
                     >
+                      {isAgentMode && !aiAnalysis && !isAIProcessing && (
+                        <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 mb-2">
+                          <p className="text-xs text-primary flex items-center gap-2">
+                            <Sparkles className="h-3.5 w-3.5" />
+                            {language === 'zh' ? 'AI 正在准备分析产品图片...' : 'AI preparing to analyze product images...'}
+                          </p>
+                        </div>
+                      )}
                       <div className="space-y-2">
                         <div>
                           <label className="text-[10px] text-foreground-muted mb-1 block">
@@ -432,25 +474,6 @@ const WorkbenchContent: React.FC = () => {
                     </ConfigSection>
                   )}
 
-                  {/* 03 - Platform & Modules */}
-                  {uploadedImages.length > 0 && (
-                    <ConfigSection 
-                      number="03" 
-                      title={language === 'zh' ? '平台配置' : 'Platform'}
-                      icon={<Layers className="h-3.5 w-3.5" />}
-                      isComplete={selectedModules.length > 0}
-                      isAgentMode={isAgentMode}
-                    >
-                      <PlatformConfig
-                        selectedPlatform={selectedPlatform}
-                        onSelectPlatform={setSelectedPlatform}
-                        selectedModules={selectedModules}
-                        onUpdateModules={setSelectedModules}
-                        isAgentMode={isAgentMode}
-                      />
-                    </ConfigSection>
-                  )}
-
                   {/* 04 - Scene Planning */}
                   {selectedPlatform && (
                     <ConfigSection 
@@ -471,7 +494,7 @@ const WorkbenchContent: React.FC = () => {
                     </ConfigSection>
                   )}
 
-                  {/* 05 - Visual & Layout */}
+                  {/* 05 - Visual & Layout (AI recommends in Agent mode, user picks in Manual) */}
                   {selectedScenes.length > 0 && (
                     <ConfigSection 
                       number="05" 
@@ -480,6 +503,14 @@ const WorkbenchContent: React.FC = () => {
                       isComplete={visualStyle !== 'ai_auto' || isAgentMode}
                       isAgentMode={isAgentMode}
                     >
+                      {isAgentMode && aiRecommendedStyle && aiRecommendedStyle !== 'ai_auto' && (
+                        <div className="p-2 rounded-lg bg-primary/5 border border-primary/20 mb-3">
+                          <p className="text-xs text-primary flex items-center gap-2">
+                            <Sparkles className="h-3.5 w-3.5" />
+                            {language === 'zh' ? 'AI 已根据产品特性推荐风格' : 'AI recommended style based on product'}
+                          </p>
+                        </div>
+                      )}
                       <VisualStylePicker
                         selectedVisual={visualStyle}
                         selectedLayout={layoutStyle}

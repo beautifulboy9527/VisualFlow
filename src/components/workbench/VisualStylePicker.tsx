@@ -71,6 +71,7 @@ interface VisualStylePickerProps {
   onVisualChange: (style: VisualStyleId) => void;
   onLayoutChange: (style: LayoutStyleId) => void;
   aiRecommendedVisual?: VisualStyleId;
+  aiRecommendedLayout?: LayoutStyleId;
   isAgentMode?: boolean;
 }
 
@@ -80,24 +81,40 @@ export const VisualStylePicker: React.FC<VisualStylePickerProps> = ({
   onVisualChange,
   onLayoutChange,
   aiRecommendedVisual,
+  aiRecommendedLayout,
   isAgentMode = false,
 }) => {
+  // Filter styles based on mode - Manual mode hides "AI Auto" option
+  const availableVisualStyles = isAgentMode 
+    ? visualStyles 
+    : visualStyles.filter(s => s.id !== 'ai_auto');
+  
+  const availableLayoutStyles = isAgentMode 
+    ? layoutStyles 
+    : layoutStyles.filter(s => s.id !== 'ai_auto');
+
   return (
     <div className="space-y-4">
       {/* Visual Style - Primary, more prominent */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-foreground-secondary">KV 视觉风格</span>
-          {aiRecommendedVisual && (
+          {isAgentMode && aiRecommendedVisual && aiRecommendedVisual !== 'ai_auto' && (
             <span className="flex items-center gap-1 text-xs text-primary">
               <Sparkles className="h-3 w-3" />
               AI推荐
             </span>
           )}
+          {!isAgentMode && (
+            <span className="text-[10px] text-foreground-muted bg-secondary px-1.5 py-0.5 rounded">手动选择</span>
+          )}
         </div>
         
         <Select value={selectedVisual} onValueChange={(v) => onVisualChange(v as VisualStyleId)}>
-          <SelectTrigger className="w-full h-11 bg-card border-border/50">
+          <SelectTrigger className={cn(
+            "w-full h-11 border-border/50",
+            isAgentMode ? "bg-card" : "bg-card/80"
+          )}>
             <SelectValue>
               {(() => {
                 const style = visualStyles.find(s => s.id === selectedVisual);
@@ -105,7 +122,7 @@ export const VisualStylePicker: React.FC<VisualStylePickerProps> = ({
                   <span className="flex items-center gap-2">
                     <span className="text-lg">{style.icon}</span>
                     <span className="font-medium">{style.nameZh}</span>
-                    {style.id === aiRecommendedVisual && (
+                    {isAgentMode && style.id === aiRecommendedVisual && style.id !== 'ai_auto' && (
                       <span className="text-[10px] text-primary bg-primary/10 px-1.5 rounded">推荐</span>
                     )}
                   </span>
@@ -114,14 +131,14 @@ export const VisualStylePicker: React.FC<VisualStylePickerProps> = ({
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {visualStyles.map(style => (
+            {availableVisualStyles.map(style => (
               <SelectItem key={style.id} value={style.id}>
                 <div className="flex items-center gap-3 py-1">
                   <span className="text-xl">{style.icon}</span>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{style.nameZh}</span>
-                      {style.id === aiRecommendedVisual && (
+                      {isAgentMode && style.id === aiRecommendedVisual && style.id !== 'ai_auto' && (
                         <span className="text-[10px] text-primary bg-primary/10 px-1.5 rounded">推荐</span>
                       )}
                     </div>
@@ -138,7 +155,11 @@ export const VisualStylePicker: React.FC<VisualStylePickerProps> = ({
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-foreground-muted">排版细节</span>
-          <span className="text-[10px] text-foreground-muted bg-secondary px-1.5 py-0.5 rounded">可选微调</span>
+          {isAgentMode ? (
+            <span className="text-[10px] text-foreground-muted bg-secondary px-1.5 py-0.5 rounded">可选微调</span>
+          ) : (
+            <span className="text-[10px] text-foreground-muted bg-secondary px-1.5 py-0.5 rounded">手动选择</span>
+          )}
         </div>
         
         <Select value={selectedLayout} onValueChange={(v) => onLayoutChange(v as LayoutStyleId)}>
@@ -150,17 +171,23 @@ export const VisualStylePicker: React.FC<VisualStylePickerProps> = ({
                   <span className="flex items-center gap-2 text-foreground-secondary">
                     <span>{style.icon}</span>
                     <span>{style.nameZh}</span>
+                    {isAgentMode && style.id === aiRecommendedLayout && style.id !== 'ai_auto' && (
+                      <span className="text-[10px] text-primary bg-primary/10 px-1.5 rounded">推荐</span>
+                    )}
                   </span>
                 ) : null;
               })()}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {layoutStyles.map(style => (
+            {availableLayoutStyles.map(style => (
               <SelectItem key={style.id} value={style.id}>
                 <span className="flex items-center gap-2">
                   <span>{style.icon}</span>
                   <span>{style.nameZh}</span>
+                  {isAgentMode && style.id === aiRecommendedLayout && style.id !== 'ai_auto' && (
+                    <span className="text-[10px] text-primary bg-primary/10 px-1.5 rounded">推荐</span>
+                  )}
                 </span>
               </SelectItem>
             ))}
