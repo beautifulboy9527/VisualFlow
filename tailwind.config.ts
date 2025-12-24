@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        display: ['Space Grotesk', 'Inter', 'sans-serif'],
       },
       fontSize: {
         'xxs': ['11px', { lineHeight: '1.3' }],
@@ -35,6 +36,7 @@ export default {
           active: "hsl(var(--primary-active))",
           foreground: "hsl(var(--primary-foreground))",
           light: "hsl(var(--primary-light))",
+          glow: "hsl(var(--primary-glow))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -85,16 +87,17 @@ export default {
         },
       },
       borderRadius: {
-        lg: "8px",
-        md: "6px",
-        sm: "4px",
-        xs: "2px",
+        lg: "10px",
+        md: "8px",
+        sm: "6px",
+        xs: "4px",
       },
       boxShadow: {
         'precision-sm': '0 1px 2px rgba(0, 0, 0, 0.05)',
         'precision-md': '0 4px 6px rgba(0, 0, 0, 0.07)',
-        'precision-lg': '0 10px 15px rgba(0, 0, 0, 0.08)',
-        'accent': '0 4px 12px rgba(99, 102, 241, 0.25)',
+        'precision-lg': '0 10px 20px rgba(0, 0, 0, 0.1)',
+        'primary': '0 4px 20px hsl(245 85% 60% / 0.35)',
+        'glow': '0 0 40px hsl(245 100% 70% / 0.25)',
       },
       keyframes: {
         "accordion-down": {
@@ -121,6 +124,18 @@ export default {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.5" },
         },
+        "float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-6px)" },
+        },
+        "shimmer": {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        "glow-pulse": {
+          "0%, 100%": { boxShadow: "0 0 20px hsl(245 85% 60% / 0.3)" },
+          "50%": { boxShadow: "0 0 40px hsl(245 85% 60% / 0.5)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -129,11 +144,18 @@ export default {
         "slide-up": "slide-up 0.2s ease-out",
         "scale-in": "scale-in 0.15s ease-out",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
+        "float": "float 3s ease-in-out infinite",
+        "shimmer": "shimmer 2s linear infinite",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
       },
       transitionDuration: {
         'fast': '150ms',
         'normal': '200ms',
         'slow': '300ms',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
     },
   },
