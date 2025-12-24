@@ -16,6 +16,7 @@ import { ImagePreviewModal } from '@/components/workbench/ImagePreviewModal';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { LanguageProvider, useLanguage } from '@/hooks/useLanguage';
+import { analyzeProduct, mapAIStyleToId, ProductAnalysis } from '@/lib/aiAnalysis';
 import { 
   Zap, 
   Loader2, 
@@ -53,6 +54,7 @@ const WorkbenchContent: React.FC = () => {
   const [activeView, setActiveView] = useState<'workbench' | 'history' | 'templates'>('workbench');
   const [isAgentMode, setIsAgentMode] = useState(true);
   const [isAIProcessing, setIsAIProcessing] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<ProductAnalysis | null>(null);
   
   // Step 1: Images
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
@@ -97,25 +99,119 @@ const WorkbenchContent: React.FC = () => {
   const [previewImage, setPreviewImage] = useState<{ url: string; id: string; index: number } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const analysisTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // AI Analysis when images uploaded
+  // AI Analysis when images uploaded (with debounce)
   useEffect(() => {
     if (uploadedImages.length > 0 && isAgentMode) {
-      runAIAnalysis();
+      // Clear any pending analysis
+      if (analysisTimeoutRef.current) {
+        clearTimeout(analysisTimeoutRef.current);
+      }
+      // Debounce the analysis to avoid multiple calls
+      analysisTimeoutRef.current = setTimeout(() => {
+        runAIAnalysis();
+      }, 500);
     }
-  }, [uploadedImages.length]);
+    
+    return () => {
+      if (analysisTimeoutRef.current) {
+        clearTimeout(analysisTimeoutRef.current);
+      }
+    };
+  }, [uploadedImages.length, isAgentMode]);
 
   const runAIAnalysis = async () => {
+    if (uploadedImages.length === 0) return;
+    
     setIsAIProcessing(true);
     
-    await new Promise(r => setTimeout(r, 800));
-    setBrandName('Premium Skincare');
-    setProductKeywords('hydrating, natural, glow, premium, organic');
-    
-    await new Promise(r => setTimeout(r, 500));
+    try {
+      // Get image URLs for analysis (use previewUrl from UploadedImage)
+      const imageUrls = uploadedImages
+        .filter(img => img.previewUrl)
+        .map(img => img.previewUrl)
+        .slice(0, 4); // Limit to 4 images for API
+      
+      console.log('Starting AI analysis with', imageUrls.length, 'images');
+      
+      const result = await analyzeProduct(imageUrls, 'full');
+      
+      if (result.success && result.analysis) {
+        const analysis = result.analysis;
+        setAiAnalysis(analysis);
+        
+        // Apply analysis results
+        const brandNameText = language === 'zh' ? analysis.brandName.zh : analysis.brandName.en;
+        setBrandName(brandNameText || analysis.brandName.en);
+        
+        // Build keywords from selling points
+        const keywords = analysis.sellingPoints
+          .map(sp => language === 'zh' ? sp.zh : sp.en)
+          .slice(0, 5)
+          .join(', ');
+        setProductKeywords(keywords);
+        
+        // Set platform (default to amazon)
+        setSelectedPlatform('amazon');
+        
+        // Set modules based on platform
+        const amazonPlatform = platformsConfig.find(p => p.id === 'amazon');
+        if (amazonPlatform) {
+          const defaultModules = amazonPlatform.modules.slice(0, 4).map(m => ({
+            id: m.id,
+            name: m.name,
+            aspectRatio: m.aspectRatio,
+          }));
+          setSelectedModules(defaultModules);
+        }
+        
+        // Apply recommended visual style
+        if (analysis.visualStyle?.recommended) {
+          const mappedStyle = mapAIStyleToId(analysis.visualStyle.recommended) as VisualStyleId;
+          setAiRecommendedStyle(mappedStyle);
+          setVisualStyle(mappedStyle);
+        }
+        
+        toast({
+          title: language === 'zh' ? 'AI 分析完成' : 'AI Analysis Complete',
+          description: language === 'zh' 
+            ? `识别品牌: ${brandNameText}, 推荐风格: ${analysis.visualStyle?.recommended || 'auto'}`
+            : `Brand: ${brandNameText}, Recommended: ${analysis.visualStyle?.recommended || 'auto'}`,
+        });
+      } else {
+        console.error('AI analysis failed:', result.error);
+        // Fall back to mock data
+        fallbackToMockAnalysis();
+        
+        if (result.error?.includes('Rate limit') || result.error?.includes('429')) {
+          toast({
+            title: language === 'zh' ? 'AI 请求限制' : 'Rate Limited',
+            description: language === 'zh' ? '请稍后重试' : 'Please try again later',
+            variant: 'destructive',
+          });
+        } else if (result.error?.includes('402') || result.error?.includes('credits')) {
+          toast({
+            title: language === 'zh' ? 'AI 额度不足' : 'Credits Exhausted',
+            description: language === 'zh' ? '请添加额度' : 'Please add credits',
+            variant: 'destructive',
+          });
+        }
+      }
+    } catch (error) {
+      console.error('AI analysis error:', error);
+      fallbackToMockAnalysis();
+    } finally {
+      setIsAIProcessing(false);
+    }
+  };
+
+  const fallbackToMockAnalysis = () => {
+    // Fallback mock data when AI fails
+    setBrandName('Product Brand');
+    setProductKeywords('quality, premium, professional');
     setSelectedPlatform('amazon');
     
-    await new Promise(r => setTimeout(r, 400));
     const amazonPlatform = platformsConfig.find(p => p.id === 'amazon');
     if (amazonPlatform) {
       const defaultModules = amazonPlatform.modules.slice(0, 4).map(m => ({
@@ -126,11 +222,8 @@ const WorkbenchContent: React.FC = () => {
       setSelectedModules(defaultModules);
     }
     
-    await new Promise(r => setTimeout(r, 400));
     setAiRecommendedStyle('natural_organic');
     setVisualStyle('natural_organic');
-    
-    setIsAIProcessing(false);
   };
 
   const handleToggleScene = (scene: SceneType) => {
