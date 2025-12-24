@@ -4,7 +4,9 @@ import { MultiImageUpload, UploadedImage } from '@/components/workbench/MultiIma
 import { PlatformConfig, platformsConfig } from '@/components/workbench/PlatformConfig';
 import { LanguageSettings, Language } from '@/components/workbench/LanguageSettings';
 import { VisualStylePicker, VisualStyleId, LayoutStyleId, visualStyles } from '@/components/workbench/VisualStylePicker';
-import { ScenePlanning, SceneType } from '@/components/workbench/ScenePlanning';
+import { ScenePlanning, SceneType, Scene, defaultScenes } from '@/components/workbench/ScenePlanning';
+import { LogoSettings, LogoConfig } from '@/components/workbench/LogoSettings';
+import { DesignBrief } from '@/components/workbench/DesignBrief';
 import { GenerationConfirmModal } from '@/components/workbench/GenerationConfirmModal';
 import { CelebrationOverlay } from '@/components/workbench/CelebrationOverlay';
 import { EnhancedResultCard } from '@/components/workbench/EnhancedResultCard';
@@ -13,6 +15,7 @@ import { TemplatesPanel } from '@/components/workbench/TemplatesPanel';
 import { ImagePreviewModal } from '@/components/workbench/ImagePreviewModal';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import { LanguageProvider, useLanguage } from '@/hooks/useLanguage';
 import { 
   Zap, 
   Loader2, 
@@ -28,7 +31,7 @@ import {
   Palette,
   Globe,
   Layers,
-  Settings
+  ImagePlus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -45,7 +48,8 @@ const sampleImages = [
   { id: '4', url: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&h=800&fit=crop', label: 'Detail' },
 ];
 
-const Workbench: React.FC = () => {
+const WorkbenchContent: React.FC = () => {
+  const { language, t } = useLanguage();
   const [activeView, setActiveView] = useState<'workbench' | 'history' | 'templates'>('workbench');
   const [isAgentMode, setIsAgentMode] = useState(true);
   const [isAIProcessing, setIsAIProcessing] = useState(false);
@@ -62,7 +66,8 @@ const Workbench: React.FC = () => {
   const [selectedModules, setSelectedModules] = useState<SelectedModule[]>([]);
   
   // Step 4: Scene Planning
-  const [selectedScenes, setSelectedScenes] = useState<SceneType[]>(['main_kv', 'lifestyle', 'detail_1', 'detail_2']);
+  const [selectedScenes, setSelectedScenes] = useState<SceneType[]>(['main', 'front_view', 'lifestyle', 'detail_1']);
+  const [customScenes, setCustomScenes] = useState<Scene[]>([]);
   
   // Step 5: Visual Style
   const [visualStyle, setVisualStyle] = useState<VisualStyleId>('ai_auto');
@@ -72,6 +77,15 @@ const Workbench: React.FC = () => {
   // Step 6: Language
   const [primaryLanguage, setPrimaryLanguage] = useState<Language>('zh');
   const [secondaryLanguage, setSecondaryLanguage] = useState<Language | null>('en');
+  
+  // Step 7: Logo
+  const [logoConfig, setLogoConfig] = useState<LogoConfig>({
+    file: null,
+    preview: null,
+    include: false,
+    position: 'top-left',
+    style: 'original',
+  });
   
   // Generation states
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -126,11 +140,21 @@ const Workbench: React.FC = () => {
   };
 
   const handleSelectAllScenes = () => {
-    const allScenes: SceneType[] = ['main_kv', 'lifestyle', 'craftsmanship', 'detail_1', 'detail_2', 'detail_3', 'reviews', 'brand_story', 'specs', 'usage_guide'];
-    setSelectedScenes(prev => prev.length === allScenes.length ? [] : allScenes);
+    const allSceneIds = [...defaultScenes, ...customScenes].map(s => s.id);
+    setSelectedScenes(prev => prev.length === allSceneIds.length ? [] : allSceneIds);
   };
 
-  const totalImages = selectedModules.length * selectedScenes.length;
+  const handleAddCustomScene = (scene: Scene) => {
+    setCustomScenes(prev => [...prev, scene]);
+  };
+
+  const handleRemoveCustomScene = (sceneId: string) => {
+    setCustomScenes(prev => prev.filter(s => s.id !== sceneId));
+    setSelectedScenes(prev => prev.filter(s => s !== sceneId));
+  };
+
+  // FIXED: Additive calculation (modules + scenes), not multiplicative
+  const totalImages = selectedModules.length + selectedScenes.length;
 
   const handleGenerate = useCallback(() => {
     setShowConfirmModal(false);
@@ -149,14 +173,14 @@ const Workbench: React.FC = () => {
     }, 4000);
   }, [totalImages]);
 
-  const handleDownload = (id: string) => toast({ title: "Downloading..." });
+  const handleDownload = (id: string) => toast({ title: language === 'zh' ? '下载中...' : 'Downloading...' });
   const handleZoom = (id: string) => {
     const index = generatedImages.findIndex(img => img.id === id);
     if (index !== -1) setPreviewImage({ url: generatedImages[index].url, id, index });
   };
-  const handleRegenerate = (id: string) => toast({ title: "Regenerating..." });
+  const handleRegenerate = (id: string) => toast({ title: language === 'zh' ? '重新生成中...' : 'Regenerating...' });
   const handleSelect = (id: string) => setGeneratedImages(prev => prev.map(img => ({ ...img, isSelected: img.id === id ? !img.isSelected : img.isSelected })));
-  const handleDownloadAll = () => toast({ title: "Downloading all..." });
+  const handleDownloadAll = () => toast({ title: language === 'zh' ? '下载全部...' : 'Downloading all...' });
 
   const canGenerate = uploadedImages.length > 0 && !isGenerating && selectedPlatform && selectedModules.length > 0;
 
@@ -166,11 +190,22 @@ const Workbench: React.FC = () => {
     setProductKeywords('');
     setSelectedPlatform(null);
     setSelectedModules([]);
-    setSelectedScenes(['main_kv', 'lifestyle', 'detail_1', 'detail_2']);
+    setSelectedScenes(['main', 'front_view', 'lifestyle', 'detail_1']);
+    setCustomScenes([]);
     setVisualStyle('ai_auto');
     setLayoutStyle('ai_auto');
     setGeneratedImages([]);
+    setLogoConfig({
+      file: null,
+      preview: null,
+      include: false,
+      position: 'top-left',
+      style: 'original',
+    });
   };
+
+  const currentPlatform = platformsConfig.find(p => p.id === selectedPlatform);
+  const currentVisualStyle = visualStyles.find(s => s.id === visualStyle);
 
   return (
     <div className="h-screen flex flex-col bg-mesh">
@@ -181,15 +216,20 @@ const Workbench: React.FC = () => {
           <div className="flex-1 flex overflow-hidden">
             {/* Left Panel - Config */}
             <aside className={cn(
-              "w-[360px] flex-shrink-0 border-r border-border/30 overflow-y-auto transition-all duration-500",
+              "w-[340px] flex-shrink-0 border-r border-border/30 overflow-y-auto transition-all duration-500",
               isAgentMode 
-                ? "bg-gradient-to-b from-primary/[0.02] to-transparent" 
-                : "bg-card/30"
+                ? "bg-gradient-to-b from-primary/[0.03] to-transparent" 
+                : "bg-card/20"
             )}>
               <div className="p-4 space-y-1">
-                {/* Mode Toggle - More Liquid Style */}
+                {/* Mode Toggle - Liquid Style */}
                 <div className="flex items-center justify-between mb-4">
-                  <div className="relative flex items-center p-1 rounded-full bg-secondary/50 border border-border/30">
+                  <div className={cn(
+                    "relative flex items-center p-1 rounded-full border transition-all duration-500",
+                    isAgentMode 
+                      ? "bg-primary/5 border-primary/20" 
+                      : "bg-secondary/50 border-border/30"
+                  )}>
                     <div
                       className={cn(
                         "absolute top-1 h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-full transition-all duration-500 ease-out",
@@ -201,45 +241,46 @@ const Workbench: React.FC = () => {
                     <button
                       onClick={() => setIsAgentMode(true)}
                       className={cn(
-                        "relative z-10 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                        "relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
                         isAgentMode ? "text-primary-foreground" : "text-foreground-muted hover:text-foreground"
                       )}
                     >
-                      <Bot className="h-4 w-4" />
-                      Agent
+                      <Bot className="h-3.5 w-3.5" />
+                      {language === 'zh' ? '智能' : 'Agent'}
                     </button>
                     <button
                       onClick={() => setIsAgentMode(false)}
                       className={cn(
-                        "relative z-10 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                        "relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
                         !isAgentMode ? "text-foreground" : "text-primary-foreground/70 hover:text-primary-foreground"
                       )}
                     >
-                      <Hand className="h-4 w-4" />
-                      Manual
+                      <Hand className="h-3.5 w-3.5" />
+                      {language === 'zh' ? '手动' : 'Manual'}
                     </button>
                   </div>
                   
                   {isAIProcessing && (
                     <div className="flex items-center gap-2 text-xs text-primary">
-                      <div className="flex gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: '150ms' }} />
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: '300ms' }} />
+                      <div className="flex gap-0.5">
+                        <span className="w-1 h-1 rounded-full bg-primary animate-pulse" />
+                        <span className="w-1 h-1 rounded-full bg-primary animate-pulse" style={{ animationDelay: '150ms' }} />
+                        <span className="w-1 h-1 rounded-full bg-primary animate-pulse" style={{ animationDelay: '300ms' }} />
                       </div>
-                      AI分析中
+                      <span>{language === 'zh' ? 'AI分析中' : 'Analyzing'}</span>
                     </div>
                   )}
                 </div>
 
                 {/* Scrollable Config Sections */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {/* 01 - Upload */}
                   <ConfigSection 
                     number="01" 
-                    title="商品上传" 
-                    icon={<Upload className="h-4 w-4" />}
+                    title={language === 'zh' ? '商品上传' : 'Product Upload'}
+                    icon={<Upload className="h-3.5 w-3.5" />}
                     isComplete={uploadedImages.length > 0}
+                    isAgentMode={isAgentMode}
                   >
                     <MultiImageUpload 
                       images={uploadedImages}
@@ -251,28 +292,37 @@ const Workbench: React.FC = () => {
                   {uploadedImages.length > 0 && (
                     <ConfigSection 
                       number="02" 
-                      title="商品信息" 
-                      icon={<Package className="h-4 w-4" />}
+                      title={language === 'zh' ? '商品信息' : 'Product Info'}
+                      icon={<Package className="h-3.5 w-3.5" />}
                       isComplete={!!brandName}
                       isProcessing={isAIProcessing}
+                      isAgentMode={isAgentMode}
                     >
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <div>
-                          <label className="text-xs text-foreground-muted mb-1 block">品牌名称</label>
+                          <label className="text-[10px] text-foreground-muted mb-1 block">
+                            {language === 'zh' ? '品牌名称' : 'Brand Name'}
+                          </label>
                           <input
                             type="text"
                             value={brandName}
                             onChange={(e) => setBrandName(e.target.value)}
-                            placeholder={isAgentMode ? "AI 自动识别..." : "输入品牌名称"}
+                            placeholder={isAgentMode 
+                              ? (language === 'zh' ? 'AI 自动识别...' : 'AI auto-detect...') 
+                              : (language === 'zh' ? '输入品牌名称' : 'Enter brand name')}
                             className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors"
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-foreground-muted mb-1 block">核心卖点/参数</label>
+                          <label className="text-[10px] text-foreground-muted mb-1 block">
+                            {language === 'zh' ? '核心卖点' : 'Key Points'}
+                          </label>
                           <textarea
                             value={productKeywords}
                             onChange={(e) => setProductKeywords(e.target.value)}
-                            placeholder={isAgentMode ? "AI 自动提取..." : "输入产品关键词"}
+                            placeholder={isAgentMode 
+                              ? (language === 'zh' ? 'AI 自动提取...' : 'AI auto-extract...') 
+                              : (language === 'zh' ? '输入产品关键词' : 'Enter keywords')}
                             rows={2}
                             className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors resize-none"
                           />
@@ -285,9 +335,10 @@ const Workbench: React.FC = () => {
                   {uploadedImages.length > 0 && (
                     <ConfigSection 
                       number="03" 
-                      title="平台配置" 
-                      icon={<Layers className="h-4 w-4" />}
+                      title={language === 'zh' ? '平台配置' : 'Platform'}
+                      icon={<Layers className="h-3.5 w-3.5" />}
                       isComplete={selectedModules.length > 0}
+                      isAgentMode={isAgentMode}
                     >
                       <PlatformConfig
                         selectedPlatform={selectedPlatform}
@@ -303,14 +354,18 @@ const Workbench: React.FC = () => {
                   {selectedPlatform && (
                     <ConfigSection 
                       number="04" 
-                      title="场景规划" 
-                      icon={<ImageIcon className="h-4 w-4" />}
+                      title={language === 'zh' ? '场景规划' : 'Scenes'}
+                      icon={<ImageIcon className="h-3.5 w-3.5" />}
                       isComplete={selectedScenes.length > 0}
+                      isAgentMode={isAgentMode}
                     >
                       <ScenePlanning
                         selectedScenes={selectedScenes}
                         onToggleScene={handleToggleScene}
                         onSelectAll={handleSelectAllScenes}
+                        customScenes={customScenes}
+                        onAddCustomScene={handleAddCustomScene}
+                        onRemoveCustomScene={handleRemoveCustomScene}
                       />
                     </ConfigSection>
                   )}
@@ -319,9 +374,10 @@ const Workbench: React.FC = () => {
                   {selectedScenes.length > 0 && (
                     <ConfigSection 
                       number="05" 
-                      title="视觉与排版" 
-                      icon={<Palette className="h-4 w-4" />}
+                      title={language === 'zh' ? '视觉风格' : 'Visual'}
+                      icon={<Palette className="h-3.5 w-3.5" />}
                       isComplete={visualStyle !== 'ai_auto' || isAgentMode}
+                      isAgentMode={isAgentMode}
                     >
                       <VisualStylePicker
                         selectedVisual={visualStyle}
@@ -338,15 +394,33 @@ const Workbench: React.FC = () => {
                   {selectedScenes.length > 0 && (
                     <ConfigSection 
                       number="06" 
-                      title="画面语言" 
-                      icon={<Globe className="h-4 w-4" />}
+                      title={language === 'zh' ? '画面语言' : 'Language'}
+                      icon={<Globe className="h-3.5 w-3.5" />}
                       isComplete={true}
+                      isAgentMode={isAgentMode}
                     >
                       <LanguageSettings
                         primaryLanguage={primaryLanguage}
                         secondaryLanguage={secondaryLanguage}
                         onPrimaryChange={setPrimaryLanguage}
                         onSecondaryChange={setSecondaryLanguage}
+                      />
+                    </ConfigSection>
+                  )}
+
+                  {/* 07 - Logo Settings */}
+                  {selectedScenes.length > 0 && (
+                    <ConfigSection 
+                      number="07" 
+                      title="Logo"
+                      icon={<ImagePlus className="h-3.5 w-3.5" />}
+                      isComplete={logoConfig.preview !== null}
+                      isAgentMode={isAgentMode}
+                      isOptional
+                    >
+                      <LogoSettings
+                        config={logoConfig}
+                        onChange={setLogoConfig}
                       />
                     </ConfigSection>
                   )}
@@ -364,15 +438,15 @@ const Workbench: React.FC = () => {
                     {isGenerating ? (
                       <>
                         <Loader2 className="h-5 w-5 animate-spin" />
-                        生成中...
+                        {language === 'zh' ? '生成中...' : 'Generating...'}
                       </>
                     ) : (
                       <>
                         <Zap className="h-5 w-5" />
-                        开始设计
+                        {language === 'zh' ? '开始设计' : 'Start Design'}
                         {totalImages > 0 && (
                           <span className="ml-1 text-primary-foreground/80">
-                            ({totalImages} 张)
+                            ({totalImages} {language === 'zh' ? '张' : 'imgs'})
                           </span>
                         )}
                       </>
@@ -386,7 +460,7 @@ const Workbench: React.FC = () => {
                     onClick={handleReset}
                   >
                     <RotateCcw className="h-4 w-4 mr-2" />
-                    重置
+                    {language === 'zh' ? '重置' : 'Reset'}
                   </Button>
                 </div>
               </div>
@@ -405,99 +479,57 @@ const Workbench: React.FC = () => {
                       <div className="absolute -inset-4 bg-primary/5 rounded-[2rem] blur-2xl -z-10" />
                     </div>
                     <h2 className="text-2xl font-display font-bold text-foreground mb-3">
-                      开始创建电商视觉
+                      {language === 'zh' ? '开始创建电商视觉' : 'Start Creating E-commerce Visuals'}
                     </h2>
                     <p className="text-foreground-muted max-w-md mb-6">
-                      上传产品图片，AI 将自动分析并生成专业的电商 KV 设计
+                      {language === 'zh' 
+                        ? '上传产品图片，AI 将自动分析并生成专业的电商 KV 设计' 
+                        : 'Upload product images, AI will analyze and generate professional e-commerce KV designs'}
                     </p>
                     <div className="flex items-center gap-6 text-sm text-foreground-secondary">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                           <Upload className="h-4 w-4 text-primary" />
                         </div>
-                        <span>上传产品图</span>
+                        <span>{language === 'zh' ? '上传产品图' : 'Upload'}</span>
                       </div>
                       <ChevronRight className="h-4 w-4 text-foreground-muted" />
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                           <Sparkles className="h-4 w-4 text-primary" />
                         </div>
-                        <span>AI 智能分析</span>
+                        <span>{language === 'zh' ? 'AI 智能分析' : 'AI Analysis'}</span>
                       </div>
                       <ChevronRight className="h-4 w-4 text-foreground-muted" />
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                           <ImageIcon className="h-4 w-4 text-primary" />
                         </div>
-                        <span>生成 KV 设计</span>
+                        <span>{language === 'zh' ? '生成 KV 设计' : 'Generate KV'}</span>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* AI Brief Preview */}
+                {/* Design Brief Preview */}
                 {uploadedImages.length > 0 && !isGenerating && generatedImages.length === 0 && (
-                  <div className="space-y-6 animate-fade-in">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-display font-semibold text-foreground">设计预览</h2>
-                      <span className="text-xs text-foreground-muted">
-                        {selectedModules.length} 模块 × {selectedScenes.length} 场景 = {totalImages} 张图
-                      </span>
-                    </div>
-                    
-                    {/* Brief Card */}
-                    <div className="glass rounded-2xl p-6 space-y-4">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 rounded-lg bg-gradient-primary">
-                          <Sparkles className="h-5 w-5 text-primary-foreground" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-foreground">AI 设计方案</h3>
-                          <p className="text-xs text-foreground-muted">基于产品分析自动生成</p>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                        <div className="p-3 rounded-lg bg-secondary/30">
-                          <span className="text-xs text-foreground-muted block mb-1">平台</span>
-                          <span className="font-medium text-foreground">
-                            {platformsConfig.find(p => p.id === selectedPlatform)?.icon} {platformsConfig.find(p => p.id === selectedPlatform)?.name || '-'}
-                          </span>
-                        </div>
-                        <div className="p-3 rounded-lg bg-secondary/30">
-                          <span className="text-xs text-foreground-muted block mb-1">视觉风格</span>
-                          <span className="font-medium text-foreground">
-                            {visualStyles.find(s => s.id === visualStyle)?.icon} {visualStyles.find(s => s.id === visualStyle)?.nameZh || '-'}
-                          </span>
-                        </div>
-                        <div className="p-3 rounded-lg bg-secondary/30">
-                          <span className="text-xs text-foreground-muted block mb-1">主语言</span>
-                          <span className="font-medium text-foreground">{primaryLanguage === 'zh' ? '🇨🇳 中文' : '🇺🇸 English'}</span>
-                        </div>
-                        <div className="p-3 rounded-lg bg-secondary/30">
-                          <span className="text-xs text-foreground-muted block mb-1">输出数量</span>
-                          <span className="font-medium text-foreground">{totalImages} 张</span>
-                        </div>
-                      </div>
-
-                      {/* Module Preview Grid */}
-                      {selectedModules.length > 0 && (
-                        <div className="pt-4 border-t border-border/30">
-                          <span className="text-xs text-foreground-muted block mb-3">输出模块预览</span>
-                          <div className="grid grid-cols-4 lg:grid-cols-6 gap-2">
-                            {selectedModules.map(mod => (
-                              <div
-                                key={mod.id}
-                                className="aspect-square rounded-lg bg-secondary/50 border border-border/30 flex flex-col items-center justify-center p-2"
-                              >
-                                <span className="text-[10px] text-foreground-secondary text-center leading-tight">{mod.name}</span>
-                                <span className="text-[9px] text-foreground-muted mt-1">{mod.aspectRatio}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                  <div className="max-w-3xl mx-auto animate-fade-in">
+                    <DesignBrief
+                      brandName={brandName}
+                      productKeywords={productKeywords}
+                      platformName={currentPlatform?.name || '-'}
+                      platformIcon={currentPlatform?.icon || ''}
+                      visualStyleName={currentVisualStyle?.nameZh || 'AI Auto'}
+                      visualStyleIcon={currentVisualStyle?.icon || ''}
+                      layoutStyleName={layoutStyle}
+                      primaryLanguage={primaryLanguage === 'zh' ? '中文' : 'English'}
+                      secondaryLanguage={secondaryLanguage ? (secondaryLanguage === 'zh' ? '中文' : 'English') : null}
+                      selectedModules={selectedModules}
+                      selectedScenes={selectedScenes}
+                      totalImages={totalImages}
+                      onConfirm={() => setShowConfirmModal(true)}
+                      isReady={canGenerate}
+                    />
                   </div>
                 )}
 
@@ -510,13 +542,17 @@ const Workbench: React.FC = () => {
                           <ImageIcon className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <h2 className="font-display font-semibold text-foreground">生成结果</h2>
-                          <span className="text-xs text-foreground-muted">{generatedImages.length} 张图片</span>
+                          <h2 className="font-display font-semibold text-foreground">
+                            {language === 'zh' ? '生成结果' : 'Generated Results'}
+                          </h2>
+                          <span className="text-xs text-foreground-muted">
+                            {generatedImages.length} {language === 'zh' ? '张图片' : 'images'}
+                          </span>
                         </div>
                       </div>
                       <Button variant="secondary" size="sm" onClick={handleDownloadAll} className="gap-2">
                         <Download className="h-4 w-4" />
-                        全部下载
+                        {language === 'zh' ? '全部下载' : 'Download All'}
                       </Button>
                     </div>
                     
@@ -547,14 +583,20 @@ const Workbench: React.FC = () => {
                           <Sparkles className="h-6 w-6 text-primary-foreground animate-pulse" />
                         </div>
                         <div>
-                          <p className="font-display font-semibold text-foreground">正在生成设计...</p>
-                          <p className="text-sm text-foreground-muted">AI 正在创作您的视觉</p>
+                          <p className="font-display font-semibold text-foreground">
+                            {language === 'zh' ? '正在生成设计...' : 'Generating designs...'}
+                          </p>
+                          <p className="text-sm text-foreground-muted">
+                            {language === 'zh' ? 'AI 正在创作您的视觉' : 'AI is creating your visuals'}
+                          </p>
                         </div>
                       </div>
                       <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
                         <div className="h-full bg-gradient-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
                       </div>
-                      <p className="text-xs text-foreground-muted mt-3 text-center">{Math.round(progress)}% 完成</p>
+                      <p className="text-xs text-foreground-muted mt-3 text-center">
+                        {Math.round(progress)}% {language === 'zh' ? '完成' : 'complete'}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -580,7 +622,7 @@ const Workbench: React.FC = () => {
           <main className="flex-1 overflow-hidden bg-card/30">
             <TemplatesPanel onSelectTemplate={() => { 
               setActiveView('workbench'); 
-              toast({ title: "模板已加载" }); 
+              toast({ title: language === 'zh' ? '模板已加载' : 'Template loaded' }); 
             }} />
           </main>
         )}
@@ -628,6 +670,8 @@ interface ConfigSectionProps {
   children: React.ReactNode;
   isComplete?: boolean;
   isProcessing?: boolean;
+  isAgentMode?: boolean;
+  isOptional?: boolean;
 }
 
 const ConfigSection: React.FC<ConfigSectionProps> = ({
@@ -637,33 +681,56 @@ const ConfigSection: React.FC<ConfigSectionProps> = ({
   children,
   isComplete = false,
   isProcessing = false,
+  isAgentMode = false,
+  isOptional = false,
 }) => {
+  const { language } = useLanguage();
+  
   return (
-    <div className="rounded-xl border border-border/30 overflow-hidden bg-card/50 hover:border-border/50 transition-colors">
-      <div className="flex items-center gap-3 p-3 border-b border-border/20">
+    <div className={cn(
+      "rounded-xl border overflow-hidden transition-all",
+      isAgentMode 
+        ? "border-primary/10 bg-card/60 hover:border-primary/20" 
+        : "border-border/30 bg-card/50 hover:border-border/50"
+    )}>
+      <div className="flex items-center gap-2 p-2.5 border-b border-border/20">
         <div className={cn(
-          "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all",
+          "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-all",
           isComplete
             ? "bg-gradient-primary text-primary-foreground shadow-sm"
             : "bg-secondary text-foreground-muted"
         )}>
           {isProcessing ? (
-            <Loader2 className="h-3 w-3 animate-spin" />
+            <Loader2 className="h-2.5 w-2.5 animate-spin" />
           ) : isComplete ? (
             '✓'
           ) : (
             number
           )}
         </div>
-        <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
           {icon}
-          {title}
+          <span>{title}</span>
         </div>
+        {isOptional && (
+          <span className="ml-auto text-[10px] text-foreground-muted px-1.5 py-0.5 rounded bg-secondary/50">
+            {language === 'zh' ? '可选' : 'Optional'}
+          </span>
+        )}
       </div>
-      <div className="p-3">
+      <div className="p-2.5">
         {children}
       </div>
     </div>
+  );
+};
+
+// Wrapper with Language Provider
+const Workbench: React.FC = () => {
+  return (
+    <LanguageProvider>
+      <WorkbenchContent />
+    </LanguageProvider>
   );
 };
 
