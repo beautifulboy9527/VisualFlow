@@ -102,14 +102,10 @@ export const Header: React.FC<HeaderProps> = ({
           </Button>
         )}
 
-        {/* Credits with glow effect */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
-          <div className="relative">
-            <CreditCard className="h-4 w-4 text-primary" />
-            <div className="absolute inset-0 blur-sm bg-primary/30" />
-          </div>
-          <span className="text-sm font-semibold text-foreground">{credits}</span>
-          <span className="text-xs text-foreground-muted">credits</span>
+        {/* Credits - Subtle display */}
+        <div className="hidden sm:flex items-center gap-1.5 text-xs text-foreground-muted">
+          <CreditCard className="h-3.5 w-3.5" />
+          <span className="font-medium">{credits}</span>
         </div>
 
         {/* Settings */}
