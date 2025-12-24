@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 
 interface DesignBriefProps {
-  brandName: string;
+  productName: string;
   productKeywords: string;
   platformName: string;
   platformIcon: string;
@@ -21,7 +21,7 @@ interface DesignBriefProps {
 }
 
 export const DesignBrief: React.FC<DesignBriefProps> = ({
-  brandName,
+  productName,
   productKeywords,
   platformName,
   platformIcon,
@@ -41,8 +41,8 @@ export const DesignBrief: React.FC<DesignBriefProps> = ({
   const sections = [
     {
       icon: <FileText className="h-4 w-4" />,
-      label: language === 'zh' ? '品牌信息' : 'Brand Info',
-      value: brandName || '-',
+      label: language === 'zh' ? '产品信息' : 'Product Info',
+      value: productName || '-',
       subValue: productKeywords?.split(',').slice(0, 3).join(', ') || null,
     },
     {

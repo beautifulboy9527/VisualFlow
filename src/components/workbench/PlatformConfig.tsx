@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Check, ChevronDown, Sparkles, Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 import {
   Select,
   SelectContent,
@@ -141,6 +142,7 @@ export const PlatformConfig: React.FC<PlatformConfigProps> = ({
   isAgentMode = false,
   onAgentRecommend,
 }) => {
+  const { language } = useLanguage();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   
   const currentPlatform = platformsConfig.find(p => p.id === selectedPlatform);
@@ -193,20 +195,11 @@ export const PlatformConfig: React.FC<PlatformConfigProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Platform Selection - Single Select */}
+      {/* Platform Selection - User Manual Select */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-foreground-secondary">目标平台</span>
-          {isAgentMode && (
-            <button
-              onClick={onAgentRecommend}
-              className="flex items-center gap-1 text-xs text-primary hover:text-primary-hover transition-colors"
-            >
-              <Sparkles className="h-3 w-3" />
-              AI推荐
-            </button>
-          )}
-        </div>
+        <span className="text-xs font-medium text-foreground-secondary">
+          {language === 'zh' ? '目标平台' : 'Target Platform'}
+        </span>
         
         <div className="flex flex-wrap gap-2">
           {platformsConfig.map((platform) => (
@@ -230,26 +223,34 @@ export const PlatformConfig: React.FC<PlatformConfigProps> = ({
         </div>
       </div>
 
-      {/* Module Configuration */}
+      {/* Module Configuration - AI Recommend */}
       {currentPlatform && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-foreground-secondary">
-              输出模块 ({selectedModules.length} 已选)
-            </span>
+          <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-foreground-secondary">
+                {language === 'zh' ? '输出模块' : 'Output Modules'} ({selectedModules.length} {language === 'zh' ? '已选' : 'selected'})
+              </span>
+              {isAgentMode && (
+                <span className="flex items-center gap-1 text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  {language === 'zh' ? 'AI推荐' : 'AI Recommended'}
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleSelectAll()}
                 className="text-xs text-primary hover:text-primary-hover"
               >
-                全选
+                {language === 'zh' ? '全选' : 'Select All'}
               </button>
               <span className="text-foreground-muted">/</span>
               <button
                 onClick={handleDeselectAll}
                 className="text-xs text-foreground-muted hover:text-foreground-secondary"
               >
-                取消全选
+                {language === 'zh' ? '取消全选' : 'Deselect All'}
               </button>
             </div>
           </div>

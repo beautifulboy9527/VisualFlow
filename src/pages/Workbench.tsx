@@ -60,8 +60,9 @@ const WorkbenchContent: React.FC = () => {
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   
   // Step 2: Product Info (AI analyzed)
-  const [brandName, setBrandName] = useState('');
+  const [productName, setProductName] = useState('');
   const [productKeywords, setProductKeywords] = useState('');
+  const [brandName, setBrandName] = useState('');
   
   // Step 3: Platform & Modules
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
@@ -121,6 +122,29 @@ const WorkbenchContent: React.FC = () => {
     };
   }, [uploadedImages.length, isAgentMode]);
 
+  // Auto-recommend modules when platform is selected in Agent mode
+  useEffect(() => {
+    if (isAgentMode && selectedPlatform && selectedModules.length === 0) {
+      const platform = platformsConfig.find(p => p.id === selectedPlatform);
+      if (platform) {
+        // AI recommends first 4 modules by default
+        const recommendedModules = platform.modules.slice(0, 4).map(m => ({
+          id: m.id,
+          name: m.name,
+          aspectRatio: m.aspectRatio,
+        }));
+        setSelectedModules(recommendedModules);
+        
+        toast({
+          title: language === 'zh' ? 'AI 模块推荐' : 'AI Module Recommendation',
+          description: language === 'zh' 
+            ? `已为您推荐 ${recommendedModules.length} 个输出模块` 
+            : `Recommended ${recommendedModules.length} output modules for you`,
+        });
+      }
+    }
+  }, [selectedPlatform, isAgentMode]);
+
   const runAIAnalysis = async () => {
     if (uploadedImages.length === 0) return;
     
@@ -142,6 +166,11 @@ const WorkbenchContent: React.FC = () => {
         setAiAnalysis(analysis);
         
         // Apply analysis results
+        // Set product name from AI
+        const productNameText = language === 'zh' ? analysis.productName?.zh : analysis.productName?.en;
+        setProductName(productNameText || analysis.productName?.en || '');
+        
+        // Set brand name
         const brandNameText = language === 'zh' ? analysis.brandName.zh : analysis.brandName.en;
         setBrandName(brandNameText || analysis.brandName.en);
         
@@ -152,20 +181,8 @@ const WorkbenchContent: React.FC = () => {
           .join(', ');
         setProductKeywords(keywords);
         
-        // Set platform (default to amazon)
-        setSelectedPlatform('amazon');
-        
-        // Set modules based on platform
-        const amazonPlatform = platformsConfig.find(p => p.id === 'amazon');
-        if (amazonPlatform) {
-          const defaultModules = amazonPlatform.modules.slice(0, 4).map(m => ({
-            id: m.id,
-            name: m.name,
-            aspectRatio: m.aspectRatio,
-          }));
-          setSelectedModules(defaultModules);
-        }
-        
+        // Don't auto-select platform - let user choose
+        // Only recommend modules after user selects platform
         // Apply recommended visual style
         if (analysis.visualStyle?.recommended) {
           const mappedStyle = mapAIStyleToId(analysis.visualStyle.recommended) as VisualStyleId;
@@ -176,8 +193,8 @@ const WorkbenchContent: React.FC = () => {
         toast({
           title: language === 'zh' ? 'AI 分析完成' : 'AI Analysis Complete',
           description: language === 'zh' 
-            ? `识别品牌: ${brandNameText}, 推荐风格: ${analysis.visualStyle?.recommended || 'auto'}`
-            : `Brand: ${brandNameText}, Recommended: ${analysis.visualStyle?.recommended || 'auto'}`,
+            ? `产品: ${productNameText || brandNameText}, 推荐风格: ${analysis.visualStyle?.recommended || 'auto'}`
+            : `Product: ${productNameText || brandNameText}, Recommended: ${analysis.visualStyle?.recommended || 'auto'}`,
         });
       } else {
         console.error('AI analysis failed:', result.error);
@@ -207,20 +224,10 @@ const WorkbenchContent: React.FC = () => {
   };
 
   const fallbackToMockAnalysis = () => {
-    // Fallback mock data when AI fails
-    setBrandName('Product Brand');
+    // Fallback mock data when AI fails - don't auto-select platform
+    setProductName('Sample Product');
+    setBrandName('Brand');
     setProductKeywords('quality, premium, professional');
-    setSelectedPlatform('amazon');
-    
-    const amazonPlatform = platformsConfig.find(p => p.id === 'amazon');
-    if (amazonPlatform) {
-      const defaultModules = amazonPlatform.modules.slice(0, 4).map(m => ({
-        id: m.id,
-        name: m.name,
-        aspectRatio: m.aspectRatio,
-      }));
-      setSelectedModules(defaultModules);
-    }
     
     setAiRecommendedStyle('natural_organic');
     setVisualStyle('natural_organic');
@@ -279,6 +286,7 @@ const WorkbenchContent: React.FC = () => {
 
   const handleReset = () => {
     setUploadedImages([]);
+    setProductName('');
     setBrandName('');
     setProductKeywords('');
     setSelectedPlatform(null);
@@ -387,22 +395,22 @@ const WorkbenchContent: React.FC = () => {
                       number="02" 
                       title={language === 'zh' ? '商品信息' : 'Product Info'}
                       icon={<Package className="h-3.5 w-3.5" />}
-                      isComplete={!!brandName}
+                      isComplete={!!productName}
                       isProcessing={isAIProcessing}
                       isAgentMode={isAgentMode}
                     >
                       <div className="space-y-2">
                         <div>
                           <label className="text-[10px] text-foreground-muted mb-1 block">
-                            {language === 'zh' ? '品牌名称' : 'Brand Name'}
+                            {language === 'zh' ? '产品名称' : 'Product Name'}
                           </label>
                           <input
                             type="text"
-                            value={brandName}
-                            onChange={(e) => setBrandName(e.target.value)}
+                            value={productName}
+                            onChange={(e) => setProductName(e.target.value)}
                             placeholder={isAgentMode 
                               ? (language === 'zh' ? 'AI 自动识别...' : 'AI auto-detect...') 
-                              : (language === 'zh' ? '输入品牌名称' : 'Enter brand name')}
+                              : (language === 'zh' ? '输入产品名称' : 'Enter product name')}
                             className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors"
                           />
                         </div>
@@ -501,20 +509,39 @@ const WorkbenchContent: React.FC = () => {
                     </ConfigSection>
                   )}
 
-                  {/* 07 - Logo Settings */}
+                  {/* 07 - Brand & Logo Settings */}
                   {selectedScenes.length > 0 && (
                     <ConfigSection 
                       number="07" 
-                      title="Logo"
+                      title={language === 'zh' ? '品牌资产' : 'Brand Assets'}
                       icon={<ImagePlus className="h-3.5 w-3.5" />}
-                      isComplete={logoConfig.preview !== null}
+                      isComplete={logoConfig.preview !== null || !!brandName}
                       isAgentMode={isAgentMode}
                       isOptional
                     >
-                      <LogoSettings
-                        config={logoConfig}
-                        onChange={setLogoConfig}
-                      />
+                      <div className="space-y-3">
+                        {/* Brand Name */}
+                        <div>
+                          <label className="text-[10px] text-foreground-muted mb-1 block">
+                            {language === 'zh' ? '品牌名称' : 'Brand Name'}
+                          </label>
+                          <input
+                            type="text"
+                            value={brandName}
+                            onChange={(e) => setBrandName(e.target.value)}
+                            placeholder={isAgentMode 
+                              ? (language === 'zh' ? 'AI 自动识别...' : 'AI auto-detect...') 
+                              : (language === 'zh' ? '输入品牌名称' : 'Enter brand name')}
+                            className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors"
+                          />
+                        </div>
+                        
+                        {/* Logo Settings */}
+                        <LogoSettings
+                          config={logoConfig}
+                          onChange={setLogoConfig}
+                        />
+                      </div>
                     </ConfigSection>
                   )}
                 </div>
@@ -608,7 +635,7 @@ const WorkbenchContent: React.FC = () => {
                 {uploadedImages.length > 0 && !isGenerating && generatedImages.length === 0 && (
                   <div className="max-w-3xl mx-auto animate-fade-in">
                     <DesignBrief
-                      brandName={brandName}
+                      productName={productName}
                       productKeywords={productKeywords}
                       platformName={currentPlatform?.name || '-'}
                       platformIcon={currentPlatform?.icon || ''}

@@ -101,7 +101,7 @@ export const ScenePlanning: React.FC<ScenePlanningProps> = ({
         </Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="grid grid-cols-3 gap-2">
         {allScenes.map((scene) => {
           const isSelected = selectedScenes.includes(scene.id);
           const label = language === 'zh' ? scene.labelZh : scene.labelEn;
@@ -110,32 +110,36 @@ export const ScenePlanning: React.FC<ScenePlanningProps> = ({
             <button
               key={scene.id}
               onClick={() => onToggleScene(scene.id)}
+              title={label}
               className={cn(
-                "relative flex items-center gap-1.5 px-2 py-2 rounded-lg text-left transition-all duration-200 border group",
+                "relative flex flex-col items-center gap-1 px-2 py-2.5 rounded-lg text-center transition-all duration-200 border group min-h-[60px]",
                 isSelected
                   ? "bg-primary/10 border-primary/30 text-foreground"
                   : "bg-card border-border/30 hover:border-border text-foreground-secondary hover:text-foreground"
               )}
             >
+              {/* Check indicator - top right */}
+              {isSelected && (
+                <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                  <Check className="h-2.5 w-2.5 text-primary-foreground" />
+                </div>
+              )}
+
               {/* Icon */}
               <div className={cn(
-                "flex-shrink-0 p-1 rounded",
-                isSelected ? "text-primary" : "text-foreground-muted"
+                "flex-shrink-0 p-1.5 rounded-lg",
+                isSelected ? "text-primary bg-primary/10" : "text-foreground-muted"
               )}>
                 {scene.icon}
               </div>
 
-              {/* Label */}
-              <span className="text-xs font-medium truncate flex-1">
+              {/* Label - full text, smaller font for longer text */}
+              <span className={cn(
+                "font-medium leading-tight text-center w-full",
+                label.length > 4 ? "text-[10px]" : "text-xs"
+              )}>
                 {label}
               </span>
-
-              {/* Check indicator */}
-              {isSelected && (
-                <div className="flex-shrink-0 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center">
-                  <Check className="h-2 w-2 text-primary-foreground" />
-                </div>
-              )}
 
               {/* Remove custom scene button */}
               {scene.isCustom && onRemoveCustomScene && (
@@ -157,10 +161,10 @@ export const ScenePlanning: React.FC<ScenePlanningProps> = ({
         {onAddCustomScene && !isAddingCustom && (
           <button
             onClick={() => setIsAddingCustom(true)}
-            className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border border-dashed border-border/50 text-foreground-muted hover:border-primary/30 hover:text-primary transition-all"
+            className="flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-lg border border-dashed border-border/50 text-foreground-muted hover:border-primary/30 hover:text-primary transition-all min-h-[60px]"
           >
-            <Plus className="h-3.5 w-3.5" />
-            <span className="text-xs">{language === 'zh' ? '自定义' : 'Custom'}</span>
+            <Plus className="h-4 w-4" />
+            <span className="text-[10px]">{language === 'zh' ? '自定义' : 'Custom'}</span>
           </button>
         )}
       </div>
