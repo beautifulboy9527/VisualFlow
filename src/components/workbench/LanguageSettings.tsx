@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export type Language = 'zh' | 'en' | 'ja' | 'ko' | 'de' | 'fr' | 'es' | 'pt' | 'it' | 'ar';
 
@@ -44,6 +45,8 @@ export const LanguageSettings: React.FC<LanguageSettingsProps> = ({
   onPrimaryChange,
   onSecondaryChange,
 }) => {
+  const { language: uiLang } = useLanguage();
+  
   return (
     <div className="space-y-3">
       {/* Primary Language */}
@@ -51,9 +54,13 @@ export const LanguageSettings: React.FC<LanguageSettingsProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Globe className="h-3.5 w-3.5 text-foreground-muted" />
-            <span className="text-xs font-medium text-foreground-secondary">主显示语言</span>
+            <span className="text-xs font-medium text-foreground-secondary">
+              {uiLang === 'zh' ? '主显示语言' : 'Primary Language'}
+            </span>
           </div>
-          <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded">核心文案</span>
+          <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+            {uiLang === 'zh' ? '核心文案' : 'Main Copy'}
+          </span>
         </div>
         <Select value={primaryLanguage} onValueChange={(v) => onPrimaryChange(v as Language)}>
           <SelectTrigger className="w-full h-9 bg-card border-border/50">
@@ -88,9 +95,13 @@ export const LanguageSettings: React.FC<LanguageSettingsProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Type className="h-3.5 w-3.5 text-foreground-muted" />
-            <span className="text-xs font-medium text-foreground-secondary">辅助语言</span>
+            <span className="text-xs font-medium text-foreground-secondary">
+              {uiLang === 'zh' ? '辅助语言' : 'Secondary Language'}
+            </span>
           </div>
-          <span className="text-[10px] text-foreground-muted bg-secondary px-1.5 py-0.5 rounded">可选</span>
+          <span className="text-[10px] text-foreground-muted bg-secondary px-1.5 py-0.5 rounded">
+            {uiLang === 'zh' ? '可选' : 'Optional'}
+          </span>
         </div>
         <Select 
           value={secondaryLanguage || 'none'} 
@@ -109,13 +120,17 @@ export const LanguageSettings: React.FC<LanguageSettingsProps> = ({
                   ) : null;
                 })()
               ) : (
-                <span className="text-foreground-muted">不使用辅助语言</span>
+                <span className="text-foreground-muted">
+                  {uiLang === 'zh' ? '不使用辅助语言' : 'No secondary language'}
+                </span>
               )}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="none">
-              <span className="text-foreground-muted">不使用辅助语言</span>
+              <span className="text-foreground-muted">
+                {uiLang === 'zh' ? '不使用辅助语言' : 'No secondary language'}
+              </span>
             </SelectItem>
             {languageOptions
               .filter(l => l.id !== primaryLanguage)
@@ -135,11 +150,13 @@ export const LanguageSettings: React.FC<LanguageSettingsProps> = ({
       {/* Language Preview */}
       {secondaryLanguage && (
         <div className="p-3 rounded-lg bg-secondary/30 border border-border/30">
-          <p className="text-xs text-foreground-muted mb-1">文字层级预览：</p>
+          <p className="text-xs text-foreground-muted mb-1">
+            {uiLang === 'zh' ? '文字层级预览：' : 'Text preview:'}
+          </p>
           <p className="text-sm font-medium text-foreground">
-            {languageOptions.find(l => l.id === primaryLanguage)?.flag} 标题文案 
+            {languageOptions.find(l => l.id === primaryLanguage)?.flag} {uiLang === 'zh' ? '标题文案' : 'Headline'}
             <span className="text-foreground-secondary text-xs font-normal ml-2">
-              {languageOptions.find(l => l.id === secondaryLanguage)?.flag} Secondary Text
+              {languageOptions.find(l => l.id === secondaryLanguage)?.flag} {uiLang === 'zh' ? '副标题' : 'Subheadline'}
             </span>
           </p>
         </div>
