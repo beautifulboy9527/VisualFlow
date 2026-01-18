@@ -13,6 +13,7 @@ import { EnhancedResultCard } from '@/components/workbench/EnhancedResultCard';
 import { HistoryPanel } from '@/components/workbench/HistoryPanel';
 import { TemplatesPanel } from '@/components/workbench/TemplatesPanel';
 import { ImagePreviewModal } from '@/components/workbench/ImagePreviewModal';
+import { AgentModePanel } from '@/components/workbench/AgentModePanel';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { LanguageProvider, useLanguage } from '@/hooks/useLanguage';
@@ -54,6 +55,7 @@ const WorkbenchContent: React.FC = () => {
   const [activeView, setActiveView] = useState<'workbench' | 'history' | 'templates'>('workbench');
   const [isAgentMode, setIsAgentMode] = useState(true);
   const [isAIProcessing, setIsAIProcessing] = useState(false);
+  const [isRefreshingPlan, setIsRefreshingPlan] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<ProductAnalysis | null>(null);
   
   // Step 1: Images
@@ -76,6 +78,7 @@ const WorkbenchContent: React.FC = () => {
   const [visualStyle, setVisualStyle] = useState<VisualStyleId>('ai_auto');
   const [layoutStyle, setLayoutStyle] = useState<LayoutStyleId>('ai_auto');
   const [aiRecommendedStyle, setAiRecommendedStyle] = useState<VisualStyleId | undefined>();
+  const [aiRecommendedLayout, setAiRecommendedLayout] = useState<LayoutStyleId | undefined>();
   
   // Step 6: Language
   const [primaryLanguage, setPrimaryLanguage] = useState<Language>('zh');
@@ -160,10 +163,14 @@ const WorkbenchContent: React.FC = () => {
     }
   }, [isAgentMode]);
 
-  const runAIAnalysis = async () => {
+  const runAIAnalysis = async (isRefresh = false) => {
     if (uploadedImages.length === 0) return;
     
-    setIsAIProcessing(true);
+    if (isRefresh) {
+      setIsRefreshingPlan(true);
+    } else {
+      setIsAIProcessing(true);
+    }
     
     try {
       // Get image URLs for analysis (use previewUrl from UploadedImage)
@@ -196,13 +203,25 @@ const WorkbenchContent: React.FC = () => {
           .join(', ');
         setProductKeywords(keywords);
         
-        // Don't auto-select platform - let user choose
-        // Only recommend modules after user selects platform
         // Apply recommended visual style
         if (analysis.visualStyle?.recommended) {
           const mappedStyle = mapAIStyleToId(analysis.visualStyle.recommended) as VisualStyleId;
           setAiRecommendedStyle(mappedStyle);
           setVisualStyle(mappedStyle);
+          
+          // Also recommend a matching layout
+          const layoutMap: Record<string, LayoutStyleId> = {
+            'magazine': 'magazine_grid',
+            'watercolor': 'handwritten',
+            'tech_futuristic': 'glassmorphism',
+            'vintage_film': 'handwritten',
+            'minimalist_nordic': 'ultra_minimal',
+            'neon_cyberpunk': 'neon_glow',
+            'natural_organic': 'glassmorphism',
+          };
+          const recommendedLayout = layoutMap[mappedStyle] || 'glassmorphism';
+          setAiRecommendedLayout(recommendedLayout);
+          setLayoutStyle(recommendedLayout);
         }
         
         toast({
@@ -235,6 +254,7 @@ const WorkbenchContent: React.FC = () => {
       fallbackToMockAnalysis();
     } finally {
       setIsAIProcessing(false);
+      setIsRefreshingPlan(false);
     }
   };
 
@@ -246,6 +266,22 @@ const WorkbenchContent: React.FC = () => {
     
     setAiRecommendedStyle('natural_organic');
     setVisualStyle('natural_organic');
+    setAiRecommendedLayout('glassmorphism');
+    setLayoutStyle('glassmorphism');
+  };
+
+  // Refresh AI plan
+  const handleRefreshPlan = () => {
+    runAIAnalysis(true);
+  };
+
+  // Switch from Agent to Manual for customization
+  const handleSwitchToManual = () => {
+    setIsAgentMode(false);
+    toast({
+      title: language === 'zh' ? '已切换至手动模式' : 'Switched to Manual Mode',
+      description: language === 'zh' ? '您现在可以自由调整所有配置' : 'You can now freely adjust all settings',
+    });
   };
 
   const handleToggleScene = (scene: SceneType) => {
@@ -310,6 +346,9 @@ const WorkbenchContent: React.FC = () => {
     setCustomScenes([]);
     setVisualStyle('ai_auto');
     setLayoutStyle('ai_auto');
+    setAiRecommendedStyle(undefined);
+    setAiRecommendedLayout(undefined);
+    setAiAnalysis(null);
     setGeneratedImages([]);
     setLogoConfig({
       file: null,
@@ -390,7 +429,7 @@ const WorkbenchContent: React.FC = () => {
 
                 {/* Scrollable Config Sections */}
                 <div className="space-y-3">
-                  {/* 01 - Upload */}
+                  {/* 01 - Upload (Both modes) */}
                   <ConfigSection 
                     number="01" 
                     title={language === 'zh' ? '商品上传' : 'Product Upload'}
@@ -404,7 +443,7 @@ const WorkbenchContent: React.FC = () => {
                     />
                   </ConfigSection>
 
-                  {/* 02 - Platform Selection (BEFORE AI Analysis - user must choose platform first) */}
+                  {/* 02 - Platform Selection (Both modes - user must choose) */}
                   {uploadedImages.length > 0 && (
                     <ConfigSection 
                       number="02" 
@@ -423,197 +462,199 @@ const WorkbenchContent: React.FC = () => {
                     </ConfigSection>
                   )}
 
-                  {/* 03 - Product Info (AI fills after platform selected in Agent mode) */}
-                  {uploadedImages.length > 0 && selectedPlatform && (
-                    <ConfigSection 
-                      number="03" 
-                      title={language === 'zh' ? '商品信息' : 'Product Info'}
-                      icon={<Package className="h-3.5 w-3.5" />}
-                      isComplete={!!productName}
-                      isProcessing={isAIProcessing}
-                      isAgentMode={isAgentMode}
-                    >
-                      {isAgentMode && !aiAnalysis && !isAIProcessing && (
-                        <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 mb-2">
-                          <p className="text-xs text-primary flex items-center gap-2">
-                            <Sparkles className="h-3.5 w-3.5" />
-                            {language === 'zh' ? 'AI 正在准备分析产品图片...' : 'AI preparing to analyze product images...'}
-                          </p>
-                        </div>
+                  {/* Agent Mode: Show AI Recommendation Panel after platform selected */}
+                  {isAgentMode && uploadedImages.length > 0 && selectedPlatform && (
+                    <AgentModePanel
+                      analysis={aiAnalysis}
+                      isAnalyzing={isAIProcessing}
+                      recommendedVisualStyle={visualStyle}
+                      recommendedLayoutStyle={layoutStyle}
+                      recommendedScenes={selectedScenes}
+                      recommendedModules={selectedModules}
+                      onConfirm={() => setShowConfirmModal(true)}
+                      onRefresh={handleRefreshPlan}
+                      onCustomize={handleSwitchToManual}
+                      isRefreshing={isRefreshingPlan}
+                      isReady={canGenerate}
+                    />
+                  )}
+
+                  {/* Manual Mode: Show all config sections step by step */}
+                  {!isAgentMode && (
+                    <>
+                      {/* 03 - Product Info (Manual) */}
+                      {uploadedImages.length > 0 && selectedPlatform && (
+                        <ConfigSection 
+                          number="03" 
+                          title={language === 'zh' ? '商品信息' : 'Product Info'}
+                          icon={<Package className="h-3.5 w-3.5" />}
+                          isComplete={!!productName}
+                          isAgentMode={isAgentMode}
+                        >
+                          <div className="space-y-2">
+                            <div>
+                              <label className="text-[10px] text-foreground-muted mb-1 block">
+                                {language === 'zh' ? '产品名称' : 'Product Name'}
+                              </label>
+                              <input
+                                type="text"
+                                value={productName}
+                                onChange={(e) => setProductName(e.target.value)}
+                                placeholder={language === 'zh' ? '输入产品名称' : 'Enter product name'}
+                                className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-foreground-muted mb-1 block">
+                                {language === 'zh' ? '核心卖点' : 'Key Points'}
+                              </label>
+                              <textarea
+                                value={productKeywords}
+                                onChange={(e) => setProductKeywords(e.target.value)}
+                                placeholder={language === 'zh' ? '输入产品关键词' : 'Enter keywords'}
+                                rows={2}
+                                className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors resize-none"
+                              />
+                            </div>
+                          </div>
+                        </ConfigSection>
                       )}
-                      <div className="space-y-2">
-                        <div>
-                          <label className="text-[10px] text-foreground-muted mb-1 block">
-                            {language === 'zh' ? '产品名称' : 'Product Name'}
-                          </label>
-                          <input
-                            type="text"
-                            value={productName}
-                            onChange={(e) => setProductName(e.target.value)}
-                            placeholder={isAgentMode 
-                              ? (language === 'zh' ? 'AI 自动识别...' : 'AI auto-detect...') 
-                              : (language === 'zh' ? '输入产品名称' : 'Enter product name')}
-                            className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[10px] text-foreground-muted mb-1 block">
-                            {language === 'zh' ? '核心卖点' : 'Key Points'}
-                          </label>
-                          <textarea
-                            value={productKeywords}
-                            onChange={(e) => setProductKeywords(e.target.value)}
-                            placeholder={isAgentMode 
-                              ? (language === 'zh' ? 'AI 自动提取...' : 'AI auto-extract...') 
-                              : (language === 'zh' ? '输入产品关键词' : 'Enter keywords')}
-                            rows={2}
-                            className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors resize-none"
-                          />
-                        </div>
-                      </div>
-                    </ConfigSection>
-                  )}
 
-                  {/* 04 - Scene Planning */}
-                  {selectedPlatform && (
-                    <ConfigSection 
-                      number="04" 
-                      title={language === 'zh' ? '场景规划' : 'Scenes'}
-                      icon={<ImageIcon className="h-3.5 w-3.5" />}
-                      isComplete={selectedScenes.length > 0}
-                      isAgentMode={isAgentMode}
-                    >
-                      <ScenePlanning
-                        selectedScenes={selectedScenes}
-                        onToggleScene={handleToggleScene}
-                        onSelectAll={handleSelectAllScenes}
-                        customScenes={customScenes}
-                        onAddCustomScene={handleAddCustomScene}
-                        onRemoveCustomScene={handleRemoveCustomScene}
-                      />
-                    </ConfigSection>
-                  )}
-
-                  {/* 05 - Visual & Layout (AI recommends in Agent mode, user picks in Manual) */}
-                  {selectedScenes.length > 0 && (
-                    <ConfigSection 
-                      number="05" 
-                      title={language === 'zh' ? '视觉风格' : 'Visual'}
-                      icon={<Palette className="h-3.5 w-3.5" />}
-                      isComplete={visualStyle !== 'ai_auto' || isAgentMode}
-                      isAgentMode={isAgentMode}
-                    >
-                      {isAgentMode && aiRecommendedStyle && aiRecommendedStyle !== 'ai_auto' && (
-                        <div className="p-2 rounded-lg bg-primary/5 border border-primary/20 mb-3">
-                          <p className="text-xs text-primary flex items-center gap-2">
-                            <Sparkles className="h-3.5 w-3.5" />
-                            {language === 'zh' ? 'AI 已根据产品特性推荐风格' : 'AI recommended style based on product'}
-                          </p>
-                        </div>
+                      {/* 04 - Scene Planning (Manual) */}
+                      {selectedPlatform && (
+                        <ConfigSection 
+                          number="04" 
+                          title={language === 'zh' ? '场景规划' : 'Scenes'}
+                          icon={<ImageIcon className="h-3.5 w-3.5" />}
+                          isComplete={selectedScenes.length > 0}
+                          isAgentMode={isAgentMode}
+                        >
+                          <ScenePlanning
+                            selectedScenes={selectedScenes}
+                            onToggleScene={handleToggleScene}
+                            onSelectAll={handleSelectAllScenes}
+                            customScenes={customScenes}
+                            onAddCustomScene={handleAddCustomScene}
+                            onRemoveCustomScene={handleRemoveCustomScene}
+                          />
+                        </ConfigSection>
                       )}
-                      <VisualStylePicker
-                        selectedVisual={visualStyle}
-                        selectedLayout={layoutStyle}
-                        onVisualChange={setVisualStyle}
-                        onLayoutChange={setLayoutStyle}
-                        aiRecommendedVisual={aiRecommendedStyle}
-                        isAgentMode={isAgentMode}
-                      />
-                    </ConfigSection>
-                  )}
 
-                  {/* 06 - Language */}
-                  {selectedScenes.length > 0 && (
-                    <ConfigSection 
-                      number="06" 
-                      title={language === 'zh' ? '画面语言' : 'Language'}
-                      icon={<Globe className="h-3.5 w-3.5" />}
-                      isComplete={true}
-                      isAgentMode={isAgentMode}
-                    >
-                      <LanguageSettings
-                        primaryLanguage={primaryLanguage}
-                        secondaryLanguage={secondaryLanguage}
-                        onPrimaryChange={setPrimaryLanguage}
-                        onSecondaryChange={setSecondaryLanguage}
-                      />
-                    </ConfigSection>
-                  )}
-
-                  {/* 07 - Brand & Logo Settings */}
-                  {selectedScenes.length > 0 && (
-                    <ConfigSection 
-                      number="07" 
-                      title={language === 'zh' ? '品牌资产' : 'Brand Assets'}
-                      icon={<ImagePlus className="h-3.5 w-3.5" />}
-                      isComplete={logoConfig.preview !== null || !!brandName}
-                      isAgentMode={isAgentMode}
-                      isOptional
-                    >
-                      <div className="space-y-3">
-                        {/* Brand Name */}
-                        <div>
-                          <label className="text-[10px] text-foreground-muted mb-1 block">
-                            {language === 'zh' ? '品牌名称' : 'Brand Name'}
-                          </label>
-                          <input
-                            type="text"
-                            value={brandName}
-                            onChange={(e) => setBrandName(e.target.value)}
-                            placeholder={isAgentMode 
-                              ? (language === 'zh' ? 'AI 自动识别...' : 'AI auto-detect...') 
-                              : (language === 'zh' ? '输入品牌名称' : 'Enter brand name')}
-                            className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors"
+                      {/* 05 - Visual & Layout (Manual) */}
+                      {selectedScenes.length > 0 && (
+                        <ConfigSection 
+                          number="05" 
+                          title={language === 'zh' ? '视觉风格' : 'Visual'}
+                          icon={<Palette className="h-3.5 w-3.5" />}
+                          isComplete={visualStyle !== 'ai_auto'}
+                          isAgentMode={isAgentMode}
+                        >
+                          <VisualStylePicker
+                            selectedVisual={visualStyle}
+                            selectedLayout={layoutStyle}
+                            onVisualChange={setVisualStyle}
+                            onLayoutChange={setLayoutStyle}
+                            aiRecommendedVisual={aiRecommendedStyle}
+                            aiRecommendedLayout={aiRecommendedLayout}
+                            isAgentMode={isAgentMode}
                           />
-                        </div>
-                        
-                        {/* Logo Settings */}
-                        <LogoSettings
-                          config={logoConfig}
-                          onChange={setLogoConfig}
-                        />
-                      </div>
-                    </ConfigSection>
+                        </ConfigSection>
+                      )}
+
+                      {/* 06 - Language (Manual) */}
+                      {selectedScenes.length > 0 && (
+                        <ConfigSection 
+                          number="06" 
+                          title={language === 'zh' ? '画面语言' : 'Language'}
+                          icon={<Globe className="h-3.5 w-3.5" />}
+                          isComplete={true}
+                          isAgentMode={isAgentMode}
+                        >
+                          <LanguageSettings
+                            primaryLanguage={primaryLanguage}
+                            secondaryLanguage={secondaryLanguage}
+                            onPrimaryChange={setPrimaryLanguage}
+                            onSecondaryChange={setSecondaryLanguage}
+                          />
+                        </ConfigSection>
+                      )}
+
+                      {/* 07 - Brand & Logo Settings (Manual) */}
+                      {selectedScenes.length > 0 && (
+                        <ConfigSection 
+                          number="07" 
+                          title={language === 'zh' ? '品牌资产' : 'Brand Assets'}
+                          icon={<ImagePlus className="h-3.5 w-3.5" />}
+                          isComplete={logoConfig.preview !== null || !!brandName}
+                          isAgentMode={isAgentMode}
+                          isOptional
+                        >
+                          <div className="space-y-3">
+                            {/* Brand Name */}
+                            <div>
+                              <label className="text-[10px] text-foreground-muted mb-1 block">
+                                {language === 'zh' ? '品牌名称' : 'Brand Name'}
+                              </label>
+                              <input
+                                type="text"
+                                value={brandName}
+                                onChange={(e) => setBrandName(e.target.value)}
+                                placeholder={language === 'zh' ? '输入品牌名称' : 'Enter brand name'}
+                                className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors"
+                              />
+                            </div>
+                            
+                            {/* Logo Settings */}
+                            <LogoSettings
+                              config={logoConfig}
+                              onChange={setLogoConfig}
+                            />
+                          </div>
+                        </ConfigSection>
+                      )}
+                    </>
                   )}
                 </div>
 
-                {/* Action Buttons */}
-                <div className="pt-4 pb-2 space-y-2 sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent">
-                  <Button
-                    variant="generate"
-                    size="lg"
-                    className="w-full"
-                    onClick={() => setShowConfirmModal(true)}
-                    disabled={!canGenerate || isGenerating}
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        {language === 'zh' ? '生成中...' : 'Generating...'}
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="h-5 w-5" />
-                        {language === 'zh' ? '开始设计' : 'Start Design'}
-                        {totalImages > 0 && (
-                          <span className="ml-1 text-primary-foreground/80">
-                            ({totalImages} {language === 'zh' ? '张' : 'imgs'})
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full text-foreground-muted"
-                    onClick={handleReset}
-                  >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    {language === 'zh' ? '重置' : 'Reset'}
-                  </Button>
-                </div>
+                {/* Action Buttons - Only show in Manual mode or when no AI panel */}
+                {(!isAgentMode || !selectedPlatform || uploadedImages.length === 0) && (
+                  <div className="pt-4 pb-2 space-y-2 sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent">
+                    <Button
+                      variant="generate"
+                      size="lg"
+                      className="w-full"
+                      onClick={() => setShowConfirmModal(true)}
+                      disabled={!canGenerate || isGenerating}
+                    >
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          {language === 'zh' ? '生成中...' : 'Generating...'}
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="h-5 w-5" />
+                          {language === 'zh' ? '开始设计' : 'Start Design'}
+                          {totalImages > 0 && (
+                            <span className="ml-1 text-primary-foreground/80">
+                              ({totalImages} {language === 'zh' ? '张' : 'imgs'})
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full text-foreground-muted"
+                      onClick={handleReset}
+                    >
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      {language === 'zh' ? '重置' : 'Reset'}
+                    </Button>
+                  </div>
+                )}
               </div>
             </aside>
 
