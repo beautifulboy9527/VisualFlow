@@ -315,7 +315,7 @@ export const PlatformConfig: React.FC<PlatformConfigProps> = ({
                             {language === 'zh' ? '选择此类别' : 'Select All'}
                           </button>
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {categoryModules.map(module => (
                             <ModuleItem
                               key={module.id}
@@ -336,7 +336,7 @@ export const PlatformConfig: React.FC<PlatformConfigProps> = ({
             </div>
           ) : (
             // Simple module grid
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {currentPlatform.modules.map(module => (
                 <ModuleItem
                   key={module.id}
@@ -385,7 +385,7 @@ const ModuleItem: React.FC<ModuleItemProps> = ({
     )}>
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-2.5 p-3 text-left"
+        className="w-full flex items-center gap-3 p-3 text-left min-h-[56px]"
       >
         <div className={cn(
           "w-5 h-5 rounded-md flex items-center justify-center border transition-colors shrink-0",
@@ -395,14 +395,14 @@ const ModuleItem: React.FC<ModuleItemProps> = ({
         )}>
           {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
           <span className={cn(
-            "text-sm font-medium block leading-tight",
+            "text-sm font-medium leading-snug",
             isSelected ? "text-foreground" : "text-foreground-secondary"
           )}>
             {language === 'zh' ? module.nameZh : module.name}
           </span>
-          <span className="text-[10px] text-foreground-muted mt-0.5 block">
+          <span className="text-[10px] text-foreground-muted leading-tight">
             {selectedModule?.aspectRatio || module.aspectRatio}
           </span>
         </div>
