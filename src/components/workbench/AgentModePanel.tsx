@@ -156,78 +156,78 @@ export const AgentModePanel: React.FC<AgentModePanelProps> = ({
       <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent overflow-hidden">
         {/* Header */}
         <div 
-          className="flex items-center justify-between p-4 cursor-pointer hover:bg-primary/5 transition-colors"
+          className="flex items-start gap-3 p-4 cursor-pointer hover:bg-primary/5 transition-colors"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-primary shadow-primary-glow">
-              <Sparkles className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-foreground">
-                {language === 'zh' ? 'AI 推荐方案' : 'AI Recommended Plan'}
-              </h3>
-              <p className="text-xs text-foreground-muted mt-0.5">
-                {language === 'zh' 
-                  ? `基于 "${analysis.productName?.zh || analysis.brandName.zh}" 的产品特性`
-                  : `Based on "${analysis.productName?.en || analysis.brandName.en}" product characteristics`}
-              </p>
-            </div>
+          <div className="p-2.5 rounded-xl bg-gradient-primary shadow-primary-glow shrink-0">
+            <Sparkles className="h-4 w-4 text-primary-foreground" />
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-primary font-medium px-2 py-1 rounded-full bg-primary/10">
-              {language === 'zh' ? '置信度 ' : 'Confidence '}{analysis.confidence}%
-            </span>
-            {isExpanded ? (
-              <ChevronUp className="h-4 w-4 text-foreground-muted" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-foreground-muted" />
-            )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="font-semibold text-foreground">
+                {language === 'zh' ? 'AI 推荐方案' : 'AI Recommendation'}
+              </h3>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[10px] text-primary font-medium px-2 py-0.5 rounded-full bg-primary/10 whitespace-nowrap">
+                  {analysis.confidence}%
+                </span>
+                {isExpanded ? (
+                  <ChevronUp className="h-4 w-4 text-foreground-muted" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-foreground-muted" />
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-foreground-muted mt-1 line-clamp-2">
+              {language === 'zh' 
+                ? `基于「${analysis.productName?.zh || analysis.brandName.zh}」的产品特性`
+                : `Based on "${analysis.productName?.en || analysis.brandName.en}"`}
+            </p>
           </div>
         </div>
 
         {/* Expandable Content */}
         {isExpanded && (
-          <div className="px-4 pb-4 space-y-4">
-            {/* Recommendation Details */}
-            <div className="grid grid-cols-2 gap-3">
+          <div className="px-4 pb-4 space-y-3">
+            {/* Recommendation Details - Stack vertically on narrow widths */}
+            <div className="space-y-2">
               {/* Visual Style */}
-              <div className="p-3 rounded-xl bg-card/80 border border-border/30">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-card/80 border border-border/30">
+                <div className="flex items-center gap-2 shrink-0">
                   <Palette className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-xs font-medium text-foreground-muted">
-                    {language === 'zh' ? '视觉风格' : 'Visual Style'}
+                  <span className="text-xs font-medium text-foreground-muted whitespace-nowrap">
+                    {language === 'zh' ? '视觉' : 'Visual'}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   {currentVisualStyle?.icon && (
-                    <span className="p-1 rounded-md bg-primary/10 text-primary">
+                    <span className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
                       {currentVisualStyle.icon}
                     </span>
                   )}
-                  <p className="text-sm font-medium text-foreground">
+                  <span className="text-sm font-medium text-foreground truncate">
                     {language === 'zh' ? currentVisualStyle?.nameZh : currentVisualStyle?.name}
-                  </p>
+                  </span>
                 </div>
               </div>
 
               {/* Layout Style */}
-              <div className="p-3 rounded-xl bg-card/80 border border-border/30">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-card/80 border border-border/30">
+                <div className="flex items-center gap-2 shrink-0">
                   <Type className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-xs font-medium text-foreground-muted">
-                    {language === 'zh' ? '排版效果' : 'Layout Style'}
+                  <span className="text-xs font-medium text-foreground-muted whitespace-nowrap">
+                    {language === 'zh' ? '排版' : 'Layout'}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   {currentLayoutStyle?.icon && (
-                    <span className="p-1 rounded-md bg-secondary text-foreground-muted">
+                    <span className="p-1.5 rounded-lg bg-secondary text-foreground-muted shrink-0">
                       {currentLayoutStyle.icon}
                     </span>
                   )}
-                  <p className="text-sm font-medium text-foreground">
+                  <span className="text-sm font-medium text-foreground truncate">
                     {language === 'zh' ? currentLayoutStyle?.nameZh : currentLayoutStyle?.name}
-                  </p>
+                  </span>
                 </div>
               </div>
             </div>
@@ -237,29 +237,29 @@ export const AgentModePanel: React.FC<AgentModePanelProps> = ({
               <div className="flex items-center gap-2 mb-2">
                 <Layers className="h-3.5 w-3.5 text-primary" />
                 <span className="text-xs font-medium text-foreground-muted">
-                  {language === 'zh' ? '输出内容' : 'Output Content'}
+                  {language === 'zh' ? '输出内容' : 'Output'}
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {recommendedModules.slice(0, 4).map(module => (
+                {recommendedModules.slice(0, 3).map(module => (
                   <span 
                     key={module.id} 
-                    className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary font-medium"
+                    className="px-2 py-1 text-[11px] rounded-md bg-primary/10 text-primary font-medium"
                   >
                     {module.name}
                   </span>
                 ))}
-                {recommendedScenes.slice(0, 4).map(scene => (
+                {recommendedScenes.slice(0, 3).map(scene => (
                   <span 
                     key={scene} 
-                    className="px-2 py-1 text-xs rounded-full bg-secondary text-foreground-muted"
+                    className="px-2 py-1 text-[11px] rounded-md bg-secondary text-foreground-muted"
                   >
                     {scene}
                   </span>
                 ))}
-                {(recommendedModules.length + recommendedScenes.length) > 8 && (
-                  <span className="px-2 py-1 text-xs rounded-full bg-secondary text-foreground-muted">
-                    +{(recommendedModules.length + recommendedScenes.length) - 8}
+                {(recommendedModules.length + recommendedScenes.length) > 6 && (
+                  <span className="px-2 py-1 text-[11px] rounded-md bg-secondary text-foreground-muted">
+                    +{(recommendedModules.length + recommendedScenes.length) - 6}
                   </span>
                 )}
               </div>
@@ -267,49 +267,48 @@ export const AgentModePanel: React.FC<AgentModePanelProps> = ({
 
             {/* Color Palette from Analysis */}
             {analysis.colorPalette && (
-              <div className="p-3 rounded-xl bg-card/80 border border-border/30">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-medium text-foreground-muted">
-                    {language === 'zh' ? '识别配色' : 'Detected Colors'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-card/80 border border-border/30">
+                <span className="text-xs font-medium text-foreground-muted whitespace-nowrap">
+                  {language === 'zh' ? '配色' : 'Colors'}
+                </span>
+                <div className="flex items-center gap-1.5">
                   <div 
-                    className="w-6 h-6 rounded-full border border-white/20 shadow-sm"
+                    className="w-5 h-5 rounded-full border border-white/20 shadow-sm"
                     style={{ backgroundColor: analysis.colorPalette.primary }}
-                    title={`Primary: ${analysis.colorPalette.primary}`}
+                    title={analysis.colorPalette.primary}
                   />
                   <div 
-                    className="w-6 h-6 rounded-full border border-white/20 shadow-sm"
+                    className="w-5 h-5 rounded-full border border-white/20 shadow-sm"
                     style={{ backgroundColor: analysis.colorPalette.secondary }}
-                    title={`Secondary: ${analysis.colorPalette.secondary}`}
+                    title={analysis.colorPalette.secondary}
                   />
                   <div 
-                    className="w-6 h-6 rounded-full border border-white/20 shadow-sm"
+                    className="w-5 h-5 rounded-full border border-white/20 shadow-sm"
                     style={{ backgroundColor: analysis.colorPalette.accent }}
-                    title={`Accent: ${analysis.colorPalette.accent}`}
+                    title={analysis.colorPalette.accent}
                   />
                 </div>
               </div>
             )}
 
             {/* Action Buttons */}
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2 pt-1">
               <Button
                 variant="generate"
-                className="flex-1"
+                className="flex-1 h-9"
                 onClick={onConfirm}
                 disabled={!isReady || isRefreshing}
               >
                 <Check className="h-4 w-4" />
-                {language === 'zh' ? '确认方案' : 'Confirm Plan'}
+                <span className="truncate">{language === 'zh' ? '确认方案' : 'Confirm'}</span>
               </Button>
               <Button
                 variant="secondary"
                 size="icon"
                 onClick={onRefresh}
                 disabled={isRefreshing}
-                className="shrink-0"
+                className="shrink-0 h-9 w-9"
+                title={language === 'zh' ? '刷新方案' : 'Refresh'}
               >
                 {isRefreshing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -321,9 +320,10 @@ export const AgentModePanel: React.FC<AgentModePanelProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={onCustomize}
-                className="shrink-0 text-xs"
+                className="shrink-0 text-xs h-9 px-2"
+                title={language === 'zh' ? '手动调整' : 'Customize'}
               >
-                {language === 'zh' ? '手动调整' : 'Customize'}
+                {language === 'zh' ? '手动' : 'Edit'}
               </Button>
             </div>
           </div>
