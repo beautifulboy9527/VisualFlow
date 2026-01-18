@@ -199,10 +199,16 @@ export const AgentModePanel: React.FC<AgentModePanelProps> = ({
                     {language === 'zh' ? '视觉风格' : 'Visual Style'}
                   </span>
                 </div>
-                <p className="text-sm font-medium text-foreground flex items-center gap-2">
-                  <span>{currentVisualStyle?.icon}</span>
-                  {language === 'zh' ? currentVisualStyle?.nameZh : currentVisualStyle?.name}
-                </p>
+                <div className="flex items-center gap-2">
+                  {currentVisualStyle?.icon && (
+                    <span className="p-1 rounded-md bg-primary/10 text-primary">
+                      {currentVisualStyle.icon}
+                    </span>
+                  )}
+                  <p className="text-sm font-medium text-foreground">
+                    {language === 'zh' ? currentVisualStyle?.nameZh : currentVisualStyle?.name}
+                  </p>
+                </div>
               </div>
 
               {/* Layout Style */}
@@ -213,10 +219,16 @@ export const AgentModePanel: React.FC<AgentModePanelProps> = ({
                     {language === 'zh' ? '排版效果' : 'Layout Style'}
                   </span>
                 </div>
-                <p className="text-sm font-medium text-foreground flex items-center gap-2">
-                  <span>{currentLayoutStyle?.icon}</span>
-                  {language === 'zh' ? currentLayoutStyle?.nameZh : currentLayoutStyle?.name}
-                </p>
+                <div className="flex items-center gap-2">
+                  {currentLayoutStyle?.icon && (
+                    <span className="p-1 rounded-md bg-secondary text-foreground-muted">
+                      {currentLayoutStyle.icon}
+                    </span>
+                  )}
+                  <p className="text-sm font-medium text-foreground">
+                    {language === 'zh' ? currentLayoutStyle?.nameZh : currentLayoutStyle?.name}
+                  </p>
+                </div>
               </div>
             </div>
 

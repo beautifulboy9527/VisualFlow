@@ -7,9 +7,9 @@ interface DesignBriefProps {
   productName: string;
   productKeywords: string;
   platformName: string;
-  platformIcon: string;
+  platformIcon: React.ReactNode;
   visualStyleName: string;
-  visualStyleIcon: string;
+  visualStyleIcon: React.ReactNode;
   layoutStyleName: string;
   primaryLanguage: string;
   secondaryLanguage: string | null;
@@ -44,24 +44,28 @@ export const DesignBrief: React.FC<DesignBriefProps> = ({
       label: language === 'zh' ? '产品信息' : 'Product Info',
       value: productName || '-',
       subValue: productKeywords?.split(',').slice(0, 3).join(', ') || null,
+      iconElement: null,
     },
     {
       icon: <Layout className="h-4 w-4" />,
       label: language === 'zh' ? '目标平台' : 'Platform',
-      value: `${platformIcon} ${platformName}`,
+      value: platformName,
       subValue: `${selectedModules.length} ${language === 'zh' ? '个模块' : 'modules'}`,
+      iconElement: platformIcon,
     },
     {
       icon: <Palette className="h-4 w-4" />,
       label: language === 'zh' ? '视觉风格' : 'Visual Style',
-      value: `${visualStyleIcon} ${visualStyleName}`,
+      value: visualStyleName,
       subValue: layoutStyleName,
+      iconElement: visualStyleIcon,
     },
     {
       icon: <Type className="h-4 w-4" />,
       label: language === 'zh' ? '文案语言' : 'Language',
       value: primaryLanguage,
       subValue: secondaryLanguage ? `+ ${secondaryLanguage}` : null,
+      iconElement: null,
     },
   ];
 
@@ -100,9 +104,14 @@ export const DesignBrief: React.FC<DesignBriefProps> = ({
                 <span className="text-foreground-muted">{section.icon}</span>
                 <span className="text-xs text-foreground-muted">{section.label}</span>
               </div>
-              <p className="text-sm font-medium text-foreground truncate">
-                {section.value}
-              </p>
+              <div className="flex items-center gap-2">
+                {section.iconElement && (
+                  <span className="text-primary shrink-0">{section.iconElement}</span>
+                )}
+                <p className="text-sm font-medium text-foreground truncate">
+                  {section.value}
+                </p>
+              </div>
               {section.subValue && (
                 <p className="text-xs text-foreground-secondary mt-0.5 truncate">
                   {section.subValue}

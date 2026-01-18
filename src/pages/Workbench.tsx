@@ -58,6 +58,14 @@ const WorkbenchContent: React.FC = () => {
   const [isRefreshingPlan, setIsRefreshingPlan] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<ProductAnalysis | null>(null);
   
+  // Config history for undo functionality
+  const [configHistory, setConfigHistory] = useState<Array<{
+    visualStyle: VisualStyleId;
+    layoutStyle: LayoutStyleId;
+    selectedModules: SelectedModule[];
+    selectedScenes: SceneType[];
+  }>>([]);
+  
   // Step 1: Images
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   
@@ -149,19 +157,54 @@ const WorkbenchContent: React.FC = () => {
     }
   }, [selectedPlatform, isAgentMode]);
 
-  // In Manual mode, clear AI-specific defaults
+  // Mode switch: Keep current configuration when switching between Agent and Manual
   useEffect(() => {
     if (!isAgentMode) {
-      // Manual mode: set to manual selection, not AI auto
+      // Switching to Manual mode - keep the AI recommended values, just hide AI auto option
       if (visualStyle === 'ai_auto') {
-        setVisualStyle('magazine'); // Default to first concrete style
+        // If currently on AI auto, use the recommended style or default
+        setVisualStyle(aiRecommendedStyle || 'magazine');
       }
       if (layoutStyle === 'ai_auto') {
-        setLayoutStyle('magazine_grid'); // Default to first concrete layout
+        setLayoutStyle(aiRecommendedLayout || 'magazine_grid');
       }
-      setAiRecommendedStyle(undefined);
+    } else {
+      // Switching back to Agent mode - restore AI recommendations if available
+      if (aiRecommendedStyle && aiRecommendedStyle !== 'ai_auto') {
+        setVisualStyle(aiRecommendedStyle);
+      }
+      if (aiRecommendedLayout && aiRecommendedLayout !== 'ai_auto') {
+        setLayoutStyle(aiRecommendedLayout);
+      }
     }
   }, [isAgentMode]);
+
+  // Save config to history before major changes
+  const saveToHistory = () => {
+    setConfigHistory(prev => [...prev.slice(-9), {
+      visualStyle,
+      layoutStyle,
+      selectedModules,
+      selectedScenes,
+    }]);
+  };
+
+  // Undo to previous config
+  const handleUndo = () => {
+    if (configHistory.length === 0) return;
+    
+    const lastConfig = configHistory[configHistory.length - 1];
+    setVisualStyle(lastConfig.visualStyle);
+    setLayoutStyle(lastConfig.layoutStyle);
+    setSelectedModules(lastConfig.selectedModules);
+    setSelectedScenes(lastConfig.selectedScenes);
+    setConfigHistory(prev => prev.slice(0, -1));
+    
+    toast({
+      title: language === 'zh' ? '已撤销' : 'Undone',
+      description: language === 'zh' ? '已恢复到上一步配置' : 'Restored to previous configuration',
+    });
+  };
 
   const runAIAnalysis = async (isRefresh = false) => {
     if (uploadedImages.length === 0) return;
@@ -270,17 +313,29 @@ const WorkbenchContent: React.FC = () => {
     setLayoutStyle('glassmorphism');
   };
 
-  // Refresh AI plan
+  // Refresh AI plan - save history first
   const handleRefreshPlan = () => {
+    saveToHistory();
     runAIAnalysis(true);
   };
 
   // Switch from Agent to Manual for customization
   const handleSwitchToManual = () => {
+    saveToHistory();
     setIsAgentMode(false);
     toast({
       title: language === 'zh' ? '已切换至手动模式' : 'Switched to Manual Mode',
-      description: language === 'zh' ? '您现在可以自由调整所有配置' : 'You can now freely adjust all settings',
+      description: language === 'zh' ? '您现在可以自由调整所有配置，点击撤销可恢复' : 'You can now freely adjust all settings, click undo to restore',
+    });
+  };
+
+  // Switch back to Agent mode
+  const handleSwitchToAgent = () => {
+    saveToHistory();
+    setIsAgentMode(true);
+    toast({
+      title: language === 'zh' ? '已切换至智能模式' : 'Switched to Agent Mode',
+      description: language === 'zh' ? 'AI 将为您智能推荐设计方案' : 'AI will intelligently recommend design plans for you',
     });
   };
 
@@ -377,7 +432,7 @@ const WorkbenchContent: React.FC = () => {
                 : "bg-card/20"
             )}>
               <div className="p-4 space-y-1">
-                {/* Mode Toggle - Liquid Style */}
+                {/* Mode Toggle with Undo */}
                 <div className="flex items-center justify-between mb-4">
                   <div className={cn(
                     "relative flex items-center p-1 rounded-full border transition-all duration-500",
@@ -394,7 +449,7 @@ const WorkbenchContent: React.FC = () => {
                       )}
                     />
                     <button
-                      onClick={() => setIsAgentMode(true)}
+                      onClick={handleSwitchToAgent}
                       className={cn(
                         "relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
                         isAgentMode ? "text-primary-foreground" : "text-foreground-muted hover:text-foreground"
@@ -404,7 +459,7 @@ const WorkbenchContent: React.FC = () => {
                       {language === 'zh' ? '智能' : 'Agent'}
                     </button>
                     <button
-                      onClick={() => setIsAgentMode(false)}
+                      onClick={handleSwitchToManual}
                       className={cn(
                         "relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
                         !isAgentMode ? "text-foreground" : "text-primary-foreground/70 hover:text-primary-foreground"
@@ -415,16 +470,30 @@ const WorkbenchContent: React.FC = () => {
                     </button>
                   </div>
                   
-                  {isAIProcessing && (
-                    <div className="flex items-center gap-2 text-xs text-primary">
-                      <div className="flex gap-0.5">
-                        <span className="w-1 h-1 rounded-full bg-primary animate-pulse" />
-                        <span className="w-1 h-1 rounded-full bg-primary animate-pulse" style={{ animationDelay: '150ms' }} />
-                        <span className="w-1 h-1 rounded-full bg-primary animate-pulse" style={{ animationDelay: '300ms' }} />
+                  <div className="flex items-center gap-2">
+                    {/* Undo Button */}
+                    {configHistory.length > 0 && (
+                      <button
+                        onClick={handleUndo}
+                        className="flex items-center gap-1 px-2 py-1 text-xs text-foreground-muted hover:text-foreground rounded-md hover:bg-secondary/50 transition-colors"
+                        title={language === 'zh' ? '撤销上一步' : 'Undo last change'}
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        <span className="hidden sm:inline">{language === 'zh' ? '撤销' : 'Undo'}</span>
+                      </button>
+                    )}
+                    
+                    {/* Processing indicator */}
+                    {isAIProcessing && (
+                      <div className="flex items-center gap-2 text-xs text-primary">
+                        <div className="flex gap-0.5">
+                          <span className="w-1 h-1 rounded-full bg-primary animate-pulse" />
+                          <span className="w-1 h-1 rounded-full bg-primary animate-pulse" style={{ animationDelay: '150ms' }} />
+                          <span className="w-1 h-1 rounded-full bg-primary animate-pulse" style={{ animationDelay: '300ms' }} />
+                        </div>
                       </div>
-                      <span>{language === 'zh' ? 'AI分析中' : 'Analyzing'}</span>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
 
                 {/* Scrollable Config Sections */}
@@ -709,10 +778,10 @@ const WorkbenchContent: React.FC = () => {
                     <DesignBrief
                       productName={productName}
                       productKeywords={productKeywords}
-                      platformName={currentPlatform?.name || '-'}
-                      platformIcon={currentPlatform?.icon || ''}
-                      visualStyleName={currentVisualStyle?.nameZh || 'AI Auto'}
-                      visualStyleIcon={currentVisualStyle?.icon || ''}
+                      platformName={language === 'zh' ? (currentPlatform?.nameZh || '-') : (currentPlatform?.name || '-')}
+                      platformIcon={currentPlatform?.icon || null}
+                      visualStyleName={language === 'zh' ? (currentVisualStyle?.nameZh || 'AI Auto') : (currentVisualStyle?.name || 'AI Auto')}
+                      visualStyleIcon={currentVisualStyle?.icon || null}
                       layoutStyleName={layoutStyle}
                       primaryLanguage={primaryLanguage === 'zh' ? '中文' : 'English'}
                       secondaryLanguage={secondaryLanguage ? (secondaryLanguage === 'zh' ? '中文' : 'English') : null}
