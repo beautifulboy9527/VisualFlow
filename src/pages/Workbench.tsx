@@ -115,25 +115,12 @@ const WorkbenchContent: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const analysisTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // AI Analysis - ONLY trigger when BOTH platform selected AND images uploaded (Agent mode only)
-  useEffect(() => {
-    // AI analysis requires: platform selected + images uploaded + agent mode
-    if (uploadedImages.length > 0 && selectedPlatform && isAgentMode && !aiAnalysis) {
-      // Clear any pending analysis
-      if (analysisTimeoutRef.current) {
-        clearTimeout(analysisTimeoutRef.current);
-      }
-      // Debounce the analysis to avoid multiple calls
-      analysisTimeoutRef.current = setTimeout(() => {
-        runAIAnalysis();
-      }, 500);
+  // AI Analysis - NOW triggered manually via "Start Analysis" button
+  // No auto-trigger - user clicks button to start analysis after uploading images
+  const handleStartAnalysis = useCallback(() => {
+    if (uploadedImages.length > 0 && selectedPlatform && isAgentMode) {
+      runAIAnalysis();
     }
-    
-    return () => {
-      if (analysisTimeoutRef.current) {
-        clearTimeout(analysisTimeoutRef.current);
-      }
-    };
   }, [uploadedImages.length, selectedPlatform, isAgentMode]);
 
   // Auto-recommend modules when platform is selected in Agent mode
@@ -538,6 +525,7 @@ const WorkbenchContent: React.FC = () => {
                     <AgentModeSidebar
                       analysis={aiAnalysis}
                       isAnalyzing={isAIProcessing}
+                      hasStartedAnalysis={!!aiAnalysis || isAIProcessing}
                       recommendedVisualStyle={visualStyle}
                       recommendedLayoutStyle={layoutStyle}
                       recommendedScenes={selectedScenes}
@@ -756,9 +744,11 @@ const WorkbenchContent: React.FC = () => {
                   recommendedModules={selectedModules}
                   totalImages={totalImages}
                   aiRecommendedCount={selectedModules.length > 0 ? selectedModules.length + Math.min(selectedScenes.length, 4) : undefined}
+                  uploadedImagesCount={uploadedImages.length}
                   onConfirm={() => setShowConfirmModal(true)}
                   onRefresh={handleRefreshPlan}
                   onCustomize={handleSwitchToManual}
+                  onStartAnalysis={handleStartAnalysis}
                   onUpdatePlan={(update) => {
                     if (update.visualStyle) setVisualStyle(update.visualStyle);
                     if (update.layoutStyle) setLayoutStyle(update.layoutStyle);

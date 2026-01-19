@@ -4,8 +4,8 @@ import {
   Palette,
   Type,
   Layers,
-  Check,
-  MessageCircle
+  MessageCircle,
+  Play
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -15,6 +15,7 @@ import { ProductAnalysis } from '@/lib/aiAnalysis';
 interface AgentModeSidebarProps {
   analysis: ProductAnalysis | null;
   isAnalyzing: boolean;
+  hasStartedAnalysis: boolean;
   recommendedVisualStyle: VisualStyleId;
   recommendedLayoutStyle: LayoutStyleId;
   recommendedModules: { id: string; name: string; aspectRatio: string }[];
@@ -25,6 +26,7 @@ interface AgentModeSidebarProps {
 export const AgentModeSidebar: React.FC<AgentModeSidebarProps> = ({
   analysis,
   isAnalyzing,
+  hasStartedAnalysis,
   recommendedVisualStyle,
   recommendedLayoutStyle,
   recommendedModules,
@@ -61,17 +63,17 @@ export const AgentModeSidebar: React.FC<AgentModeSidebarProps> = ({
     );
   }
 
-  // No analysis yet
+  // No analysis yet - show hint to start
   if (!analysis) {
     return (
-      <div className="rounded-2xl border border-border/30 bg-card/50 p-4 text-center">
-        <div className="p-3 rounded-full bg-secondary/50 inline-flex mb-2">
-          <Sparkles className="h-5 w-5 text-foreground-muted" />
+      <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4 text-center">
+        <div className="p-3 rounded-full bg-primary/10 inline-flex mb-2">
+          <Play className="h-5 w-5 text-primary" />
         </div>
         <p className="text-xs text-foreground-muted">
           {language === 'zh' 
-            ? '选择平台后，AI 将自动分析' 
-            : 'After selecting platform, AI will analyze'}
+            ? '点击主面板「开始 AI 分析」按钮' 
+            : 'Click "Start AI Analysis" in main panel'}
         </p>
       </div>
     );
