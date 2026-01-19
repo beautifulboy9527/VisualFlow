@@ -315,7 +315,7 @@ export const PlatformConfig: React.FC<PlatformConfigProps> = ({
                             {language === 'zh' ? '选择此类别' : 'Select All'}
                           </button>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 gap-2">
                           {categoryModules.map(module => (
                             <ModuleItem
                               key={module.id}

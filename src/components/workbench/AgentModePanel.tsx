@@ -30,6 +30,12 @@ interface AgentModePanelProps {
   recommendedScenes: string[];
   recommendedModules: { id: string; name: string; aspectRatio: string }[];
   
+  // Image count
+  totalImages: number;
+  aiRecommendedCount?: number;
+  selectedSceneCount: number;
+  selectedModuleCount: number;
+  
   // Actions
   onConfirm: () => void;
   onRefresh: () => void;
@@ -52,6 +58,10 @@ export const AgentModePanel: React.FC<AgentModePanelProps> = ({
   recommendedLayoutStyle,
   recommendedScenes,
   recommendedModules,
+  totalImages,
+  aiRecommendedCount,
+  selectedSceneCount,
+  selectedModuleCount,
   onConfirm,
   onRefresh,
   onCustomize,
@@ -232,7 +242,43 @@ export const AgentModePanel: React.FC<AgentModePanelProps> = ({
               </div>
             </div>
 
-            {/* Modules & Scenes */}
+            {/* Image Count Summary */}
+            <div className="p-3 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">
+                    {language === 'zh' ? '输出统计' : 'Output Summary'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-foreground-muted">
+                    {language === 'zh' ? '模块' : 'Modules'}: <span className="text-foreground font-medium">{selectedModuleCount}</span>
+                  </span>
+                  <span className="text-foreground-muted/50">+</span>
+                  <span className="text-foreground-muted">
+                    {language === 'zh' ? '场景' : 'Scenes'}: <span className="text-foreground font-medium">{selectedSceneCount}</span>
+                  </span>
+                  <span className="text-foreground-muted/50">=</span>
+                  <span className="text-primary font-bold text-base">{totalImages}</span>
+                  <span className="text-xs text-foreground-muted">{language === 'zh' ? '张' : 'imgs'}</span>
+                </div>
+              </div>
+              {aiRecommendedCount && aiRecommendedCount !== totalImages && (
+                <div className="mt-2 pt-2 border-t border-primary/10">
+                  <div className="flex items-center gap-2 text-xs text-primary">
+                    <Sparkles className="h-3 w-3" />
+                    <span>
+                      {language === 'zh' 
+                        ? `AI 推荐: ${aiRecommendedCount} 张 (基于产品特性)` 
+                        : `AI Suggested: ${aiRecommendedCount} images (based on product)`}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modules & Scenes Details */}
             <div className="p-3 rounded-xl bg-card/80 border border-border/30">
               <div className="flex items-center gap-2 mb-2">
                 <Layers className="h-3.5 w-3.5 text-primary" />

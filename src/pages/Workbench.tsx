@@ -540,6 +540,10 @@ const WorkbenchContent: React.FC = () => {
                       recommendedLayoutStyle={layoutStyle}
                       recommendedScenes={selectedScenes}
                       recommendedModules={selectedModules}
+                      totalImages={totalImages}
+                      aiRecommendedCount={selectedModules.length > 0 ? selectedModules.length + Math.min(selectedScenes.length, 4) : undefined}
+                      selectedSceneCount={selectedScenes.length}
+                      selectedModuleCount={selectedModules.length}
                       onConfirm={() => setShowConfirmModal(true)}
                       onRefresh={handleRefreshPlan}
                       onCustomize={handleSwitchToManual}
