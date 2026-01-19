@@ -34,7 +34,15 @@ import xiaohongshuSkincare from '@/assets/templates/xiaohongshu-skincare.jpg';
 import beverageWine from '@/assets/templates/beverage-wine.jpg';
 import kidsToys from '@/assets/templates/kids-toys.jpg';
 
-interface Template {
+export interface TemplateConfig {
+  platform: string;
+  visualStyle: string;
+  layoutStyle: string;
+  modules: Array<{ id: string; name: string; aspectRatio: string }>;
+  scenes: string[];
+}
+
+export interface Template {
   id: string;
   nameKey: string;
   category: string;
@@ -44,6 +52,7 @@ interface Template {
   descKey: string;
   platform?: string;
   style?: string;
+  config: TemplateConfig;
 }
 
 const templates: Template[] = [
@@ -57,6 +66,18 @@ const templates: Template[] = [
     descKey: 'templates.skincareDesc',
     platform: 'Amazon',
     style: 'minimalist_nordic',
+    config: {
+      platform: 'amazon',
+      visualStyle: 'minimalist_nordic',
+      layoutStyle: 'clean_minimal',
+      modules: [
+        { id: 'main_image', name: '主图', aspectRatio: '1:1' },
+        { id: 'sub_1', name: '副图1', aspectRatio: '1:1' },
+        { id: 'sub_2', name: '副图2', aspectRatio: '1:1' },
+        { id: 'aplus_banner', name: 'A+横幅', aspectRatio: '970:600' },
+      ],
+      scenes: ['main', 'front_view', 'lifestyle', 'detail_1'],
+    },
   },
   {
     id: '2',
@@ -68,6 +89,17 @@ const templates: Template[] = [
     descKey: 'templates.artisanCoffeeDesc',
     platform: 'Shopify',
     style: 'natural_organic',
+    config: {
+      platform: 'shopify',
+      visualStyle: 'natural_organic',
+      layoutStyle: 'organic_flow',
+      modules: [
+        { id: 'hero', name: '主横幅', aspectRatio: '12:5' },
+        { id: 'product', name: '产品图', aspectRatio: '1:1' },
+        { id: 'collection', name: '系列图', aspectRatio: '16:9' },
+      ],
+      scenes: ['main', 'lifestyle', 'detail_1', 'detail_2'],
+    },
   },
   {
     id: '3',
@@ -79,6 +111,17 @@ const templates: Template[] = [
     descKey: 'templates.techEarbudsDesc',
     platform: 'TikTok',
     style: 'neon_cyberpunk',
+    config: {
+      platform: 'tiktok',
+      visualStyle: 'neon_cyberpunk',
+      layoutStyle: 'dynamic_diagonal',
+      modules: [
+        { id: 'video_cover', name: '视频封面', aspectRatio: '9:16' },
+        { id: 'product_main', name: '产品主图', aspectRatio: '1:1' },
+        { id: 'detail_1', name: '细节图1', aspectRatio: '1:1' },
+      ],
+      scenes: ['main', 'front_view', 'detail_1', 'promo'],
+    },
   },
   {
     id: '4',
@@ -90,6 +133,17 @@ const templates: Template[] = [
     descKey: 'templates.kbeautyDesc',
     platform: 'Xiaohongshu',
     style: 'watercolor',
+    config: {
+      platform: 'xiaohongshu',
+      visualStyle: 'watercolor',
+      layoutStyle: 'magazine_grid',
+      modules: [
+        { id: 'main', name: '主图', aspectRatio: '3:4' },
+        { id: 'detail', name: '详情图', aspectRatio: '3:4' },
+        { id: 'multi', name: '多图', aspectRatio: '1:1' },
+      ],
+      scenes: ['main', 'lifestyle', 'detail_1', 'promo'],
+    },
   },
   {
     id: '5',
@@ -101,6 +155,17 @@ const templates: Template[] = [
     descKey: 'templates.luxuryBagDesc',
     platform: 'Shopify',
     style: 'magazine',
+    config: {
+      platform: 'shopify',
+      visualStyle: 'magazine',
+      layoutStyle: 'magazine_grid',
+      modules: [
+        { id: 'hero', name: '主横幅', aspectRatio: '12:5' },
+        { id: 'product', name: '产品图', aspectRatio: '1:1' },
+        { id: 'product_card', name: '产品卡', aspectRatio: '1:1' },
+      ],
+      scenes: ['main', 'front_view', 'side_view', 'lifestyle'],
+    },
   },
   {
     id: '6',
@@ -112,6 +177,18 @@ const templates: Template[] = [
     descKey: 'templates.luxuryWatchDesc',
     platform: 'Amazon',
     style: 'tech_futuristic',
+    config: {
+      platform: 'amazon',
+      visualStyle: 'tech_futuristic',
+      layoutStyle: 'dynamic_diagonal',
+      modules: [
+        { id: 'main_image', name: '主图', aspectRatio: '1:1' },
+        { id: 'sub_1', name: '副图1', aspectRatio: '1:1' },
+        { id: 'sub_2', name: '副图2', aspectRatio: '1:1' },
+        { id: 'sub_3', name: '副图3', aspectRatio: '1:1' },
+      ],
+      scenes: ['main', 'front_view', 'detail_1', 'specs'],
+    },
   },
   {
     id: '7',
@@ -123,6 +200,17 @@ const templates: Template[] = [
     descKey: 'templates.holidayGiftDesc',
     platform: 'Shopify',
     style: 'vintage_film',
+    config: {
+      platform: 'shopify',
+      visualStyle: 'vintage_film',
+      layoutStyle: 'classic_center',
+      modules: [
+        { id: 'hero', name: '主横幅', aspectRatio: '12:5' },
+        { id: 'product', name: '产品图', aspectRatio: '1:1' },
+        { id: 'collection', name: '系列图', aspectRatio: '16:9' },
+      ],
+      scenes: ['main', 'lifestyle', 'promo', 'sale_event'],
+    },
   },
   {
     id: '8',
@@ -134,6 +222,17 @@ const templates: Template[] = [
     descKey: 'templates.organicBeautyDesc',
     platform: 'Shopify',
     style: 'natural_organic',
+    config: {
+      platform: 'shopify',
+      visualStyle: 'natural_organic',
+      layoutStyle: 'organic_flow',
+      modules: [
+        { id: 'hero', name: '主横幅', aspectRatio: '12:5' },
+        { id: 'product', name: '产品图', aspectRatio: '1:1' },
+        { id: 'product_card', name: '产品卡', aspectRatio: '1:1' },
+      ],
+      scenes: ['main', 'lifestyle', 'detail_1', 'detail_2'],
+    },
   },
   {
     id: '9',
@@ -145,6 +244,18 @@ const templates: Template[] = [
     descKey: 'templates.fitnessSupplementDesc',
     platform: 'Amazon',
     style: 'tech_futuristic',
+    config: {
+      platform: 'amazon',
+      visualStyle: 'tech_futuristic',
+      layoutStyle: 'dynamic_diagonal',
+      modules: [
+        { id: 'main_image', name: '主图', aspectRatio: '1:1' },
+        { id: 'sub_1', name: '副图1', aspectRatio: '1:1' },
+        { id: 'sub_2', name: '副图2', aspectRatio: '1:1' },
+        { id: 'aplus_banner', name: 'A+横幅', aspectRatio: '970:600' },
+      ],
+      scenes: ['main', 'front_view', 'specs', 'lifestyle'],
+    },
   },
   {
     id: '10',
@@ -156,6 +267,18 @@ const templates: Template[] = [
     descKey: 'templates.smartHomeDesc',
     platform: 'Amazon',
     style: 'minimalist_nordic',
+    config: {
+      platform: 'amazon',
+      visualStyle: 'minimalist_nordic',
+      layoutStyle: 'clean_minimal',
+      modules: [
+        { id: 'main_image', name: '主图', aspectRatio: '1:1' },
+        { id: 'sub_1', name: '副图1', aspectRatio: '1:1' },
+        { id: 'sub_2', name: '副图2', aspectRatio: '1:1' },
+        { id: 'aplus_feature', name: '特性展示', aspectRatio: '970:300' },
+      ],
+      scenes: ['main', 'front_view', 'lifestyle', 'specs'],
+    },
   },
   {
     id: '11',
@@ -167,6 +290,17 @@ const templates: Template[] = [
     descKey: 'templates.premiumWineDesc',
     platform: 'Shopify',
     style: 'magazine',
+    config: {
+      platform: 'shopify',
+      visualStyle: 'magazine',
+      layoutStyle: 'magazine_grid',
+      modules: [
+        { id: 'hero', name: '主横幅', aspectRatio: '12:5' },
+        { id: 'product', name: '产品图', aspectRatio: '1:1' },
+        { id: 'collection', name: '系列图', aspectRatio: '16:9' },
+      ],
+      scenes: ['main', 'lifestyle', 'detail_1', 'promo'],
+    },
   },
   {
     id: '12',
@@ -178,6 +312,18 @@ const templates: Template[] = [
     descKey: 'templates.kidsToysDesc',
     platform: 'Amazon',
     style: 'watercolor',
+    config: {
+      platform: 'amazon',
+      visualStyle: 'watercolor',
+      layoutStyle: 'playful_pop',
+      modules: [
+        { id: 'main_image', name: '主图', aspectRatio: '1:1' },
+        { id: 'sub_1', name: '副图1', aspectRatio: '1:1' },
+        { id: 'sub_2', name: '副图2', aspectRatio: '1:1' },
+        { id: 'sub_3', name: '副图3', aspectRatio: '1:1' },
+      ],
+      scenes: ['main', 'lifestyle', 'detail_1', 'promo'],
+    },
   },
 ];
 
