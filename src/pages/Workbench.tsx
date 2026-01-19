@@ -14,6 +14,8 @@ import { HistoryPanel } from '@/components/workbench/HistoryPanel';
 import { TemplatesPanel } from '@/components/workbench/TemplatesPanel';
 import { ImagePreviewModal } from '@/components/workbench/ImagePreviewModal';
 import { AgentModePanel } from '@/components/workbench/AgentModePanel';
+import { AgentModeSidebar } from '@/components/workbench/AgentModeSidebar';
+import { AgentChatCanvas } from '@/components/workbench/AgentChatCanvas';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { LanguageProvider, useLanguage } from '@/hooks/useLanguage';
@@ -531,9 +533,9 @@ const WorkbenchContent: React.FC = () => {
                     </ConfigSection>
                   )}
 
-                  {/* Agent Mode: Show AI Recommendation Panel after platform selected */}
+                  {/* Agent Mode: Compact sidebar summary after platform selected */}
                   {isAgentMode && uploadedImages.length > 0 && selectedPlatform && (
-                    <AgentModePanel
+                    <AgentModeSidebar
                       analysis={aiAnalysis}
                       isAnalyzing={isAIProcessing}
                       recommendedVisualStyle={visualStyle}
@@ -541,14 +543,6 @@ const WorkbenchContent: React.FC = () => {
                       recommendedScenes={selectedScenes}
                       recommendedModules={selectedModules}
                       totalImages={totalImages}
-                      aiRecommendedCount={selectedModules.length > 0 ? selectedModules.length + Math.min(selectedScenes.length, 4) : undefined}
-                      selectedSceneCount={selectedScenes.length}
-                      selectedModuleCount={selectedModules.length}
-                      onConfirm={() => setShowConfirmModal(true)}
-                      onRefresh={handleRefreshPlan}
-                      onCustomize={handleSwitchToManual}
-                      isRefreshing={isRefreshingPlan}
-                      isReady={canGenerate}
                     />
                   )}
 
@@ -750,8 +744,36 @@ const WorkbenchContent: React.FC = () => {
             </aside>
 
             {/* Right Panel - Preview / Results */}
-            <main className="flex-1 overflow-y-auto" ref={containerRef}>
-              <div className="p-6 lg:p-8">
+            <main className="flex-1 overflow-hidden" ref={containerRef}>
+              {/* Agent Mode: AI Chat Canvas */}
+              {isAgentMode && uploadedImages.length > 0 && selectedPlatform && generatedImages.length === 0 && !isGenerating && (
+                <AgentChatCanvas
+                  analysis={aiAnalysis}
+                  isAnalyzing={isAIProcessing}
+                  recommendedVisualStyle={visualStyle}
+                  recommendedLayoutStyle={layoutStyle}
+                  recommendedScenes={selectedScenes}
+                  recommendedModules={selectedModules}
+                  totalImages={totalImages}
+                  aiRecommendedCount={selectedModules.length > 0 ? selectedModules.length + Math.min(selectedScenes.length, 4) : undefined}
+                  onConfirm={() => setShowConfirmModal(true)}
+                  onRefresh={handleRefreshPlan}
+                  onCustomize={handleSwitchToManual}
+                  onUpdatePlan={(update) => {
+                    if (update.visualStyle) setVisualStyle(update.visualStyle);
+                    if (update.layoutStyle) setLayoutStyle(update.layoutStyle);
+                    if (update.scenes) setSelectedScenes(update.scenes as SceneType[]);
+                    if (update.modules) setSelectedModules(update.modules);
+                  }}
+                  isRefreshing={isRefreshingPlan}
+                  isReady={canGenerate}
+                />
+              )}
+
+              <div className={cn(
+                "p-6 lg:p-8",
+                isAgentMode && uploadedImages.length > 0 && selectedPlatform && generatedImages.length === 0 && !isGenerating ? "hidden" : ""
+              )}>
                 {/* Empty State */}
                 {uploadedImages.length === 0 && generatedImages.length === 0 && !isGenerating && (
                   <div className="h-full flex flex-col items-center justify-center text-center py-20 animate-fade-in">
@@ -794,8 +816,8 @@ const WorkbenchContent: React.FC = () => {
                   </div>
                 )}
 
-                {/* Design Brief Preview */}
-                {uploadedImages.length > 0 && !isGenerating && generatedImages.length === 0 && (
+                {/* Manual Mode: Design Brief Preview */}
+                {!isAgentMode && uploadedImages.length > 0 && !isGenerating && generatedImages.length === 0 && (
                   <div className="max-w-3xl mx-auto animate-fade-in">
                     <DesignBrief
                       productName={productName}
