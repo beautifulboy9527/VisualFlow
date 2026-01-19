@@ -673,7 +673,7 @@ const WorkbenchContent: React.FC = () => {
 
                 {/* Action Buttons - Only show in Manual mode or when no AI panel */}
                 {(!isAgentMode || !selectedPlatform || uploadedImages.length === 0) && (
-                  <div className="pt-4 pb-2 space-y-3 sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent">
+                  <div className="mt-6 pt-4 pb-4 space-y-3 border-t border-border/30 bg-background relative z-10">
                     {/* Calculation breakdown */}
                     {(selectedModules.length > 0 || selectedScenes.length > 0) && (
                       <div className="px-3 py-2 rounded-lg bg-secondary/30 border border-border/30">
