@@ -343,6 +343,10 @@ export const translations: Translations = {
   'templates.useTemplate': { zh: '使用模板', en: 'Use Template' },
   'templates.use': { zh: '使用', en: 'Use' },
   'templates.all': { zh: '全部', en: 'All' },
+  'templates.loading': { zh: '加载中...', en: 'Loading...' },
+  'templates.loaded': { zh: '已加载', en: 'Loaded' },
+  'templates.selectToApply': { zh: '点击模板一键应用配置', en: 'Click to apply template settings' },
+  'templates.noTemplates': { zh: '暂无模板', en: 'No templates found' },
   
   // Template Items
   'templates.skincare': { zh: '护肤精华', en: 'Skincare Essence' },
