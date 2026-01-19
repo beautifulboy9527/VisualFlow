@@ -916,8 +916,15 @@ const WorkbenchContent: React.FC = () => {
         {activeView === 'templates' && (
           <main className="flex-1 overflow-hidden bg-card/30">
             <TemplatesPanel onSelectTemplate={() => { 
-              setActiveView('workbench'); 
-              toast({ title: language === 'zh' ? '模板已加载' : 'Template loaded' }); 
+              // Switch to workbench view
+              setActiveView('workbench');
+              // Switch to Manual Mode so user can see all loaded configurations
+              saveToHistory();
+              setIsAgentMode(false);
+              toast({ 
+                title: language === 'zh' ? '模板已加载' : 'Template loaded',
+                description: language === 'zh' ? '已切换至手动模式，您可以查看并调整配置' : 'Switched to Manual Mode, you can view and adjust settings',
+              }); 
             }} />
           </main>
         )}
