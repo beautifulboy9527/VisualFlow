@@ -197,101 +197,95 @@ export const TemplatesPanel: React.FC<TemplatesPanelProps> = ({
   onSelectTemplate,
 }) => {
   const { t } = useLanguage();
+  const [activeFilter, setActiveFilter] = React.useState<string>('all');
   
-  // Get unique categories and order them
-  const categoryOrder = ['Amazon', 'Shopify', 'TikTok', 'Xiaohongshu', 'Fashion', 'Beauty', 'Health', 'Tech', 'Holiday', 'Beverage', 'Kids'];
-  const categories = categoryOrder.filter(cat => templates.some(tmpl => tmpl.category === cat));
+  // Get unique platforms for filtering
+  const platforms = ['all', 'Amazon', 'Shopify', 'TikTok', 'Xiaohongshu'];
+  
+  const filteredTemplates = activeFilter === 'all' 
+    ? templates 
+    : templates.filter(t => t.platform === activeFilter);
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Header */}
-      <div className="p-4 border-b border-border bg-card/50 backdrop-blur-sm">
-        <div className="flex items-center gap-2 mb-1">
-          <Sparkles className="h-5 w-5 text-primary" />
-          <h2 className="font-semibold text-foreground">{t('templates.quickStart')}</h2>
+      {/* Compact Header with Filters */}
+      <div className="p-3 border-b border-border bg-card/50 backdrop-blur-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <h2 className="font-medium text-sm text-foreground">{t('templates.quickStart')}</h2>
+            <span className="text-xs text-foreground-muted">({filteredTemplates.length})</span>
+          </div>
+          
+          {/* Platform Filters - Compact Pills */}
+          <div className="flex items-center gap-1">
+            {platforms.map(platform => (
+              <button
+                key={platform}
+                onClick={() => setActiveFilter(platform)}
+                className={`px-2 py-0.5 text-[10px] rounded-full transition-all ${
+                  activeFilter === platform
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted/50 text-foreground-muted hover:bg-muted'
+                }`}
+              >
+                {platform === 'all' ? t('templates.all') : platform}
+              </button>
+            ))}
+          </div>
         </div>
-        <p className="text-sm text-foreground-muted">
-          {t('templates.quickStartDesc')}
-        </p>
       </div>
 
-      {/* Templates Grid - Improved Layout */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {categories.map((category) => {
-          const categoryTemplates = templates.filter(tmpl => tmpl.category === category);
-          const categoryKey = categoryTemplates[0]?.categoryKey || category;
-          
-          return (
-            <div key={category}>
-              {/* Category Header */}
-              <div className="flex items-center gap-2 mb-3">
-                <h3 className="text-xs font-semibold text-foreground-secondary uppercase tracking-wider">
-                  {t(categoryKey)}
-                </h3>
-                <div className="flex-1 h-px bg-border/50" />
-                <span className="text-xs text-foreground-muted">
-                  {categoryTemplates.length} {t('templates.items')}
-                </span>
-              </div>
-              
-              {/* Template Cards Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                {categoryTemplates.map((template) => (
-                  <div
-                    key={template.id}
-                    onClick={() => onSelectTemplate(template)}
-                    className="group relative bg-card rounded-xl border border-border/50 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 overflow-hidden cursor-pointer"
-                  >
-                    {/* Thumbnail */}
-                    <div className="relative aspect-square overflow-hidden">
-                      <img
-                        src={template.thumbnail}
-                        alt={t(template.nameKey)}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      
-                      {/* Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      
-                      {/* Platform Badge */}
-                      {template.platform && (
-                        <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-card/80 backdrop-blur-sm text-[10px] font-medium text-foreground-secondary border border-border/50">
-                          {template.platform}
-                        </div>
-                      )}
-                      
-                      {/* Use Template Button */}
-                      <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                        <Button 
-                          size="sm" 
-                          className="w-full bg-primary/90 text-primary-foreground hover:bg-primary text-xs h-7"
-                        >
-                          <Sparkles className="h-3 w-3 mr-1" />
-                          {t('templates.useTemplate')}
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Info */}
-                    <div className="p-2.5">
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <div className="p-1 rounded bg-primary/10 text-primary flex-shrink-0">
-                          {template.icon}
-                        </div>
-                        <span className="text-xs font-medium text-foreground truncate">
-                          {t(template.nameKey)}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-foreground-muted line-clamp-1 pl-6">
-                        {t(template.descKey)}
-                      </p>
-                    </div>
+      {/* Dense Masonry-like Grid */}
+      <div className="flex-1 overflow-y-auto p-2">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-2">
+          {filteredTemplates.map((template) => (
+            <div
+              key={template.id}
+              onClick={() => onSelectTemplate(template)}
+              className="group relative bg-card rounded-lg border border-border/30 hover:border-primary/50 hover:shadow-md hover:shadow-primary/10 transition-all duration-200 overflow-hidden cursor-pointer"
+            >
+              {/* Compact Thumbnail */}
+              <div className="relative aspect-[3/4] overflow-hidden">
+                <img
+                  src={template.thumbnail}
+                  alt={t(template.nameKey)}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                
+                {/* Platform Badge - Smaller */}
+                {template.platform && (
+                  <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-card/90 backdrop-blur-sm text-[8px] font-medium text-foreground-secondary">
+                    {template.platform}
                   </div>
-                ))}
+                )}
+                
+                {/* Use Button on Hover */}
+                <div className="absolute bottom-1 left-1 right-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                  <Button 
+                    size="sm" 
+                    className="w-full bg-primary text-primary-foreground text-[10px] h-5 px-1"
+                  >
+                    <Sparkles className="h-2.5 w-2.5 mr-0.5" />
+                    {t('templates.use')}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Minimal Info */}
+              <div className="p-1.5">
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] font-medium text-foreground truncate leading-tight">
+                    {t(template.nameKey)}
+                  </span>
+                </div>
               </div>
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
     </div>
   );

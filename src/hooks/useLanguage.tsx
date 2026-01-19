@@ -341,6 +341,8 @@ export const translations: Translations = {
   'templates.category.beverage': { zh: '饮品', en: 'Beverage' },
   'templates.category.kids': { zh: '母婴', en: 'Kids' },
   'templates.useTemplate': { zh: '使用模板', en: 'Use Template' },
+  'templates.use': { zh: '使用', en: 'Use' },
+  'templates.all': { zh: '全部', en: 'All' },
   
   // Template Items
   'templates.skincare': { zh: '护肤精华', en: 'Skincare Essence' },
