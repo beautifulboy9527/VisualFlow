@@ -335,8 +335,8 @@ export const PlatformConfig: React.FC<PlatformConfigProps> = ({
               })}
             </div>
           ) : (
-            // Simple module grid
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            // Simple module grid - single column for full text visibility
+            <div className="grid grid-cols-1 gap-2">
               {currentPlatform.modules.map(module => (
                 <ModuleItem
                   key={module.id}
@@ -383,7 +383,7 @@ const ModuleItem: React.FC<ModuleItemProps> = ({
         ? "bg-primary/5 border-primary/40 shadow-sm"
         : "bg-card/50 border-transparent hover:border-border/50"
     )}>
-      <div className="flex items-center gap-2.5 p-2.5">
+      <div className="flex items-center gap-3 p-3">
         {/* Checkbox */}
         <button
           onClick={onToggle}
@@ -397,31 +397,21 @@ const ModuleItem: React.FC<ModuleItemProps> = ({
           {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
         </button>
         
-        {/* Module name */}
-        <div className="flex-1 min-w-0">
-          <span className={cn(
-            "text-sm font-medium block truncate",
-            isSelected ? "text-foreground" : "text-foreground-secondary"
-          )}>
-            {language === 'zh' ? module.nameZh : module.name}
-          </span>
-        </div>
+        {/* Module name - full display without truncation */}
+        <span className={cn(
+          "text-sm font-medium flex-1",
+          isSelected ? "text-foreground" : "text-foreground-secondary"
+        )}>
+          {language === 'zh' ? module.nameZh : module.name}
+        </span>
         
-        {/* Settings icon (non-interactive, just indicator) */}
-        <Settings2 className={cn(
-          "h-3.5 w-3.5 shrink-0 transition-colors",
-          isSelected ? "text-primary/60" : "text-foreground-muted/40"
-        )} />
-      </div>
-      
-      {/* Inline aspect ratio dropdown - always visible when selected */}
-      {isSelected && (
-        <div className="px-2.5 pb-2.5 pt-0">
+        {/* Aspect ratio selector inline */}
+        {isSelected ? (
           <Select 
             value={currentRatio} 
             onValueChange={onAspectRatioChange}
           >
-            <SelectTrigger className="h-7 text-xs bg-background/60 border-border/40 hover:border-border/60 focus:ring-0 focus:ring-offset-0">
+            <SelectTrigger className="h-7 w-auto min-w-[70px] text-xs bg-background/60 border-border/40 hover:border-border/60 focus:ring-0 focus:ring-offset-0 px-2">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border z-50">
@@ -432,8 +422,12 @@ const ModuleItem: React.FC<ModuleItemProps> = ({
               ))}
             </SelectContent>
           </Select>
-        </div>
-      )}
+        ) : (
+          <span className="text-xs text-foreground-muted">
+            {module.aspectRatio}
+          </span>
+        )}
+      </div>
     </div>
   );
 };
