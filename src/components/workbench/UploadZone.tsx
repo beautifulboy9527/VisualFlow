@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Upload, X, Sparkles, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface UploadZoneProps {
   onImageUpload: (file: File, previewUrl: string) => void;
@@ -13,6 +14,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
   uploadedImage,
   onClear 
 }) => {
+  const { t } = useLanguage();
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -64,7 +66,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
         <div className="relative overflow-hidden rounded-md border border-border">
           <img
             src={uploadedImage}
-            alt="Uploaded product"
+            alt={t('upload.mainImage')}
             className="w-full aspect-square object-cover"
           />
           {/* Overlay on hover */}
@@ -75,7 +77,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
         <button
           onClick={onClear}
           className="absolute top-2 right-2 p-1.5 rounded-md bg-foreground/80 text-background hover:bg-foreground transition-colors duration-200"
-          aria-label="Remove image"
+          aria-label={t('action.reset')}
         >
           <X className="h-4 w-4" />
         </button>
@@ -83,7 +85,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
         {/* AI Analysis indicator */}
         <div className="mt-3 flex items-center gap-2 text-sm text-foreground-secondary animate-slide-up">
           <Sparkles className="h-4 w-4 text-primary" />
-          <span>AI analyzing product...</span>
+          <span>{t('upload.aiAnalyzing')}</span>
         </div>
       </div>
     );
@@ -126,10 +128,10 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
         
         <div>
           <p className="text-sm font-medium text-foreground">
-            {isDragging ? 'Drop your image here' : 'Drop image or click to upload'}
+            {isDragging ? t('upload.dropHere') : t('upload.dropImage')}
           </p>
           <p className="text-xs text-foreground-muted mt-1">
-            JPG, PNG up to 10MB
+            {t('upload.supportedFormats')}
           </p>
         </div>
 
@@ -142,7 +144,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
             handleClick();
           }}
         >
-          Select File
+          {t('upload.selectFile')}
         </Button>
       </div>
     </div>

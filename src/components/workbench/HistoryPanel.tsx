@@ -2,6 +2,7 @@ import React from 'react';
 import { Clock, Download, Trash2, Eye, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface HistoryItem {
   id: string;
@@ -28,12 +29,14 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
   searchQuery,
   onSearchChange,
 }) => {
+  const { t, language } = useLanguage();
+  
   const filteredItems = historyItems.filter(item =>
     item.prompt?.toLowerCase().includes(searchQuery.toLowerCase()) || searchQuery === ''
   );
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat(language === 'zh' ? 'zh-CN' : 'en-US', {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -48,10 +51,10 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
           <Clock className="h-12 w-12 text-foreground-muted" />
         </div>
         <h3 className="text-lg font-semibold text-foreground mb-2">
-          No generation history yet
+          {t('history.noHistory')}
         </h3>
         <p className="text-sm text-foreground-muted max-w-sm">
-          Your generated images will appear here. Start creating to build your history!
+          {t('history.noHistoryDesc')}
         </p>
       </div>
     );
@@ -64,7 +67,7 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-muted" />
           <Input
-            placeholder="Search history..."
+            placeholder={t('history.search')}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-9 bg-secondary/50 border-border"
@@ -85,7 +88,7 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
                 <div key={idx} className="relative overflow-hidden bg-secondary">
                   <img
                     src={img}
-                    alt={`History item ${item.id} - ${idx + 1}`}
+                    alt={`${t('history.title')} ${item.id} - ${idx + 1}`}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -136,7 +139,7 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
         {filteredItems.length === 0 && searchQuery && (
           <div className="text-center py-8">
             <p className="text-sm text-foreground-muted">
-              No results found for "{searchQuery}"
+              {t('history.noResults')} "{searchQuery}"
             </p>
           </div>
         )}
