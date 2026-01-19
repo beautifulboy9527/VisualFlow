@@ -14,8 +14,10 @@ import {
   Bot
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const Index = () => {
+  const { language, setLanguage, t } = useLanguage();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
 
@@ -34,10 +36,35 @@ const Index = () => {
   ];
 
   const stats = [
-    { value: '20s', label: 'Generation' },
-    { value: '96%', label: 'Accuracy' },
-    { value: '10K+', label: 'Created' },
+    { value: '20s', label: t('home.stat1.label') },
+    { value: '96%', label: t('home.stat2.label') },
+    { value: '10K+', label: t('home.stat3.label') },
   ];
+
+  const features = [
+    { 
+      icon: MousePointer, 
+      title: t('home.feature1.title'), 
+      desc: t('home.feature1.desc'),
+      gradient: 'from-primary/10 to-primary/5'
+    },
+    { 
+      icon: Wand2, 
+      title: t('home.feature2.title'), 
+      desc: t('home.feature2.desc'),
+      gradient: 'from-accent/10 to-accent/5'
+    },
+    { 
+      icon: Zap, 
+      title: t('home.feature3.title'), 
+      desc: t('home.feature3.desc'),
+      gradient: 'from-primary/10 to-accent/5'
+    },
+  ];
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'zh' ? 'en' : 'zh');
+  };
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -78,16 +105,29 @@ const Index = () => {
                 </span>
               </div>
               
-              <Link to="/workbench">
+              <div className="flex items-center gap-3">
+                {/* Language Toggle */}
                 <Button 
                   variant="ghost" 
-                  size="sm" 
-                  className="text-foreground-secondary hover:text-foreground hover:bg-transparent gap-2 group"
+                  size="sm"
+                  onClick={toggleLanguage}
+                  className="text-foreground-secondary hover:text-foreground gap-1.5"
                 >
-                  Start
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  <Globe className="h-4 w-4" />
+                  <span className="text-xs">{language === 'zh' ? 'EN' : '中'}</span>
                 </Button>
-              </Link>
+                
+                <Link to="/workbench">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-foreground-secondary hover:text-foreground hover:bg-transparent gap-2 group"
+                  >
+                    {t('home.start')}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </header>
@@ -98,23 +138,22 @@ const Index = () => {
             {/* Floating badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/50 backdrop-blur-xl border border-border/30 text-xs text-foreground-secondary mb-12 animate-fade-in">
               <Bot className="h-3.5 w-3.5 text-primary" />
-              <span>AI Multi-Agent Visual System</span>
+              <span>{t('home.badge')}</span>
               <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-medium">v2.0</span>
             </div>
             
             {/* Main headline - Clean typography */}
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-foreground leading-[0.95] mb-8 animate-slide-up tracking-tight">
-              Create
+              {t('home.headline1')}
               <br />
-              <span className="text-gradient-primary">stunning</span>
+              <span className="text-gradient-primary">{t('home.headline2')}</span>
               <br />
-              visuals
+              {t('home.headline3')}
             </h1>
             
             {/* Subtitle */}
             <p className="text-lg md:text-xl text-foreground-secondary max-w-lg mx-auto mb-12 animate-slide-up leading-relaxed" style={{ animationDelay: '0.1s' }}>
-              Upload your product. AI handles everything —
-              <span className="text-foreground"> Main KV, Banners, Social</span>, and more.
+              {t('home.subtitle')}
             </p>
             
             {/* CTA - Single prominent button */}
@@ -127,7 +166,7 @@ const Index = () => {
                   onMouseLeave={() => setIsHovering(false)}
                 >
                   <Sparkles className={`h-5 w-5 mr-2 transition-all ${isHovering ? 'scale-110' : ''}`} />
-                  Start Creating
+                  {t('home.startCreating')}
                   <ArrowRight className="h-5 w-5 ml-2 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
@@ -149,26 +188,7 @@ const Index = () => {
         <section className="py-32 px-6">
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-3 gap-6">
-              {[
-                { 
-                  icon: MousePointer, 
-                  title: 'Upload', 
-                  desc: 'Drop your product image',
-                  gradient: 'from-primary/10 to-primary/5'
-                },
-                { 
-                  icon: Wand2, 
-                  title: 'Configure', 
-                  desc: 'AI generates copy & layout',
-                  gradient: 'from-accent/10 to-accent/5'
-                },
-                { 
-                  icon: Zap, 
-                  title: 'Generate', 
-                  desc: 'Get all platform-ready visuals',
-                  gradient: 'from-primary/10 to-accent/5'
-                },
-              ].map(({ icon: Icon, title, desc, gradient }, index) => (
+              {features.map(({ icon: Icon, title, desc, gradient }, index) => (
                 <div 
                   key={title}
                   className={cn(
@@ -214,11 +234,11 @@ const Index = () => {
           <div className="max-w-2xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 mb-8">
               <Layers className="h-5 w-5 text-primary" />
-              <span className="text-sm text-foreground-secondary">Human-in-the-loop AI</span>
+              <span className="text-sm text-foreground-secondary">{t('home.humanInLoop')}</span>
             </div>
             
             <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-6 leading-tight">
-              Ready to transform<br />your product visuals?
+              {t('home.ctaTitle')}
             </h2>
             
             <Link to="/workbench">
@@ -226,7 +246,7 @@ const Index = () => {
                 size="lg" 
                 className="bg-gradient-primary text-primary-foreground hover:opacity-90 rounded-full px-8 shadow-primary"
               >
-                Get Started — Free
+                {t('home.ctaButton')}
               </Button>
             </Link>
           </div>
@@ -243,8 +263,8 @@ const Index = () => {
             </div>
             
             <div className="flex items-center gap-6 text-sm text-foreground-muted">
-              <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-              <a href="#" className="hover:text-foreground transition-colors">Terms</a>
+              <a href="#" className="hover:text-foreground transition-colors">{t('home.privacy')}</a>
+              <a href="#" className="hover:text-foreground transition-colors">{t('home.terms')}</a>
             </div>
           </div>
         </footer>
