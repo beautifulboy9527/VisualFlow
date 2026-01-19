@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Upload, X, Plus, Image as ImageIcon, Camera, Layers, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export interface UploadedImage {
   id: string;
@@ -16,21 +17,22 @@ interface MultiImageUploadProps {
   maxImages?: number;
 }
 
-const imageTypes = [
-  { type: 'main', label: 'Main', icon: Star, description: 'Primary product shot' },
-  { type: 'angle', label: 'Angle', icon: Camera, description: 'Different angles' },
-  { type: 'detail', label: 'Detail', icon: Layers, description: 'Close-up details' },
-  { type: 'lifestyle', label: 'Lifestyle', icon: ImageIcon, description: 'In-use scenes' },
-] as const;
-
 export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
   images,
   onImagesChange,
   maxImages = 8,
 }) => {
+  const { t } = useLanguage();
   const [isDragging, setIsDragging] = useState(false);
   const [activeDropZone, setActiveDropZone] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const imageTypes = [
+    { type: 'main' as const, labelKey: 'upload.mainImage', icon: Star, descKey: 'upload.mainImage' },
+    { type: 'angle' as const, labelKey: 'upload.angleImage', icon: Camera, descKey: 'upload.angleImage' },
+    { type: 'detail' as const, labelKey: 'upload.detailImage', icon: Layers, descKey: 'upload.detailImage' },
+    { type: 'lifestyle' as const, labelKey: 'upload.lifestyleImage', icon: ImageIcon, descKey: 'upload.lifestyleImage' },
+  ];
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -116,7 +118,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
           <div className="relative group">
             <img
               src={mainImage.previewUrl}
-              alt="Main product"
+              alt={t('upload.mainImage')}
               className="w-full aspect-square object-cover rounded-xl"
             />
             {/* Liquid overlay effect */}
@@ -133,7 +135,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
             {/* Type badge */}
             <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-primary/90 text-primary-foreground text-xs font-medium flex items-center gap-1.5">
               <Star className="h-3 w-3" />
-              Main
+              {t('upload.mainImage')}
             </div>
           </div>
         ) : (
@@ -157,10 +159,10 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
             
             <div className="text-center">
               <p className="text-sm font-medium text-foreground">
-                {isDragging ? 'Drop your images here' : 'Drop product images or click to upload'}
+                {isDragging ? t('upload.dropHere') : t('upload.dropOrClick')}
               </p>
               <p className="text-xs text-foreground-muted mt-1">
-                Main product shot • Multiple angles • Detail shots
+                {t('upload.hint')}
               </p>
             </div>
           </div>
@@ -172,7 +174,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-foreground-muted">
-              Additional Images ({otherImages.length}/{maxImages - 1})
+              {t('upload.additional')} ({otherImages.length}/{maxImages - 1})
             </p>
           </div>
           
@@ -181,7 +183,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
               <div key={image.id} className="relative group aspect-square">
                 <img
                   src={image.previewUrl}
-                  alt={image.label || image.type}
+                  alt={image.label || t(`upload.${image.type}Image`)}
                   className="w-full h-full object-cover rounded-lg"
                 />
                 <button
@@ -190,8 +192,8 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
                 >
                   <X className="h-3 w-3" />
                 </button>
-                <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-foreground/70 text-background text-[10px] font-medium capitalize">
-                  {image.type}
+                <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-foreground/70 text-background text-[10px] font-medium">
+                  {t(`upload.${image.type}Image`)}
                 </div>
               </div>
             ))}
@@ -212,7 +214,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
       {/* Quick type selectors for next upload */}
       {images.length > 0 && images.length < maxImages && (
         <div className="flex flex-wrap gap-2">
-          {imageTypes.slice(1).map(({ type, label, icon: Icon }) => (
+          {imageTypes.slice(1).map(({ type, labelKey, icon: Icon }) => (
             <button
               key={type}
               onClick={() => {
@@ -229,7 +231,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-secondary/50 hover:bg-secondary text-xs text-foreground-muted hover:text-foreground transition-colors"
             >
               <Icon className="h-3 w-3" />
-              + {label}
+              + {t(labelKey)}
             </button>
           ))}
         </div>
