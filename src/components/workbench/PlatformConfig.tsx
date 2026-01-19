@@ -378,12 +378,12 @@ const ModuleItem: React.FC<ModuleItemProps> = ({
   
   return (
     <div className={cn(
-      "relative rounded-xl border-2 transition-all duration-200",
+      "relative rounded-xl border-2 transition-colors duration-200",
       isSelected
-        ? "bg-primary/5 border-primary/40 shadow-sm"
+        ? "bg-primary/5 border-primary/40"
         : "bg-card/50 border-transparent hover:border-border/50"
     )}>
-      <div className="flex items-center gap-3 p-3">
+      <div className="flex items-center gap-3 p-3 h-[52px]">
         {/* Checkbox */}
         <button
           onClick={onToggle}
@@ -405,28 +405,30 @@ const ModuleItem: React.FC<ModuleItemProps> = ({
           {language === 'zh' ? module.nameZh : module.name}
         </span>
         
-        {/* Aspect ratio selector inline */}
-        {isSelected ? (
-          <Select 
-            value={currentRatio} 
-            onValueChange={onAspectRatioChange}
-          >
-            <SelectTrigger className="h-7 w-auto min-w-[70px] text-xs bg-background/60 border-border/40 hover:border-border/60 focus:ring-0 focus:ring-offset-0 px-2">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border z-50">
-              {aspectRatioOptions.map(opt => (
-                <SelectItem key={opt.id} value={opt.id} className="text-xs">
-                  {language === 'zh' ? opt.labelZh : opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <span className="text-xs text-foreground-muted">
-            {module.aspectRatio}
-          </span>
-        )}
+        {/* Aspect ratio - fixed height container to prevent jitter */}
+        <div className="h-7 flex items-center">
+          {isSelected ? (
+            <Select 
+              value={currentRatio} 
+              onValueChange={onAspectRatioChange}
+            >
+              <SelectTrigger className="h-7 w-auto min-w-[70px] text-xs bg-background/60 border-border/40 hover:border-border/60 focus:ring-0 focus:ring-offset-0 px-2">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border z-50">
+                {aspectRatioOptions.map(opt => (
+                  <SelectItem key={opt.id} value={opt.id} className="text-xs">
+                    {language === 'zh' ? opt.labelZh : opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <span className="text-xs text-foreground-muted px-2">
+              {module.aspectRatio}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
