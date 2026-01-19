@@ -11,7 +11,7 @@ import { GenerationConfirmModal } from '@/components/workbench/GenerationConfirm
 import { CelebrationOverlay } from '@/components/workbench/CelebrationOverlay';
 import { EnhancedResultCard } from '@/components/workbench/EnhancedResultCard';
 import { HistoryPanel } from '@/components/workbench/HistoryPanel';
-import { TemplatesPanel } from '@/components/workbench/TemplatesPanel';
+import { TemplatesPanel, Template } from '@/components/workbench/TemplatesPanel';
 import { ImagePreviewModal } from '@/components/workbench/ImagePreviewModal';
 import { AgentModePanel } from '@/components/workbench/AgentModePanel';
 import { AgentModeSidebar } from '@/components/workbench/AgentModeSidebar';
@@ -915,15 +915,35 @@ const WorkbenchContent: React.FC = () => {
         
         {activeView === 'templates' && (
           <main className="flex-1 overflow-hidden bg-card/30">
-            <TemplatesPanel onSelectTemplate={() => { 
+            <TemplatesPanel onSelectTemplate={(template: Template) => { 
+              // Apply template configuration
+              const { config } = template;
+              
+              // Set platform
+              setSelectedPlatform(config.platform);
+              
+              // Set visual and layout style
+              setVisualStyle(config.visualStyle as VisualStyleId);
+              setLayoutStyle(config.layoutStyle as LayoutStyleId);
+              
+              // Set modules
+              setSelectedModules(config.modules);
+              
+              // Set scenes
+              setSelectedScenes(config.scenes as SceneType[]);
+              
               // Switch to workbench view
               setActiveView('workbench');
+              
               // Switch to Manual Mode so user can see all loaded configurations
               saveToHistory();
               setIsAgentMode(false);
+              
               toast({ 
-                title: language === 'zh' ? '模板已加载' : 'Template loaded',
-                description: language === 'zh' ? '已切换至手动模式，您可以查看并调整配置' : 'Switched to Manual Mode, you can view and adjust settings',
+                title: language === 'zh' ? '模板配置已加载' : 'Template loaded',
+                description: language === 'zh' 
+                  ? `平台: ${config.platform} · 风格: ${template.style} · ${config.modules.length}个模块` 
+                  : `Platform: ${config.platform} · Style: ${template.style} · ${config.modules.length} modules`,
               }); 
             }} />
           </main>
