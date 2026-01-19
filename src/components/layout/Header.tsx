@@ -9,7 +9,8 @@ import {
   Home,
   Clock,
   LayoutGrid,
-  Zap
+  Zap,
+  Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface HeaderProps {
   credits: number;
@@ -35,7 +37,12 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { language, setLanguage, t } = useLanguage();
   const isWorkbench = location.pathname === '/workbench';
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'zh' ? 'en' : 'zh');
+  };
 
   return (
     <header className="h-16 bg-card/80 backdrop-blur-md border-b border-border/50 flex items-center justify-between px-6 sticky top-0 z-50">
@@ -50,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
             PixMiller
           </span>
           <span className="text-[10px] font-medium text-primary tracking-widest uppercase">
-            AI Design Studio
+            {t('header.aiDesignStudio')}
           </span>
         </div>
       </Link>
@@ -65,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
             className={`gap-2 ${activeView === 'workbench' ? 'bg-card shadow-sm' : ''}`}
           >
             <Zap className="h-4 w-4" />
-            Workbench
+            <span className="hidden lg:inline">{t('nav.workbench')}</span>
           </Button>
           <Button 
             variant={activeView === 'history' ? 'secondary' : 'ghost'} 
@@ -74,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
             className={`gap-2 ${activeView === 'history' ? 'bg-card shadow-sm' : ''}`}
           >
             <Clock className="h-4 w-4" />
-            History
+            <span className="hidden lg:inline">{t('nav.history')}</span>
           </Button>
           <Button 
             variant={activeView === 'templates' ? 'secondary' : 'ghost'} 
@@ -83,13 +90,13 @@ export const Header: React.FC<HeaderProps> = ({
             className={`gap-2 ${activeView === 'templates' ? 'bg-card shadow-sm' : ''}`}
           >
             <LayoutGrid className="h-4 w-4" />
-            Templates
+            <span className="hidden lg:inline">{t('nav.templates')}</span>
           </Button>
         </nav>
       )}
 
       {/* Right section */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         {/* Home link - only show on workbench */}
         {isWorkbench && (
           <Button 
@@ -101,6 +108,18 @@ export const Header: React.FC<HeaderProps> = ({
             <Home className="h-4 w-4" />
           </Button>
         )}
+
+        {/* Language Toggle */}
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={toggleLanguage}
+          className="text-foreground-muted hover:text-foreground gap-1.5 px-2"
+          title={language === 'zh' ? 'Switch to English' : '切换到中文'}
+        >
+          <Globe className="h-4 w-4" />
+          <span className="text-xs font-medium">{language === 'zh' ? 'EN' : '中'}</span>
+        </Button>
 
         {/* Credits - Subtle display */}
         <div className="hidden sm:flex items-center gap-1.5 text-xs text-foreground-muted">
@@ -131,15 +150,15 @@ export const Header: React.FC<HeaderProps> = ({
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={() => navigate('/settings')}>
               <User className="h-4 w-4 mr-2" />
-              Profile
+              {t('user.profile')}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate('/settings')}>
               <Settings className="h-4 w-4 mr-2" />
-              Settings
+              {t('user.settings')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive">
-              Log out
+              {t('user.logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
