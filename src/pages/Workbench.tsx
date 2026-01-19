@@ -687,7 +687,25 @@ const WorkbenchContent: React.FC = () => {
 
                 {/* Action Buttons - Only show in Manual mode or when no AI panel */}
                 {(!isAgentMode || !selectedPlatform || uploadedImages.length === 0) && (
-                  <div className="pt-4 pb-2 space-y-2 sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent">
+                  <div className="pt-4 pb-2 space-y-3 sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent">
+                    {/* Calculation breakdown */}
+                    {(selectedModules.length > 0 || selectedScenes.length > 0) && (
+                      <div className="px-3 py-2 rounded-lg bg-secondary/30 border border-border/30">
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2 text-foreground-muted">
+                            <span>{language === 'zh' ? '输出模块' : 'Modules'}: <span className="text-foreground font-medium">{selectedModules.length}</span></span>
+                            <span className="text-foreground-muted/50">+</span>
+                            <span>{language === 'zh' ? '场景' : 'Scenes'}: <span className="text-foreground font-medium">{selectedScenes.length}</span></span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-primary font-semibold">
+                            <span>=</span>
+                            <span>{totalImages}</span>
+                            <span className="font-normal text-foreground-muted">{language === 'zh' ? '张' : 'imgs'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <Button
                       variant="generate"
                       size="lg"

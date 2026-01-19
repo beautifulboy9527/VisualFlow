@@ -374,62 +374,57 @@ const ModuleItem: React.FC<ModuleItemProps> = ({
   onAspectRatioChange,
   language,
 }) => {
-  const [showSettings, setShowSettings] = useState(false);
+  const currentRatio = selectedModule?.aspectRatio || module.aspectRatio;
   
   return (
     <div className={cn(
-      "relative rounded-xl border transition-all duration-200",
+      "relative rounded-xl border-2 transition-all duration-200",
       isSelected
-        ? "bg-primary/5 border-primary/30"
-        : "bg-card/50 border-border/30 hover:border-border"
+        ? "bg-primary/5 border-primary/40 shadow-sm"
+        : "bg-card/50 border-transparent hover:border-border/50"
     )}>
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center gap-3 p-3 text-left min-h-[56px]"
-      >
-        <div className={cn(
-          "w-5 h-5 rounded-md flex items-center justify-center border transition-colors shrink-0",
-          isSelected
-            ? "bg-primary border-primary"
-            : "bg-card border-border"
-        )}>
+      <div className="flex items-center gap-2.5 p-2.5">
+        {/* Checkbox */}
+        <button
+          onClick={onToggle}
+          className={cn(
+            "w-5 h-5 rounded-md flex items-center justify-center border-2 transition-all shrink-0",
+            isSelected
+              ? "bg-primary border-primary"
+              : "bg-card border-border/60 hover:border-primary/40"
+          )}
+        >
           {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
-        </div>
-        <div className="flex-1 min-w-0 flex flex-col justify-center">
+        </button>
+        
+        {/* Module name */}
+        <div className="flex-1 min-w-0">
           <span className={cn(
-            "text-sm font-medium leading-snug",
+            "text-sm font-medium block truncate",
             isSelected ? "text-foreground" : "text-foreground-secondary"
           )}>
             {language === 'zh' ? module.nameZh : module.name}
           </span>
-          <span className="text-[10px] text-foreground-muted leading-tight">
-            {selectedModule?.aspectRatio || module.aspectRatio}
-          </span>
         </div>
-        {isSelected && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowSettings(!showSettings);
-            }}
-            className="p-1.5 rounded-lg hover:bg-secondary/50 text-foreground-muted shrink-0"
-          >
-            <Settings2 className="h-3.5 w-3.5" />
-          </button>
-        )}
-      </button>
+        
+        {/* Settings icon (non-interactive, just indicator) */}
+        <Settings2 className={cn(
+          "h-3.5 w-3.5 shrink-0 transition-colors",
+          isSelected ? "text-primary/60" : "text-foreground-muted/40"
+        )} />
+      </div>
       
-      {/* Settings dropdown */}
-      {isSelected && showSettings && (
-        <div className="p-2 pt-0 border-t border-border/20">
+      {/* Inline aspect ratio dropdown - always visible when selected */}
+      {isSelected && (
+        <div className="px-2.5 pb-2.5 pt-0">
           <Select 
-            value={selectedModule?.aspectRatio || module.aspectRatio} 
+            value={currentRatio} 
             onValueChange={onAspectRatioChange}
           >
-            <SelectTrigger className="h-8 text-xs bg-card border-border/50">
+            <SelectTrigger className="h-7 text-xs bg-background/60 border-border/40 hover:border-border/60 focus:ring-0 focus:ring-offset-0">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-card border-border z-50">
+            <SelectContent className="bg-popover border-border z-50">
               {aspectRatioOptions.map(opt => (
                 <SelectItem key={opt.id} value={opt.id} className="text-xs">
                   {language === 'zh' ? opt.labelZh : opt.label}
