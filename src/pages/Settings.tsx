@@ -2,9 +2,11 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
-import { User, Bell, CreditCard, Shield, Palette, ChevronRight, ArrowLeft, Globe } from 'lucide-react';
+import { User, Bell, CreditCard, Shield, Palette, ChevronRight, ArrowLeft, Globe, LogOut } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Logo } from '@/components/layout/Logo';
+import { cn } from '@/lib/utils';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -14,15 +16,35 @@ const Settings: React.FC = () => {
     {
       title: t('settings.account'),
       items: [
-        { icon: <User className="h-5 w-5" />, label: t('settings.profile'), description: t('settings.profileDesc') },
-        { icon: <Shield className="h-5 w-5" />, label: t('settings.security'), description: t('settings.securityDesc') },
+        { 
+          icon: <User className="h-5 w-5" />, 
+          label: t('settings.profile'), 
+          description: t('settings.profileDesc'),
+          path: '/settings/profile'
+        },
+        { 
+          icon: <Shield className="h-5 w-5" />, 
+          label: t('settings.security'), 
+          description: t('settings.securityDesc'),
+          path: '/settings/security'
+        },
       ]
     },
     {
       title: t('settings.preferences'),
       items: [
-        { icon: <Bell className="h-5 w-5" />, label: t('settings.notifications'), description: t('settings.notificationsDesc'), toggle: true },
-        { icon: <Palette className="h-5 w-5" />, label: t('settings.appearance'), description: t('settings.appearanceDesc') },
+        { 
+          icon: <Bell className="h-5 w-5" />, 
+          label: t('settings.notifications'), 
+          description: t('settings.notificationsDesc'), 
+          toggle: true 
+        },
+        { 
+          icon: <Palette className="h-5 w-5" />, 
+          label: t('settings.appearance'), 
+          description: t('settings.appearanceDesc'),
+          path: '/settings/appearance'
+        },
         { 
           icon: <Globe className="h-5 w-5" />, 
           label: t('settings.language'), 
@@ -34,7 +56,12 @@ const Settings: React.FC = () => {
     {
       title: t('settings.billing'),
       items: [
-        { icon: <CreditCard className="h-5 w-5" />, label: t('settings.creditsPlans'), description: t('settings.creditsPlansDesc') },
+        { 
+          icon: <CreditCard className="h-5 w-5" />, 
+          label: t('settings.creditsPlans'), 
+          description: t('settings.creditsPlansDesc'),
+          path: '/settings/credits'
+        },
       ]
     },
   ];
@@ -49,7 +76,20 @@ const Settings: React.FC = () => {
           {t('settings.back')}
         </Button>
 
-        <h1 className="text-2xl font-display font-bold text-foreground mb-8">{t('settings.title')}</h1>
+        {/* Header with Logo */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+              <Logo size="sm" showText={false} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-display font-bold text-foreground">{t('settings.title')}</h1>
+              <p className="text-sm text-foreground-muted">
+                {language === 'zh' ? '管理您的账户和偏好设置' : 'Manage your account and preferences'}
+              </p>
+            </div>
+          </div>
+        </div>
 
         <div className="space-y-8">
           {settingsSections.map((section) => (
@@ -61,16 +101,20 @@ const Settings: React.FC = () => {
                 {section.items.map((item, idx) => (
                   <button
                     key={item.label}
-                    className={`w-full flex items-center justify-between p-4 hover:bg-secondary/50 transition-colors text-left
-                      ${idx !== section.items.length - 1 ? 'border-b border-border' : ''}`}
+                    className={cn(
+                      "w-full flex items-center justify-between p-4 hover:bg-secondary/50 transition-colors text-left group",
+                      idx !== section.items.length - 1 && 'border-b border-border'
+                    )}
                     onClick={() => {
                       if (item.languageToggle) {
                         setLanguage(language === 'zh' ? 'en' : 'zh');
+                      } else if (item.path) {
+                        navigate(item.path);
                       }
                     }}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="p-2 rounded-lg bg-secondary text-foreground-secondary">
+                      <div className="p-2 rounded-lg bg-secondary text-foreground-secondary group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                         {item.icon}
                       </div>
                       <div>
@@ -81,17 +125,41 @@ const Settings: React.FC = () => {
                     {item.toggle ? (
                       <Switch />
                     ) : item.languageToggle ? (
-                      <span className="text-sm font-medium text-primary">
-                        {language === 'zh' ? '中文' : 'English'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-primary">
+                          {language === 'zh' ? '中文' : 'English'}
+                        </span>
+                        <ChevronRight className="h-4 w-4 text-foreground-muted" />
+                      </div>
                     ) : (
-                      <ChevronRight className="h-5 w-5 text-foreground-muted" />
+                      <ChevronRight className="h-5 w-5 text-foreground-muted group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                     )}
                   </button>
                 ))}
               </div>
             </div>
           ))}
+
+          {/* Logout Section */}
+          <div className="pt-4">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start gap-3 text-foreground-muted hover:text-destructive hover:border-destructive/50"
+            >
+              <LogOut className="h-5 w-5" />
+              {t('settings.logout')}
+            </Button>
+          </div>
+
+          {/* App Info */}
+          <div className="text-center pt-4 pb-8">
+            <div className="inline-flex items-center gap-2 mb-2">
+              <Logo size="sm" />
+            </div>
+            <p className="text-xs text-foreground-muted">
+              {language === 'zh' ? '版本 1.0.0 · 由 AI 驱动' : 'Version 1.0.0 · Powered by AI'}
+            </p>
+          </div>
         </div>
       </div>
     </div>
