@@ -80,8 +80,8 @@ const WorkbenchContent: React.FC = () => {
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [selectedModules, setSelectedModules] = useState<SelectedModule[]>([]);
   
-  // Step 4: Scene Planning
-  const [selectedScenes, setSelectedScenes] = useState<SceneType[]>(['main', 'front_view', 'lifestyle', 'detail_1']);
+  // Step 4: Scene Planning - Start empty, AI will recommend after analysis
+  const [selectedScenes, setSelectedScenes] = useState<SceneType[]>([]);
   const [customScenes, setCustomScenes] = useState<Scene[]>([]);
   
   // Step 5: Visual Style
@@ -256,6 +256,12 @@ const WorkbenchContent: React.FC = () => {
           setLayoutStyle(recommendedLayout);
         }
         
+        // Recommend default scenes after AI analysis
+        if (selectedScenes.length === 0) {
+          const defaultRecommendedScenes: SceneType[] = ['main', 'front_view', 'lifestyle', 'detail_1'];
+          setSelectedScenes(defaultRecommendedScenes);
+        }
+        
         toast({
           title: language === 'zh' ? 'AI 分析完成' : 'AI Analysis Complete',
           description: language === 'zh' 
@@ -300,6 +306,12 @@ const WorkbenchContent: React.FC = () => {
     setVisualStyle('natural_organic');
     setAiRecommendedLayout('glassmorphism');
     setLayoutStyle('glassmorphism');
+    
+    // Also recommend default scenes on fallback
+    if (selectedScenes.length === 0) {
+      const defaultRecommendedScenes: SceneType[] = ['main', 'front_view', 'lifestyle', 'detail_1'];
+      setSelectedScenes(defaultRecommendedScenes);
+    }
   };
 
   // Refresh AI plan - save history first
@@ -674,8 +686,8 @@ const WorkbenchContent: React.FC = () => {
                 {/* Action Buttons - Only show in Manual mode or when no AI panel */}
                 {(!isAgentMode || !selectedPlatform || uploadedImages.length === 0) && (
                   <div className="mt-6 pt-4 pb-4 space-y-3 border-t border-border/30 bg-background relative z-10">
-                    {/* Calculation breakdown */}
-                    {(selectedModules.length > 0 || selectedScenes.length > 0) && (
+                    {/* Calculation breakdown - only show after upload when there are selections */}
+                    {uploadedImages.length > 0 && (selectedModules.length > 0 || selectedScenes.length > 0) && (
                       <div className="px-3 py-2 rounded-lg bg-secondary/30 border border-border/30">
                         <div className="flex items-center justify-between text-xs">
                           <div className="flex items-center gap-2 text-foreground-muted">
@@ -708,11 +720,6 @@ const WorkbenchContent: React.FC = () => {
                         <>
                           <Zap className="h-5 w-5" />
                           {language === 'zh' ? '开始设计' : 'Start Design'}
-                          {totalImages > 0 && (
-                            <span className="ml-1 text-primary-foreground/80">
-                              ({totalImages} {language === 'zh' ? '张' : 'imgs'})
-                            </span>
-                          )}
                         </>
                       )}
                     </Button>
