@@ -96,8 +96,8 @@ export default {
         'precision-sm': '0 1px 2px rgba(0, 0, 0, 0.05)',
         'precision-md': '0 4px 6px rgba(0, 0, 0, 0.07)',
         'precision-lg': '0 10px 20px rgba(0, 0, 0, 0.1)',
-        'primary': '0 4px 20px hsl(245 85% 60% / 0.35)',
-        'glow': '0 0 40px hsl(245 100% 70% / 0.25)',
+        'primary': '0 4px 20px hsl(175 70% 45% / 0.35)',
+        'glow': '0 0 40px hsl(175 85% 55% / 0.25)',
       },
       keyframes: {
         "accordion-down": {
@@ -133,8 +133,8 @@ export default {
           "100%": { backgroundPosition: "200% 0" },
         },
         "glow-pulse": {
-          "0%, 100%": { boxShadow: "0 0 20px hsl(245 85% 60% / 0.3)" },
-          "50%": { boxShadow: "0 0 40px hsl(245 85% 60% / 0.5)" },
+          "0%, 100%": { boxShadow: "0 0 20px hsl(175 70% 45% / 0.3)" },
+          "50%": { boxShadow: "0 0 40px hsl(175 70% 45% / 0.5)" },
         },
       },
       animation: {

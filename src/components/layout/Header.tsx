@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  Sparkles, 
   CreditCard, 
   Settings, 
   User, 
@@ -21,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Logo } from './Logo';
 
 interface HeaderProps {
   credits: number;
@@ -47,19 +47,8 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="h-16 bg-card/80 backdrop-blur-md border-b border-border/50 flex items-center justify-between px-6 sticky top-0 z-50">
       {/* Logo */}
-      <Link to="/" className="flex items-center gap-3 group">
-        <div className="relative p-2 rounded-lg bg-gradient-primary shadow-primary group-hover:shadow-glow transition-shadow duration-300">
-          <Sparkles className="h-5 w-5 text-primary-foreground" />
-          <div className="absolute inset-0 bg-gradient-primary rounded-lg blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
-        </div>
-        <div className="flex flex-col">
-          <span className="text-lg font-display font-bold text-foreground tracking-tight">
-            PixMiller
-          </span>
-          <span className="text-[10px] font-medium text-primary tracking-widest uppercase">
-            {t('header.aiDesignStudio')}
-          </span>
-        </div>
+      <Link to="/" className="group">
+        <Logo size="md" showText={true} />
       </Link>
 
       {/* Navigation - only show on workbench */}
