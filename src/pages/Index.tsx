@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Logo, LogoLetter } from '@/components/layout/Logo';
 
 const Index = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -70,18 +71,18 @@ const Index = () => {
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Liquid Glass Background Effect */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        {/* Main gradient orb following mouse */}
+        {/* Main gradient orb following mouse - Cyan/Teal theme */}
         <div 
           className="absolute w-[800px] h-[800px] rounded-full transition-all duration-1000 ease-out"
           style={{
             left: mousePosition.x - 400,
             top: mousePosition.y - 400,
-            background: 'radial-gradient(circle, hsl(245 85% 60% / 0.15) 0%, hsl(280 80% 60% / 0.08) 40%, transparent 70%)',
+            background: 'radial-gradient(circle, hsl(185 75% 50% / 0.15) 0%, hsl(160 70% 45% / 0.08) 40%, transparent 70%)',
             filter: 'blur(60px)',
           }}
         />
         
-        {/* Static ambient orbs */}
+        {/* Static ambient orbs - Cyan/Teal colors */}
         <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-gradient-radial from-primary/10 via-primary/5 to-transparent blur-3xl animate-float" />
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-gradient-radial from-accent/10 via-transparent to-transparent blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
         <div className="absolute top-1/2 left-1/3 w-[400px] h-[400px] rounded-full bg-gradient-radial from-primary/5 to-transparent blur-2xl animate-float" style={{ animationDelay: '3s' }} />
@@ -96,14 +97,7 @@ const Index = () => {
         <header className="fixed top-0 left-0 right-0 z-50">
           <div className="container mx-auto px-6">
             <div className="h-20 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center shadow-primary">
-                  <span className="text-primary-foreground font-bold text-sm">P</span>
-                </div>
-                <span className="font-display font-semibold text-foreground tracking-tight">
-                  PixMiller
-                </span>
-              </div>
+              <Logo size="md" showText={true} />
               
               <div className="flex items-center gap-3">
                 {/* Language Toggle */}
@@ -256,10 +250,8 @@ const Index = () => {
         <footer className="py-8 px-6 border-t border-border/20">
           <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-gradient-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-xs">P</span>
-              </div>
-              <span className="text-sm text-foreground-muted">PixMiller © 2025</span>
+              <LogoLetter size={24} />
+              <span className="text-sm text-foreground-muted">VisualFlow © 2025</span>
             </div>
             
             <div className="flex items-center gap-6 text-sm text-foreground-muted">
