@@ -123,18 +123,20 @@ export const AgentModeSidebar: React.FC<AgentModeSidebarProps> = ({
           </span>
         </div>
         
-        {/* Output Count */}
-        <div className="flex items-center justify-between p-2 rounded-lg bg-primary/5 border border-primary/10">
-          <div className="flex items-center gap-2">
-            <Layers className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs text-foreground-muted">
-              {language === 'zh' ? '输出' : 'Output'}
+        {/* Output Count - only show when there are selections */}
+        {totalImages > 0 && (
+          <div className="flex items-center justify-between p-2 rounded-lg bg-primary/5 border border-primary/10">
+            <div className="flex items-center gap-2">
+              <Layers className="h-3.5 w-3.5 text-primary" />
+              <span className="text-xs text-foreground-muted">
+                {language === 'zh' ? '输出' : 'Output'}
+              </span>
+            </div>
+            <span className="text-sm font-bold text-primary">
+              {totalImages} {language === 'zh' ? '张' : 'imgs'}
             </span>
           </div>
-          <span className="text-sm font-bold text-primary">
-            {totalImages} {language === 'zh' ? '张' : 'imgs'}
-          </span>
-        </div>
+        )}
         
         {/* Content Preview */}
         <div className="pt-1">

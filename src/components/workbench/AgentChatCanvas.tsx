@@ -469,14 +469,16 @@ export const AgentChatCanvas: React.FC<AgentChatCanvasProps> = ({
               </div>
             </div>
             
-            {/* Output Count Card */}
-            <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-accent/10 border border-accent/20 shrink-0">
-              <Layers className="h-4 w-4 text-accent-foreground" />
-              <div className="text-sm">
-                <span className="font-bold text-accent-foreground">{totalImages}</span>
-                <span className="text-foreground-muted ml-1.5">{language === 'zh' ? '张输出' : 'images'}</span>
+            {/* Output Count Card - only show when there are selections */}
+            {totalImages > 0 && (
+              <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-accent/10 border border-accent/20 shrink-0">
+                <Layers className="h-4 w-4 text-accent-foreground" />
+                <div className="text-sm">
+                  <span className="font-bold text-accent-foreground">{totalImages}</span>
+                  <span className="text-foreground-muted ml-1.5">{language === 'zh' ? '张输出' : 'images'}</span>
+                </div>
               </div>
-            </div>
+            )}
             
             {/* Color Palette */}
             {analysis?.colorPalette && (
