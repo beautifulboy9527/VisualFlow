@@ -146,10 +146,10 @@ const Index = () => {
 
       {/* Content Layer */}
       <div className="relative z-10">
-        {/* Minimal Header */}
-        <header className="fixed top-0 left-0 right-0 z-50">
+        {/* Fixed Header with glassmorphism to prevent overlap */}
+        <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/20">
           <div className="container mx-auto px-6">
-            <div className="h-20 flex items-center justify-between">
+            <div className="h-16 flex items-center justify-between">
               <Logo size="md" showText={true} />
               
               <div className="flex items-center gap-3">
@@ -203,17 +203,14 @@ const Index = () => {
               {t('home.subtitle')}
             </p>
             
-            {/* CTA - Single prominent button with proper dark variant */}
+            {/* CTA - Button without left icon */}
             <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <Link to="/workbench">
                 <Button 
                   variant="dark"
                   size="xl" 
                   className="px-10 h-14 text-base font-medium group"
-                  onMouseEnter={() => setIsHovering(true)}
-                  onMouseLeave={() => setIsHovering(false)}
                 >
-                  <Sparkles className={`h-5 w-5 mr-2 transition-all ${isHovering ? 'scale-110' : ''}`} />
                   {t('home.startCreating')}
                   <ArrowRight className="h-5 w-5 ml-2 transition-transform group-hover:translate-x-1" />
                 </Button>
@@ -297,35 +294,56 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Final CTA - Enhanced with better gradient and content */}
-        <section className="py-32 px-6 relative">
+        {/* Final CTA - Enhanced with more informative content */}
+        <section className="py-24 px-6 relative">
           {/* Subtle gradient background for CTA section */}
           <div 
             className="absolute inset-0 pointer-events-none"
             style={{
-              background: 'linear-gradient(180deg, transparent 0%, hsl(185 80% 95% / 0.4) 50%, transparent 100%)',
+              background: 'linear-gradient(180deg, transparent 0%, hsl(185 80% 95% / 0.5) 50%, transparent 100%)',
             }}
           />
           
-          <div className="max-w-2xl mx-auto text-center relative z-10">
-            <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full bg-primary/5 border border-primary/20">
+          <div className="max-w-3xl mx-auto text-center relative z-10">
+            <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-primary/5 border border-primary/20">
               <Layers className="h-4 w-4 text-primary" />
               <span className="text-sm text-foreground-secondary">{t('home.humanInLoop')}</span>
             </div>
             
-            <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-8 leading-tight">
+            <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-4 leading-tight">
               {t('home.ctaTitle')}
             </h2>
+            
+            <p className="text-lg text-foreground-muted mb-8 max-w-xl mx-auto">
+              {t('home.ctaSubtitle')}
+            </p>
             
             <Link to="/workbench">
               <Button 
                 variant="generate"
                 size="lg" 
-                className="rounded-full px-10 h-14"
+                className="rounded-full px-10 h-14 mb-8"
               >
                 {t('home.ctaButton')}
+                <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>
+            
+            {/* Trust indicators */}
+            <div className="flex items-center justify-center gap-6 text-sm text-foreground-muted">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-success" />
+                <span>{t('home.ctaFeature1')}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-success" />
+                <span>{t('home.ctaFeature2')}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-success" />
+                <span>{t('home.ctaFeature3')}</span>
+              </div>
+            </div>
           </div>
         </section>
 
