@@ -4,9 +4,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/hooks/useLanguage";
+import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Workbench from "./pages/Workbench";
 import Settings from "./pages/Settings";
+import Auth from "./pages/Auth";
 import ProfileSettings from "./pages/settings/ProfileSettings";
 import SecuritySettings from "./pages/settings/SecuritySettings";
 import AppearanceSettings from "./pages/settings/AppearanceSettings";
@@ -18,22 +20,25 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/workbench" element={<Workbench />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/settings/profile" element={<ProfileSettings />} />
-            <Route path="/settings/security" element={<SecuritySettings />} />
-            <Route path="/settings/appearance" element={<AppearanceSettings />} />
-            <Route path="/settings/credits" element={<CreditsSettings />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/workbench" element={<Workbench />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/settings/profile" element={<ProfileSettings />} />
+              <Route path="/settings/security" element={<SecuritySettings />} />
+              <Route path="/settings/appearance" element={<AppearanceSettings />} />
+              <Route path="/settings/credits" element={<CreditsSettings />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </LanguageProvider>
   </QueryClientProvider>
 );

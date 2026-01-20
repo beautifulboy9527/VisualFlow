@@ -4,16 +4,17 @@ import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Shield, Key, Smartphone, History, AlertTriangle, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Shield, Key, History, AlertTriangle, Save, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const SecuritySettings: React.FC = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { user, signOut } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   
   const [passwords, setPasswords] = useState({
     current: '',
@@ -29,22 +30,56 @@ const SecuritySettings: React.FC = () => {
       });
       return;
     }
+
+    if (passwords.new.length < 6) {
+      toast({
+        title: language === 'zh' ? '密码太短' : 'Password too short',
+        description: language === 'zh' ? '密码至少需要 6 个字符' : 'Password must be at least 6 characters',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setIsSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSaving(false);
-    setPasswords({ current: '', new: '', confirm: '' });
-    toast({
-      title: language === 'zh' ? '密码已更新' : 'Password Updated',
-      description: language === 'zh' ? '您的密码已成功更改' : 'Your password has been changed successfully',
-    });
+    
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwords.new
+      });
+
+      if (error) {
+        toast({
+          title: language === 'zh' ? '更新失败' : 'Update Failed',
+          description: error.message,
+          variant: 'destructive',
+        });
+      } else {
+        setPasswords({ current: '', new: '', confirm: '' });
+        toast({
+          title: language === 'zh' ? '密码已更新' : 'Password Updated',
+          description: language === 'zh' ? '您的密码已成功更改' : 'Your password has been changed successfully',
+        });
+      }
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const recentSessions = [
-    { device: 'MacBook Pro', location: 'Shanghai, CN', time: language === 'zh' ? '当前会话' : 'Current session', current: true },
-    { device: 'iPhone 15', location: 'Beijing, CN', time: language === 'zh' ? '2 小时前' : '2 hours ago', current: false },
-    { device: 'Windows PC', location: 'Hangzhou, CN', time: language === 'zh' ? '昨天' : 'Yesterday', current: false },
-  ];
+  const handleSignOutAllDevices = async () => {
+    await signOut();
+    toast({
+      title: language === 'zh' ? '已登出所有设备' : 'Signed Out',
+      description: language === 'zh' ? '您已从所有设备登出' : 'You have been signed out from all devices',
+    });
+    navigate('/auth');
+  };
+
+  const handleDeleteAccount = () => {
+    toast({
+      title: language === 'zh' ? '功能开发中' : 'Coming Soon',
+      description: language === 'zh' ? '账户删除功能即将上线' : 'Account deletion feature is coming soon',
+    });
+  };
 
   return (
     <div className="min-h-screen bg-mesh">
@@ -71,6 +106,16 @@ const SecuritySettings: React.FC = () => {
         </div>
 
         <div className="space-y-6">
+          {/* Current Account Info */}
+          {user && (
+            <div className="bg-card rounded-xl border border-border p-6">
+              <h3 className="text-sm font-medium text-foreground-muted mb-2">
+                {language === 'zh' ? '当前账户' : 'Current Account'}
+              </h3>
+              <p className="text-foreground font-medium">{user.email}</p>
+            </div>
+          )}
+
           {/* Change Password */}
           <div className="bg-card rounded-xl border border-border p-6 space-y-5">
             <div className="flex items-center gap-3">
@@ -81,17 +126,6 @@ const SecuritySettings: React.FC = () => {
             </div>
             
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">{language === 'zh' ? '当前密码' : 'Current Password'}</Label>
-                <Input
-                  id="currentPassword"
-                  type="password"
-                  value={passwords.current}
-                  onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
-                  placeholder="••••••••"
-                />
-              </div>
-              
               <div className="space-y-2">
                 <Label htmlFor="newPassword">{language === 'zh' ? '新密码' : 'New Password'}</Label>
                 <Input
@@ -118,7 +152,7 @@ const SecuritySettings: React.FC = () => {
             <Button 
               variant="generate" 
               onClick={handleSavePassword}
-              disabled={isSaving || !passwords.current || !passwords.new}
+              disabled={isSaving || !passwords.new}
             >
               {isSaving ? (
                 <>
@@ -134,75 +168,27 @@ const SecuritySettings: React.FC = () => {
             </Button>
           </div>
 
-          {/* Two-Factor Authentication */}
-          <div className="bg-card rounded-xl border border-border p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Smartphone className="h-5 w-5 text-foreground-muted" />
-                <div>
-                  <h2 className="text-base font-medium text-foreground">
-                    {language === 'zh' ? '双重认证' : 'Two-Factor Authentication'}
-                  </h2>
-                  <p className="text-sm text-foreground-muted">
-                    {language === 'zh' ? '使用手机验证码增强账户安全' : 'Add extra security with phone verification'}
-                  </p>
-                </div>
-              </div>
-              <Switch 
-                checked={twoFactorEnabled} 
-                onCheckedChange={setTwoFactorEnabled}
-              />
-            </div>
-            
-            {twoFactorEnabled && (
-              <div className="mt-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
-                <p className="text-sm text-foreground">
-                  {language === 'zh' 
-                    ? '双重认证已启用。登录时需要验证码。' 
-                    : 'Two-factor authentication is enabled. A verification code will be required at login.'}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Active Sessions */}
+          {/* Session Management */}
           <div className="bg-card rounded-xl border border-border p-6 space-y-4">
             <div className="flex items-center gap-3">
               <History className="h-5 w-5 text-foreground-muted" />
               <h2 className="text-base font-medium text-foreground">
-                {language === 'zh' ? '活跃会话' : 'Active Sessions'}
+                {language === 'zh' ? '会话管理' : 'Session Management'}
               </h2>
             </div>
             
-            <div className="space-y-3">
-              {recentSessions.map((session, idx) => (
-                <div 
-                  key={idx}
-                  className={`flex items-center justify-between p-3 rounded-lg ${
-                    session.current ? 'bg-primary/5 border border-primary/20' : 'bg-secondary/30'
-                  }`}
-                >
-                  <div>
-                    <p className="font-medium text-foreground text-sm">
-                      {session.device}
-                      {session.current && (
-                        <span className="ml-2 text-xs text-primary font-medium">
-                          {language === 'zh' ? '(当前)' : '(Current)'}
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-xs text-foreground-muted">
-                      {session.location} · {session.time}
-                    </p>
-                  </div>
-                  {!session.current && (
-                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                      {language === 'zh' ? '登出' : 'Sign out'}
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
+            <p className="text-sm text-foreground-muted">
+              {language === 'zh' 
+                ? '登出所有设备将结束您在所有设备上的会话' 
+                : 'Signing out of all devices will end your sessions on all devices'}
+            </p>
+            
+            <Button 
+              variant="outline" 
+              onClick={handleSignOutAllDevices}
+            >
+              {language === 'zh' ? '登出所有设备' : 'Sign Out All Devices'}
+            </Button>
           </div>
 
           {/* Danger Zone */}
@@ -220,7 +206,11 @@ const SecuritySettings: React.FC = () => {
                 : 'Deleting your account will permanently remove all data. This action cannot be undone.'}
             </p>
             
-            <Button variant="outline" className="border-destructive/50 text-destructive hover:bg-destructive/10">
+            <Button 
+              variant="outline" 
+              onClick={handleDeleteAccount}
+              className="border-destructive/50 text-destructive hover:bg-destructive/10"
+            >
               {language === 'zh' ? '删除账户' : 'Delete Account'}
             </Button>
           </div>
