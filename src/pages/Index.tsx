@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   Sparkles, 
   ArrowRight, 
@@ -19,6 +20,8 @@ import { Logo, LogoIcon } from '@/components/layout/Logo';
 
 const Index = () => {
   const { language, setLanguage, t } = useLanguage();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
 
@@ -29,6 +32,15 @@ const Index = () => {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
+
+  // Handle CTA click - redirect to auth if not logged in
+  const handleStartClick = () => {
+    if (user) {
+      navigate('/workbench');
+    } else {
+      navigate('/auth', { state: { from: { pathname: '/workbench' } } });
+    }
+  };
 
   const platforms = [
     { icon: ShoppingBag, name: 'Amazon' },
@@ -164,16 +176,15 @@ const Index = () => {
                   <span className="text-xs">{language === 'zh' ? 'EN' : '中'}</span>
                 </Button>
                 
-                <Link to="/workbench">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-foreground-secondary hover:text-foreground hover:bg-transparent gap-2 group"
-                  >
-                    {t('home.start')}
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Button>
-                </Link>
+                <Button 
+                  onClick={handleStartClick}
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-foreground-secondary hover:text-foreground hover:bg-transparent gap-2 group"
+                >
+                  {t('home.start')}
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Button>
               </div>
             </div>
           </div>
@@ -205,16 +216,15 @@ const Index = () => {
             
             {/* CTA - Button without left icon */}
             <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              <Link to="/workbench">
-                <Button 
-                  variant="dark"
-                  size="xl" 
-                  className="px-10 h-14 text-base font-medium group"
-                >
-                  {t('home.startCreating')}
-                  <ArrowRight className="h-5 w-5 ml-2 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
+              <Button 
+                onClick={handleStartClick}
+                variant="dark"
+                size="xl" 
+                className="px-10 h-14 text-base font-medium group"
+              >
+                {t('home.startCreating')}
+                <ArrowRight className="h-5 w-5 ml-2 transition-transform group-hover:translate-x-1" />
+              </Button>
             </div>
             
             {/* Platform indicators - Minimal */}
@@ -318,16 +328,15 @@ const Index = () => {
               {t('home.ctaSubtitle')}
             </p>
             
-            <Link to="/workbench">
-              <Button 
-                variant="generate"
-                size="lg" 
-                className="rounded-full px-10 h-14 mb-8"
-              >
-                {t('home.ctaButton')}
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </Link>
+            <Button 
+              onClick={handleStartClick}
+              variant="generate"
+              size="lg" 
+              className="rounded-full px-10 h-14 mb-8"
+            >
+              {t('home.ctaButton')}
+              <ArrowRight className="h-5 w-5 ml-2" />
+            </Button>
             
             {/* Trust indicators */}
             <div className="flex items-center justify-center gap-6 text-sm text-foreground-muted">
