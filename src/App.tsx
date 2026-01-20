@@ -7,6 +7,10 @@ import { LanguageProvider } from "@/hooks/useLanguage";
 import Index from "./pages/Index";
 import Workbench from "./pages/Workbench";
 import Settings from "./pages/Settings";
+import ProfileSettings from "./pages/settings/ProfileSettings";
+import SecuritySettings from "./pages/settings/SecuritySettings";
+import AppearanceSettings from "./pages/settings/AppearanceSettings";
+import CreditsSettings from "./pages/settings/CreditsSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +26,10 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/workbench" element={<Workbench />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/settings/profile" element={<ProfileSettings />} />
+            <Route path="/settings/security" element={<SecuritySettings />} />
+            <Route path="/settings/appearance" element={<AppearanceSettings />} />
+            <Route path="/settings/credits" element={<CreditsSettings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
