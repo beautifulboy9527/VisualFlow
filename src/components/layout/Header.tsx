@@ -9,7 +9,9 @@ import {
   Clock,
   LayoutGrid,
   Zap,
-  Globe
+  Globe,
+  LogIn,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useAuth } from '@/hooks/useAuth';
 import { Logo } from './Logo';
 
 interface HeaderProps {
@@ -38,10 +41,16 @@ export const Header: React.FC<HeaderProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   const { language, setLanguage, t } = useLanguage();
+  const { user, signOut } = useAuth();
   const isWorkbench = location.pathname === '/workbench';
 
   const toggleLanguage = () => {
     setLanguage(language === 'zh' ? 'en' : 'zh');
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
   };
 
   return (
@@ -126,31 +135,48 @@ export const Header: React.FC<HeaderProps> = ({
           <Settings className="h-4 w-4" />
         </Button>
 
-        {/* User menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-secondary transition-colors duration-200">
-              <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center shadow-sm">
-                <User className="h-4 w-4 text-primary-foreground" />
+        {/* User menu or Login button */}
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-secondary transition-colors duration-200">
+                <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center shadow-sm">
+                  <User className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <ChevronDown className="h-4 w-4 text-foreground-muted hidden sm:block" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <div className="px-2 py-1.5 text-xs text-foreground-muted truncate">
+                {user.email}
               </div>
-              <ChevronDown className="h-4 w-4 text-foreground-muted hidden sm:block" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => navigate('/settings')}>
-              <User className="h-4 w-4 mr-2" />
-              {t('user.profile')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/settings')}>
-              <Settings className="h-4 w-4 mr-2" />
-              {t('user.settings')}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              {t('user.logout')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/settings/profile')}>
+                <User className="h-4 w-4 mr-2" />
+                {t('user.profile')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings')}>
+                <Settings className="h-4 w-4 mr-2" />
+                {t('user.settings')}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                <LogOut className="h-4 w-4 mr-2" />
+                {t('user.logout')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button 
+            variant="generate" 
+            size="sm"
+            onClick={() => navigate('/auth')}
+            className="gap-2"
+          >
+            <LogIn className="h-4 w-4" />
+            <span className="hidden sm:inline">{language === 'zh' ? '登录' : 'Sign In'}</span>
+          </Button>
+        )}
       </div>
     </header>
   );
