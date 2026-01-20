@@ -11,11 +11,11 @@ import {
   MousePointer,
   Zap,
   Layers,
-  Bot
+  Cpu
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
-import { Logo, LogoLetter } from '@/components/layout/Logo';
+import { Logo, LogoIcon } from '@/components/layout/Logo';
 
 const Index = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -47,19 +47,19 @@ const Index = () => {
       icon: MousePointer, 
       title: t('home.feature1.title'), 
       desc: t('home.feature1.desc'),
-      gradient: 'from-primary/10 to-primary/5'
+      gradient: 'from-[hsl(185,75%,50%,0.12)] to-[hsl(160,70%,45%,0.05)]'
     },
     { 
       icon: Wand2, 
       title: t('home.feature2.title'), 
       desc: t('home.feature2.desc'),
-      gradient: 'from-accent/10 to-accent/5'
+      gradient: 'from-[hsl(195,85%,55%,0.12)] to-[hsl(175,70%,45%,0.05)]'
     },
     { 
       icon: Zap, 
       title: t('home.feature3.title'), 
       desc: t('home.feature3.desc'),
-      gradient: 'from-primary/10 to-accent/5'
+      gradient: 'from-[hsl(175,80%,48%,0.12)] to-[hsl(185,75%,50%,0.05)]'
     },
   ];
 
@@ -69,26 +69,79 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Liquid Glass Background Effect */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        {/* Main gradient orb following mouse - Cyan/Teal theme */}
+      {/* Enhanced Liquid Glass Background Effect */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Main gradient orb following mouse - Enhanced Cyan/Teal with more visible gradients */}
         <div 
-          className="absolute w-[800px] h-[800px] rounded-full transition-all duration-1000 ease-out"
+          className="absolute w-[900px] h-[900px] rounded-full transition-all duration-700 ease-out"
           style={{
-            left: mousePosition.x - 400,
-            top: mousePosition.y - 400,
-            background: 'radial-gradient(circle, hsl(185 75% 50% / 0.15) 0%, hsl(160 70% 45% / 0.08) 40%, transparent 70%)',
-            filter: 'blur(60px)',
+            left: mousePosition.x - 450,
+            top: mousePosition.y - 450,
+            background: 'radial-gradient(circle, hsl(185 80% 55% / 0.25) 0%, hsl(175 75% 50% / 0.15) 30%, hsl(160 70% 45% / 0.08) 50%, transparent 70%)',
+            filter: 'blur(80px)',
           }}
         />
         
-        {/* Static ambient orbs - Cyan/Teal colors */}
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-gradient-radial from-primary/10 via-primary/5 to-transparent blur-3xl animate-float" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-gradient-radial from-accent/10 via-transparent to-transparent blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute top-1/2 left-1/3 w-[400px] h-[400px] rounded-full bg-gradient-radial from-primary/5 to-transparent blur-2xl animate-float" style={{ animationDelay: '3s' }} />
+        {/* Flowing gradient layers - More visible and fluid */}
+        <div 
+          className="absolute top-0 left-0 w-full h-full"
+          style={{
+            background: 'linear-gradient(135deg, hsl(185 85% 92%) 0%, transparent 40%)',
+          }}
+        />
+        <div 
+          className="absolute bottom-0 right-0 w-full h-full"
+          style={{
+            background: 'linear-gradient(315deg, hsl(160 75% 90%) 0%, transparent 40%)',
+          }}
+        />
+        
+        {/* Static ambient orbs - Enhanced visibility */}
+        <div 
+          className="absolute -top-32 -left-32 w-[700px] h-[700px] rounded-full animate-float"
+          style={{
+            background: 'radial-gradient(circle, hsl(185 80% 55% / 0.2) 0%, hsl(175 75% 50% / 0.1) 40%, transparent 70%)',
+            filter: 'blur(60px)',
+          }}
+        />
+        <div 
+          className="absolute -bottom-32 -right-32 w-[600px] h-[600px] rounded-full animate-float"
+          style={{
+            background: 'radial-gradient(circle, hsl(160 75% 50% / 0.2) 0%, hsl(175 70% 45% / 0.1) 40%, transparent 70%)',
+            filter: 'blur(50px)',
+            animationDelay: '1.5s',
+          }}
+        />
+        <div 
+          className="absolute top-1/3 left-1/4 w-[500px] h-[500px] rounded-full animate-float"
+          style={{
+            background: 'radial-gradient(circle, hsl(195 85% 60% / 0.12) 0%, transparent 60%)',
+            filter: 'blur(40px)',
+            animationDelay: '3s',
+          }}
+        />
+        
+        {/* Subtle flowing wave accent */}
+        <svg 
+          className="absolute bottom-0 left-0 w-full h-64 opacity-[0.08]" 
+          viewBox="0 0 1440 320" 
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="hsl(185, 75%, 50%)" />
+              <stop offset="50%" stopColor="hsl(175, 70%, 48%)" />
+              <stop offset="100%" stopColor="hsl(160, 70%, 45%)" />
+            </linearGradient>
+          </defs>
+          <path 
+            fill="url(#waveGradient)" 
+            d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          />
+        </svg>
         
         {/* Subtle grid overlay */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.015]" />
       </div>
 
       {/* Content Layer */}
@@ -131,7 +184,7 @@ const Index = () => {
           <div className="max-w-4xl mx-auto text-center">
             {/* Floating badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/50 backdrop-blur-xl border border-border/30 text-xs text-foreground-secondary mb-12 animate-fade-in">
-              <Bot className="h-3.5 w-3.5 text-primary" />
+              <Cpu className="h-3.5 w-3.5 text-primary" />
               <span>{t('home.badge')}</span>
               <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-medium">v2.0</span>
             </div>
@@ -150,12 +203,13 @@ const Index = () => {
               {t('home.subtitle')}
             </p>
             
-            {/* CTA - Single prominent button */}
+            {/* CTA - Single prominent button with proper dark variant */}
             <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <Link to="/workbench">
                 <Button 
+                  variant="dark"
                   size="xl" 
-                  className="bg-foreground text-background hover:bg-foreground/90 rounded-full px-10 h-14 text-base font-medium shadow-lg group"
+                  className="px-10 h-14 text-base font-medium group"
                   onMouseEnter={() => setIsHovering(true)}
                   onMouseLeave={() => setIsHovering(false)}
                 >
@@ -178,7 +232,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Feature Section - Minimal Cards */}
+        {/* Feature Section - Enhanced Cards with fluid hover effects */}
         <section className="py-32 px-6">
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-3 gap-6">
@@ -186,21 +240,31 @@ const Index = () => {
                 <div 
                   key={title}
                   className={cn(
-                    'group relative p-8 rounded-3xl border border-border/30 bg-gradient-to-b',
+                    'group relative p-8 rounded-3xl border border-border/40 bg-gradient-to-b backdrop-blur-sm',
                     gradient,
-                    'hover:border-border/50 transition-all duration-500',
-                    'animate-fade-in'
+                    'hover:border-primary/40 hover:shadow-[0_8px_40px_hsl(175,70%,45%,0.15)] transition-all duration-500',
+                    'animate-fade-in overflow-hidden'
                   )}
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className="w-12 h-12 rounded-2xl bg-card/80 backdrop-blur flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Icon className="h-6 w-6 text-foreground" />
-                  </div>
-                  <h3 className="text-xl font-display font-semibold text-foreground mb-2">{title}</h3>
-                  <p className="text-foreground-muted">{desc}</p>
+                  {/* Hover glow effect */}
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                    style={{
+                      background: 'radial-gradient(circle at 50% 0%, hsl(175 70% 50% / 0.08) 0%, transparent 60%)',
+                    }}
+                  />
                   
-                  {/* Step number */}
-                  <div className="absolute top-6 right-6 w-8 h-8 rounded-full bg-card/50 flex items-center justify-center text-sm font-medium text-foreground-muted">
+                  <div className="relative z-10">
+                    <div className="w-12 h-12 rounded-2xl bg-card/80 backdrop-blur border border-border/30 flex items-center justify-center mb-6 group-hover:scale-105 group-hover:border-primary/30 group-hover:shadow-md transition-all duration-300">
+                      <Icon className="h-6 w-6 text-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                    <h3 className="text-xl font-display font-semibold text-foreground mb-2">{title}</h3>
+                    <p className="text-foreground-muted leading-relaxed">{desc}</p>
+                  </div>
+                  
+                  {/* Step number with gradient on hover */}
+                  <div className="absolute top-6 right-6 w-8 h-8 rounded-full bg-card/50 backdrop-blur border border-border/20 flex items-center justify-center text-sm font-medium text-primary group-hover:bg-primary/10 group-hover:border-primary/30 transition-all">
                     {String(index + 1).padStart(2, '0')}
                   </div>
                 </div>
@@ -209,13 +273,23 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Stats Section - Clean horizontal */}
-        <section className="py-20 px-6 border-y border-border/20">
-          <div className="max-w-4xl mx-auto">
+        {/* Stats Section - Enhanced with gradient text */}
+        <section className="py-24 px-6 relative">
+          {/* Subtle gradient background */}
+          <div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'linear-gradient(180deg, hsl(185 80% 96% / 0.5) 0%, transparent 30%, transparent 70%, hsl(160 75% 95% / 0.5) 100%)',
+            }}
+          />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          
+          <div className="max-w-4xl mx-auto relative z-10">
             <div className="flex items-center justify-center gap-16 md:gap-24">
-              {stats.map(({ value, label }) => (
-                <div key={label} className="text-center">
-                  <p className="text-4xl md:text-5xl font-display font-bold text-foreground mb-1">{value}</p>
+              {stats.map(({ value, label }, index) => (
+                <div key={label} className="text-center group">
+                  <p className="text-4xl md:text-5xl font-display font-bold text-gradient-primary mb-2 group-hover:scale-105 transition-transform">{value}</p>
                   <p className="text-sm text-foreground-muted">{label}</p>
                 </div>
               ))}
@@ -223,22 +297,31 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Final CTA */}
-        <section className="py-32 px-6">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 mb-8">
-              <Layers className="h-5 w-5 text-primary" />
+        {/* Final CTA - Enhanced with better gradient and content */}
+        <section className="py-32 px-6 relative">
+          {/* Subtle gradient background for CTA section */}
+          <div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'linear-gradient(180deg, transparent 0%, hsl(185 80% 95% / 0.4) 50%, transparent 100%)',
+            }}
+          />
+          
+          <div className="max-w-2xl mx-auto text-center relative z-10">
+            <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full bg-primary/5 border border-primary/20">
+              <Layers className="h-4 w-4 text-primary" />
               <span className="text-sm text-foreground-secondary">{t('home.humanInLoop')}</span>
             </div>
             
-            <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-6 leading-tight">
+            <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-8 leading-tight">
               {t('home.ctaTitle')}
             </h2>
             
             <Link to="/workbench">
               <Button 
+                variant="generate"
                 size="lg" 
-                className="bg-gradient-primary text-primary-foreground hover:opacity-90 rounded-full px-8 shadow-primary"
+                className="rounded-full px-10 h-14"
               >
                 {t('home.ctaButton')}
               </Button>
@@ -246,11 +329,11 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Minimal Footer */}
+        {/* Minimal Footer - Using consistent LogoIcon */}
         <footer className="py-8 px-6 border-t border-border/20">
           <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <LogoLetter size={24} />
+            <div className="flex items-center gap-3">
+              <LogoIcon size={20} />
               <span className="text-sm text-foreground-muted">VisualFlow © 2025</span>
             </div>
             
