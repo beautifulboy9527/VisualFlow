@@ -420,7 +420,7 @@ const WorkbenchContent: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col bg-mesh">
-      <Header onNavigate={setActiveView} activeView={activeView} />
+      <Header credits={credits} onNavigate={setActiveView} activeView={activeView} />
       
       <div className="flex-1 flex overflow-hidden">
         {activeView === 'workbench' && (

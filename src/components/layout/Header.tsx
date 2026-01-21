@@ -26,22 +26,23 @@ import { useAuth } from '@/hooks/useAuth';
 import { Logo } from './Logo';
 
 interface HeaderProps {
+  credits: number;
+  userName?: string;
   onNavigate?: (view: 'workbench' | 'history' | 'templates') => void;
   activeView?: 'workbench' | 'history' | 'templates';
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
+  credits, 
+  userName = 'User',
   onNavigate,
   activeView = 'workbench'
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { language, setLanguage, t } = useLanguage();
-  const { user, profile, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const isWorkbench = location.pathname === '/workbench';
-  
-  const credits = profile?.credits ?? 0;
-  const displayName = profile?.display_name || user?.email || 'User';
 
   const toggleLanguage = () => {
     setLanguage(language === 'zh' ? 'en' : 'zh');

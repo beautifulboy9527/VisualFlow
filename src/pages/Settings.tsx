@@ -68,7 +68,7 @@ const Settings: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-mesh">
-      <Header />
+      <Header credits={100} />
       
       <div className="max-w-2xl mx-auto px-6 py-8">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-6 gap-2">
