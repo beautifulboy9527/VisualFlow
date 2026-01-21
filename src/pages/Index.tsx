@@ -176,6 +176,16 @@ const Index = () => {
                   <span className="text-xs">{language === 'zh' ? 'EN' : '中'}</span>
                 </Button>
                 
+                {/* Pricing Link */}
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => navigate('/pricing')}
+                  className="text-foreground-secondary hover:text-foreground"
+                >
+                  {language === 'zh' ? '定价' : 'Pricing'}
+                </Button>
+                
                 <Button 
                   onClick={handleStartClick}
                   variant="ghost" 
@@ -365,6 +375,9 @@ const Index = () => {
             </div>
             
             <div className="flex items-center gap-6 text-sm text-foreground-muted">
+              <button onClick={() => navigate('/pricing')} className="hover:text-foreground transition-colors">
+                {language === 'zh' ? '定价' : 'Pricing'}
+              </button>
               <a href="#" className="hover:text-foreground transition-colors">{t('home.privacy')}</a>
               <a href="#" className="hover:text-foreground transition-colors">{t('home.terms')}</a>
             </div>

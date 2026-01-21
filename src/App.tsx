@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Workbench from "./pages/Workbench";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
+import Pricing from "./pages/Pricing";
 import ProfileSettings from "./pages/settings/ProfileSettings";
 import SecuritySettings from "./pages/settings/SecuritySettings";
 import AppearanceSettings from "./pages/settings/AppearanceSettings";
@@ -29,6 +30,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/workbench" element={
                 <ProtectedRoute>
                   <Workbench />
