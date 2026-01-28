@@ -27,6 +27,39 @@ export const platforms: Platform[] = [
     ],
   },
   {
+    id: 'temu',
+    name: 'Temu',
+    icon: '🧡',
+    modules: [
+      { id: 'main', name: 'Main Image', size: { width: 1200, height: 1200 }, aspectRatio: '1:1' },
+      { id: 'detail_1', name: 'Detail 1', size: { width: 1200, height: 1200 }, aspectRatio: '1:1' },
+      { id: 'detail_2', name: 'Detail 2', size: { width: 1200, height: 1200 }, aspectRatio: '1:1' },
+      { id: 'white_bg', name: 'White BG', size: { width: 800, height: 800 }, aspectRatio: '1:1' },
+    ],
+  },
+  {
+    id: 'taobao',
+    name: '淘宝/天猫',
+    icon: '🔶',
+    modules: [
+      { id: 'main', name: '主图', size: { width: 800, height: 800 }, aspectRatio: '1:1' },
+      { id: 'detail', name: '详情图', size: { width: 750, height: 1000 }, aspectRatio: '3:4' },
+      { id: 'long_detail', name: '长图详情', size: { width: 750, height: 1500 }, aspectRatio: '1:2' },
+      { id: 'video_cover', name: '视频封面', size: { width: 800, height: 800 }, aspectRatio: '1:1' },
+    ],
+  },
+  {
+    id: 'aliexpress',
+    name: 'AliExpress',
+    icon: '🌐',
+    modules: [
+      { id: 'main', name: 'Main Image', size: { width: 1000, height: 1000 }, aspectRatio: '1:1' },
+      { id: 'detail_1', name: 'Detail 1', size: { width: 1000, height: 1000 }, aspectRatio: '1:1' },
+      { id: 'detail_2', name: 'Detail 2', size: { width: 1000, height: 1000 }, aspectRatio: '1:1' },
+      { id: 'description', name: 'Description', size: { width: 750, height: 1200 }, aspectRatio: '5:8' },
+    ],
+  },
+  {
     id: 'shopify',
     name: 'Shopify',
     icon: '🛒',
@@ -62,6 +95,26 @@ export const platforms: Platform[] = [
     modules: [
       { id: 'cover', name: 'Cover', size: { width: 1242, height: 1660 }, aspectRatio: '3:4' },
       { id: 'detail', name: 'Detail', size: { width: 1242, height: 1660 }, aspectRatio: '3:4' },
+    ],
+  },
+  {
+    id: 'jd',
+    name: '京东',
+    icon: '🔴',
+    modules: [
+      { id: 'main', name: '主图', size: { width: 800, height: 800 }, aspectRatio: '1:1' },
+      { id: 'detail', name: '详情图', size: { width: 750, height: 1000 }, aspectRatio: '3:4' },
+      { id: 'white_bg', name: '白底图', size: { width: 800, height: 800 }, aspectRatio: '1:1' },
+    ],
+  },
+  {
+    id: 'pinduoduo',
+    name: '拼多多',
+    icon: '🟠',
+    modules: [
+      { id: 'main', name: '主图', size: { width: 750, height: 750 }, aspectRatio: '1:1' },
+      { id: 'detail', name: '详情图', size: { width: 750, height: 1000 }, aspectRatio: '3:4' },
+      { id: 'white_bg', name: '白底图', size: { width: 750, height: 750 }, aspectRatio: '1:1' },
     ],
   },
   {
