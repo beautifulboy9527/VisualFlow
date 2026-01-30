@@ -19,13 +19,13 @@ import {
   Eraser,
   ImagePlus,
   Wand2,
-  X,
-  Check
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { InpaintingCanvas } from './InpaintingCanvas';
 
 type ToolType = 'inpainting' | 'upscale' | 'remove_bg' | 'scene_replace' | 'product_swap';
 
@@ -46,18 +46,20 @@ const toolConfig: Record<ToolType, {
   promptPlaceholder: string;
   promptPlaceholderZh: string;
   showPrompt: boolean;
+  isFullWidth?: boolean;
 }> = {
   inpainting: {
     name: 'Inpainting',
     nameZh: '局部重绘',
-    description: 'Edit specific areas of your image',
-    descriptionZh: '编辑图片的特定区域',
+    description: 'Paint on the image to mark areas you want to edit',
+    descriptionZh: '在图片上涂抹标记需要修改的区域',
     icon: Paintbrush,
     promptLabel: 'Describe the edit',
-    promptLabelZh: '描述编辑内容',
-    promptPlaceholder: 'e.g., Change the background color to blue, add a reflection effect...',
-    promptPlaceholderZh: '例如：将背景颜色改为蓝色，添加倒影效果...',
+    promptLabelZh: '描述修改内容',
+    promptPlaceholder: 'e.g., Replace with blue color, add reflection effect, change to wood texture...',
+    promptPlaceholderZh: '例如：替换为蓝色、添加倒影效果、改为木纹材质...',
     showPrompt: true,
+    isFullWidth: true,
   },
   upscale: {
     name: 'AI Upscale',
@@ -120,9 +122,11 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
   const [prompt, setPrompt] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [maskData, setMaskData] = useState<string | null>(null);
 
   const config = toolConfig[toolId];
   const Icon = config.icon;
+  const isInpainting = toolId === 'inpainting';
 
   const handleFileSelect = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -138,6 +142,7 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
     reader.onload = (e) => {
       setUploadedImage(e.target?.result as string);
       setResultImage(null);
+      setMaskData(null);
     };
     reader.readAsDataURL(file);
   }, [language]);
@@ -158,6 +163,10 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
     setIsDragging(false);
   }, []);
 
+  const handleMaskComplete = useCallback((mask: string, combined: string) => {
+    setMaskData(mask);
+  }, []);
+
   const handleProcess = async () => {
     if (!uploadedImage) {
       toast({
@@ -167,16 +176,30 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
       return;
     }
 
+    if (isInpainting && !maskData) {
+      toast({
+        title: language === 'zh' ? '请先涂抹需要修改的区域' : 'Please paint the area to edit first',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
+      // Build the prompt for inpainting with mask info
+      let finalPrompt = prompt;
+      if (isInpainting && maskData) {
+        finalPrompt = `Edit the marked/highlighted areas in this image. ${prompt || 'Make the changes look natural and seamless.'}`;
+      }
+
       const { data, error } = await supabase.functions.invoke('image-tools', {
         body: {
           tool: toolId,
           imageUrl: uploadedImage,
-          prompt: prompt || undefined,
+          prompt: finalPrompt || undefined,
           newScene: toolId === 'scene_replace' ? prompt : undefined,
-          maskArea: toolId === 'inpainting' ? prompt : undefined,
+          maskArea: toolId === 'inpainting' ? (prompt || 'the marked area') : undefined,
         },
       });
 
@@ -225,6 +248,7 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
     setUploadedImage(null);
     setResultImage(null);
     setPrompt('');
+    setMaskData(null);
   };
 
   const handleClose = () => {
@@ -232,6 +256,168 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
     onClose();
   };
 
+  // Inpainting has a special full-width layout
+  if (isInpainting) {
+    return (
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Icon className="h-5 w-5 text-primary" />
+              {language === 'zh' ? config.nameZh : config.name}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'zh' ? config.descriptionZh : config.description}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            {!uploadedImage ? (
+              /* Upload Zone */
+              <div
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                className={cn(
+                  "relative border-2 border-dashed rounded-xl transition-all duration-300",
+                  "min-h-[300px] flex items-center justify-center",
+                  isDragging 
+                    ? "border-primary bg-primary/5" 
+                    : "border-border/50 hover:border-primary/50"
+                )}
+              >
+                <label className="flex flex-col items-center gap-3 p-8 cursor-pointer">
+                  <div className="p-4 rounded-full bg-primary/10">
+                    <Upload className="h-8 w-8 text-primary" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-foreground">
+                      {language === 'zh' ? '拖拽图片到此处' : 'Drop image here'}
+                    </p>
+                    <p className="text-xs text-foreground-muted mt-1">
+                      {language === 'zh' ? '或点击选择文件' : 'or click to select'}
+                    </p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileSelect(file);
+                    }}
+                  />
+                </label>
+              </div>
+            ) : !resultImage ? (
+              /* Inpainting Canvas */
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setUploadedImage(null)}
+                    className="text-foreground-muted"
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    {language === 'zh' ? '重新选择图片' : 'Choose different image'}
+                  </Button>
+                </div>
+
+                <InpaintingCanvas
+                  imageUrl={uploadedImage}
+                  onMaskComplete={handleMaskComplete}
+                />
+
+                {/* Prompt Input */}
+                <div className="space-y-2">
+                  <Label>
+                    {language === 'zh' ? config.promptLabelZh : config.promptLabel}
+                  </Label>
+                  <Textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder={language === 'zh' ? config.promptPlaceholderZh : config.promptPlaceholder}
+                    className="min-h-[80px] resize-none"
+                  />
+                </div>
+
+                {/* Process Button */}
+                <Button
+                  onClick={handleProcess}
+                  disabled={!uploadedImage || !maskData || isProcessing}
+                  className="w-full"
+                  variant="generate"
+                  size="lg"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      {language === 'zh' ? '处理中...' : 'Processing...'}
+                    </>
+                  ) : (
+                    <>
+                      <Icon className="h-4 w-4 mr-2" />
+                      {language === 'zh' ? '开始处理' : 'Start Processing'}
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : (
+              /* Result Display */
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>{language === 'zh' ? '处理结果' : 'Result'}</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleReset}
+                    className="text-foreground-muted"
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    {language === 'zh' ? '处理新图片' : 'Process new image'}
+                  </Button>
+                </div>
+                
+                <div className="flex justify-center rounded-xl border border-border/30 overflow-hidden bg-muted/20 p-4">
+                  <img 
+                    src={resultImage} 
+                    alt="Result" 
+                    className="max-w-full max-h-[500px] object-contain rounded-lg"
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setResultImage(null);
+                      setMaskData(null);
+                    }}
+                    disabled={isProcessing}
+                    className="flex-1"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    {language === 'zh' ? '继续编辑' : 'Continue Editing'}
+                  </Button>
+                  <Button
+                    onClick={handleDownload}
+                    className="flex-1"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    {language === 'zh' ? '下载图片' : 'Download'}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Standard layout for other tools
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -257,7 +443,7 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
               onDragLeave={handleDragLeave}
               className={cn(
                 "relative border-2 border-dashed rounded-xl transition-all duration-300 overflow-hidden",
-                "min-h-[200px] flex items-center justify-center",
+                "min-h-[250px] flex items-center justify-center",
                 isDragging 
                   ? "border-primary bg-primary/5" 
                   : "border-border/50 hover:border-primary/50",
@@ -269,7 +455,7 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
                   <img 
                     src={uploadedImage} 
                     alt="Uploaded" 
-                    className="w-full h-auto max-h-[300px] object-contain"
+                    className="w-full h-auto max-h-[350px] object-contain"
                   />
                   <button
                     onClick={() => setUploadedImage(null)}
@@ -345,7 +531,7 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
             <Label>{language === 'zh' ? '处理结果' : 'Result'}</Label>
             
             <div className={cn(
-              "border-2 border-dashed rounded-xl min-h-[200px] flex items-center justify-center overflow-hidden",
+              "border-2 border-dashed rounded-xl min-h-[250px] flex items-center justify-center overflow-hidden",
               resultImage ? "border-solid border-primary/30" : "border-border/50"
             )}>
               {resultImage ? (
@@ -353,7 +539,7 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
                   <img 
                     src={resultImage} 
                     alt="Result" 
-                    className="w-full h-auto max-h-[300px] object-contain"
+                    className="w-full h-auto max-h-[350px] object-contain"
                   />
                   <div className="absolute top-2 right-2 flex gap-2">
                     <button
@@ -408,9 +594,6 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
                 {toolId === 'remove_bg' && (language === 'zh' 
                   ? '💡 AI 将自动识别主体并移除背景' 
                   : '💡 AI will automatically detect subject and remove background')}
-                {toolId === 'inpainting' && (language === 'zh' 
-                  ? '💡 描述您想要修改的区域和效果' 
-                  : '💡 Describe the area and effect you want to modify')}
                 {toolId === 'scene_replace' && (language === 'zh' 
                   ? '💡 描述您想要的新场景或背景' 
                   : '💡 Describe the new scene or background you want')}
