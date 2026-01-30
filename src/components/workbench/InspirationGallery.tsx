@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, TrendingUp, ChevronRight, Heart, Eye, ExternalLink } from 'lucide-react';
+import { TrendingUp, ChevronRight, Heart, Eye, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 
@@ -145,8 +145,7 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-semibold text-foreground">
           {language === 'zh' ? '灵感案例' : 'Inspiration Gallery'}
         </h3>
         <button className="text-xs text-primary hover:text-primary-hover flex items-center gap-1 transition-colors">
@@ -155,7 +154,7 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
         </button>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
         {displayItems.map((item) => (
           <button
             key={item.id}
