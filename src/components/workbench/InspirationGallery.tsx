@@ -155,7 +155,7 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
         </button>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {displayItems.map((item) => (
           <button
             key={item.id}
@@ -163,7 +163,7 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
             onMouseEnter={() => setHoveredId(item.id)}
             onMouseLeave={() => setHoveredId(null)}
             className={cn(
-              "relative group rounded-xl overflow-hidden aspect-[4/5]",
+              "relative group rounded-xl overflow-hidden aspect-[3/4]",
               "ring-2 ring-transparent hover:ring-primary/50 transition-all duration-300",
               "hover:shadow-xl hover:shadow-primary/10"
             )}
@@ -173,48 +173,48 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
               alt={language === 'zh' ? item.titleZh : item.title}
               className={cn(
                 "w-full h-full object-cover transition-transform duration-500",
-                hoveredId === item.id && "scale-110"
+                hoveredId === item.id && "scale-105"
               )}
             />
             
             {/* Gradient overlay */}
             <div className={cn(
-              "absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity",
-              hoveredId === item.id ? "opacity-100" : "opacity-70"
+              "absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent transition-opacity",
+              hoveredId === item.id ? "opacity-100" : "opacity-60"
             )} />
             
             {/* Category badge */}
-            <div className="absolute top-2 left-2">
-              <span className="text-[9px] bg-white/20 backdrop-blur-sm text-white px-2 py-0.5 rounded-full">
+            <div className="absolute top-2.5 left-2.5">
+              <span className="text-[10px] bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded-full font-medium">
                 {language === 'zh' ? item.categoryZh : item.category}
               </span>
             </div>
             
             {/* Stats */}
             <div className={cn(
-              "absolute top-2 right-2 flex items-center gap-2 transition-opacity",
+              "absolute top-2.5 right-2.5 flex items-center gap-2 transition-opacity",
               hoveredId === item.id ? "opacity-100" : "opacity-0"
             )}>
-              <span className="flex items-center gap-0.5 text-[9px] text-white/90">
-                <Heart className="h-2.5 w-2.5" />
+              <span className="flex items-center gap-1 text-[10px] text-white/90 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded">
+                <Heart className="h-3 w-3" />
                 {formatNumber(item.likes)}
               </span>
-              <span className="flex items-center gap-0.5 text-[9px] text-white/90">
-                <Eye className="h-2.5 w-2.5" />
+              <span className="flex items-center gap-1 text-[10px] text-white/90 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded">
+                <Eye className="h-3 w-3" />
                 {formatNumber(item.views)}
               </span>
             </div>
             
             {/* Title and action */}
             <div className="absolute bottom-0 left-0 right-0 p-3">
-              <p className="text-sm font-medium text-white mb-1">
+              <p className="text-sm font-semibold text-white mb-1.5 drop-shadow-md">
                 {language === 'zh' ? item.titleZh : item.title}
               </p>
               <div className={cn(
-                "flex items-center gap-1 text-[10px] text-white/80 transition-all",
+                "flex items-center gap-1.5 text-[11px] text-white/90 transition-all",
                 hoveredId === item.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
               )}>
-                <ExternalLink className="h-3 w-3" />
+                <ExternalLink className="h-3.5 w-3.5" />
                 {language === 'zh' ? '使用此风格' : 'Use this style'}
               </div>
             </div>
