@@ -2,10 +2,10 @@ import React from 'react';
 import { 
   Paintbrush, 
   ImagePlus, 
-  Sparkles, 
   ZoomIn, 
   Eraser,
   Wand2,
+  Layers,
   LucideIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -74,7 +74,7 @@ const quickTools: QuickTool[] = [
     nameZh: '批量生成',
     description: 'Multiple products',
     descriptionZh: '多产品批量处理',
-    icon: Sparkles,
+    icon: Layers,
     gradient: 'from-primary/20 to-accent/20',
     comingSoon: true,
   },
@@ -139,8 +139,7 @@ export const QuickToolCards: React.FC<QuickToolCardsProps> = ({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-semibold text-foreground">
           {language === 'zh' ? '快捷工具' : 'Quick Tools'}
         </h3>
         <span className="text-[10px] text-foreground-muted">
