@@ -3,8 +3,6 @@ import {
   Brush, 
   Eraser, 
   RotateCcw, 
-  ZoomIn, 
-  ZoomOut, 
   Move,
   Minus,
   Plus
@@ -13,6 +11,12 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface InpaintingCanvasProps {
   imageUrl: string;
@@ -247,182 +251,190 @@ export const InpaintingCanvas: React.FC<InpaintingCanvasProps> = ({
     }
   }, [hasMask, exportMask]);
 
+  // Tool button component with tooltip
+  const ToolButton = ({ 
+    toolType, 
+    icon: Icon, 
+    labelZh, 
+    labelEn 
+  }: { 
+    toolType: Tool; 
+    icon: React.ElementType; 
+    labelZh: string; 
+    labelEn: string;
+  }) => (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant={tool === toolType ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setTool(toolType)}
+          className="h-9 w-9 p-0"
+        >
+          <Icon className="h-4.5 w-4.5" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom">
+        {language === 'zh' ? labelZh : labelEn}
+      </TooltipContent>
+    </Tooltip>
+  );
+
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border/30">
-        {/* Tool Selection */}
-        <div className="flex items-center gap-1 p-1 bg-background rounded-lg border border-border/50">
-          <Button
-            variant={tool === 'brush' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setTool('brush')}
-            className="h-8 w-8 p-0"
-            title={language === 'zh' ? '画笔' : 'Brush'}
-          >
-            <Brush className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={tool === 'eraser' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setTool('eraser')}
-            className="h-8 w-8 p-0"
-            title={language === 'zh' ? '橡皮擦' : 'Eraser'}
-          >
-            <Eraser className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={tool === 'pan' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setTool('pan')}
-            className="h-8 w-8 p-0"
-            title={language === 'zh' ? '平移' : 'Pan'}
-          >
-            <Move className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Brush Size */}
-        <div className="flex items-center gap-2 min-w-[140px]">
-          <span className="text-xs text-foreground-muted whitespace-nowrap">
-            {language === 'zh' ? '笔刷' : 'Size'}
-          </span>
-          <Slider
-            value={[brushSize]}
-            onValueChange={([v]) => setBrushSize(v)}
-            min={5}
-            max={100}
-            step={5}
-            className="flex-1"
-          />
-          <span className="text-xs text-foreground-secondary w-8">{brushSize}</span>
-        </div>
-
-        {/* Zoom Controls */}
-        <div className="flex items-center gap-1 p-1 bg-background rounded-lg border border-border/50">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleZoomOut}
-            className="h-8 w-8 p-0"
-            title={language === 'zh' ? '缩小' : 'Zoom Out'}
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
-          <span className="text-xs text-foreground-secondary w-12 text-center">
-            {Math.round(zoom * 100)}%
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleZoomIn}
-            className="h-8 w-8 p-0"
-            title={language === 'zh' ? '放大' : 'Zoom In'}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Reset & Clear */}
-        <div className="flex items-center gap-2 ml-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={resetView}
-            className="h-8"
-          >
-            <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-            {language === 'zh' ? '重置视图' : 'Reset View'}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={clearMask}
-            disabled={!hasMask}
-            className="h-8"
-          >
-            <Eraser className="h-3.5 w-3.5 mr-1.5" />
-            {language === 'zh' ? '清除涂抹' : 'Clear Mask'}
-          </Button>
-        </div>
-      </div>
-
-      {/* Canvas Container */}
-      <div 
-        ref={containerRef}
-        className="relative overflow-hidden rounded-xl border-2 border-dashed border-border/50 bg-muted/20"
-        style={{ 
-          minHeight: '500px',
-          cursor: tool === 'pan' ? 'grab' : 'crosshair'
-        }}
-      >
-        {!imageLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-pulse text-foreground-muted">
-              {language === 'zh' ? '加载图片中...' : 'Loading image...'}
-            </div>
+    <TooltipProvider>
+      <div className={cn("flex flex-col gap-4", className)}>
+        {/* Optimized Toolbar - Following professional editor layout */}
+        <div className="flex flex-wrap items-center gap-4 p-3 bg-muted/30 rounded-xl border border-border/30">
+          {/* Left: Tool Selection Group */}
+          <div className="flex items-center gap-1 p-1 bg-background rounded-lg border border-border/50">
+            <ToolButton toolType="brush" icon={Brush} labelZh="画笔" labelEn="Brush" />
+            <ToolButton toolType="eraser" icon={Eraser} labelZh="橡皮擦" labelEn="Eraser" />
+            <ToolButton toolType="pan" icon={Move} labelZh="平移" labelEn="Pan" />
           </div>
-        )}
 
-        <div
-          className="relative inline-block"
-          style={{
-            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-            transformOrigin: 'top left',
-            transition: isDrawing ? 'none' : 'transform 0.1s ease-out',
+          {/* Separator */}
+          <div className="h-6 w-px bg-border/50" />
+
+          {/* Brush Size - Clear slider style */}
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-muted-foreground whitespace-nowrap">
+              {language === 'zh' ? '笔刷' : 'Size'}
+            </span>
+            <Slider
+              value={[brushSize]}
+              onValueChange={([v]) => setBrushSize(v)}
+              min={5}
+              max={100}
+              step={5}
+              className="w-28"
+            />
+            <span className="text-sm font-medium w-8 text-center">{brushSize}</span>
+          </div>
+
+          {/* Separator */}
+          <div className="h-6 w-px bg-border/50" />
+
+          {/* Zoom Controls - Centered percentage */}
+          <div className="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleZoomOut}
+                  className="h-9 w-9 p-0"
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{language === 'zh' ? '缩小' : 'Zoom Out'}</TooltipContent>
+            </Tooltip>
+            <span className="text-sm font-medium w-14 text-center">
+              {Math.round(zoom * 100)}%
+            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleZoomIn}
+                  className="h-9 w-9 p-0"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{language === 'zh' ? '放大' : 'Zoom In'}</TooltipContent>
+            </Tooltip>
+          </div>
+
+          {/* Right: Action Buttons */}
+          <div className="flex items-center gap-2 ml-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={resetView}
+              className="h-9"
+            >
+              <RotateCcw className="h-4 w-4 mr-1.5" />
+              {language === 'zh' ? '重置视图' : 'Reset View'}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearMask}
+              disabled={!hasMask}
+              className="h-9"
+            >
+              <Eraser className="h-4 w-4 mr-1.5" />
+              {language === 'zh' ? '清除涂抹' : 'Clear Mask'}
+            </Button>
+          </div>
+        </div>
+
+        {/* Canvas Container */}
+        <div 
+          ref={containerRef}
+          className="relative overflow-hidden rounded-xl border-2 border-dashed border-border/50 bg-muted/20"
+          style={{ 
+            minHeight: '500px',
+            cursor: tool === 'pan' ? 'grab' : 'crosshair'
           }}
         >
-          {/* Base Image Canvas */}
-          <canvas
-            ref={canvasRef}
-            className="block"
-            style={{ display: imageLoaded ? 'block' : 'none' }}
-          />
+          {!imageLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="animate-pulse text-muted-foreground">
+                {language === 'zh' ? '加载图片中...' : 'Loading image...'}
+              </div>
+            </div>
+          )}
 
-          {/* Mask Canvas (Overlay) */}
-          <canvas
-            ref={maskCanvasRef}
-            className="absolute top-0 left-0"
-            style={{ 
-              display: imageLoaded ? 'block' : 'none',
-              pointerEvents: 'auto'
-            }}
-            onMouseDown={startDrawing}
-            onMouseMove={draw}
-            onMouseUp={stopDrawing}
-            onMouseLeave={stopDrawing}
-            onTouchStart={startDrawing}
-            onTouchMove={draw}
-            onTouchEnd={stopDrawing}
-          />
-        </div>
-
-        {/* Brush Preview Cursor */}
-        {tool !== 'pan' && imageLoaded && (
           <div
-            className="pointer-events-none fixed rounded-full border-2 border-white mix-blend-difference"
+            className="relative inline-block"
             style={{
-              width: brushSize * zoom,
-              height: brushSize * zoom,
-              transform: 'translate(-50%, -50%)',
-              display: 'none', // Will be shown via CSS :hover
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+              transformOrigin: 'top left',
+              transition: isDrawing ? 'none' : 'transform 0.1s ease-out',
             }}
-          />
-        )}
-      </div>
+          >
+            {/* Base Image Canvas */}
+            <canvas
+              ref={canvasRef}
+              className="block"
+              style={{ display: imageLoaded ? 'block' : 'none' }}
+            />
 
-      {/* Instructions */}
-      <div className="flex items-center gap-4 text-xs text-foreground-muted">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-[rgba(255,0,100,0.5)]" />
-          <span>{language === 'zh' ? '涂抹区域将被AI修改' : 'Painted areas will be edited by AI'}</span>
+            {/* Mask Canvas (Overlay) */}
+            <canvas
+              ref={maskCanvasRef}
+              className="absolute top-0 left-0"
+              style={{ 
+                display: imageLoaded ? 'block' : 'none',
+                pointerEvents: 'auto'
+              }}
+              onMouseDown={startDrawing}
+              onMouseMove={draw}
+              onMouseUp={stopDrawing}
+              onMouseLeave={stopDrawing}
+              onTouchStart={startDrawing}
+              onTouchMove={draw}
+              onTouchEnd={stopDrawing}
+            />
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Move className="h-3 w-3" />
-          <span>{language === 'zh' ? '使用平移工具或滚轮缩放查看细节' : 'Use pan tool or scroll to zoom'}</span>
+
+        {/* Instructions */}
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-[rgba(255,0,100,0.5)]" />
+            <span>{language === 'zh' ? '涂抹区域将被AI修改' : 'Painted areas will be edited by AI'}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Move className="h-3 w-3" />
+            <span>{language === 'zh' ? '使用平移工具或滚轮缩放查看细节' : 'Use pan tool or scroll to zoom'}</span>
+          </div>
         </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
 
