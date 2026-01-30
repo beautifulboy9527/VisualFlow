@@ -17,6 +17,9 @@ import { ImagePreviewModal } from '@/components/workbench/ImagePreviewModal';
 import { AgentModePanel } from '@/components/workbench/AgentModePanel';
 import { AgentModeSidebar } from '@/components/workbench/AgentModeSidebar';
 import { AgentChatCanvas } from '@/components/workbench/AgentChatCanvas';
+import { QuickToolCards } from '@/components/workbench/QuickToolCards';
+import { InspirationGallery } from '@/components/workbench/InspirationGallery';
+import { VisualPresetCards } from '@/components/workbench/VisualPresetCards';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { LanguageProvider, useLanguage } from '@/hooks/useLanguage';
@@ -774,42 +777,86 @@ const WorkbenchContent: React.FC = () => {
               )}>
                 {/* Empty State */}
                 {uploadedImages.length === 0 && generatedImages.length === 0 && !isGenerating && (
-                  <div className="h-full flex flex-col items-center justify-center text-center py-20 animate-fade-in">
-                    <div className="relative mb-6">
-                      <div className="p-8 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20">
-                        <Package className="h-20 w-20 text-primary" />
-                      </div>
-                      <div className="absolute -inset-4 bg-primary/5 rounded-[2rem] blur-2xl -z-10" />
-                    </div>
-                    <h2 className="text-2xl font-display font-bold text-foreground mb-3">
-                      {language === 'zh' ? '开始创建电商视觉' : 'Start Creating E-commerce Visuals'}
-                    </h2>
-                    <p className="text-foreground-muted max-w-md mb-6">
-                      {language === 'zh' 
-                        ? '上传产品图片，AI 将自动分析并生成专业的电商 KV 设计' 
-                        : 'Upload product images, AI will analyze and generate professional e-commerce KV designs'}
-                    </p>
-                    <div className="flex items-center gap-6 text-sm text-foreground-secondary">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Upload className="h-4 w-4 text-primary" />
+                  <div className="h-full overflow-y-auto animate-fade-in">
+                    <div className="max-w-5xl mx-auto space-y-8 pb-8">
+                      {/* Hero Section */}
+                      <div className="flex flex-col items-center text-center pt-8 pb-4">
+                        <div className="relative mb-4">
+                          <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20">
+                            <Package className="h-14 w-14 text-primary" />
+                          </div>
+                          <div className="absolute -inset-4 bg-primary/5 rounded-[2rem] blur-2xl -z-10" />
                         </div>
-                        <span>{language === 'zh' ? '上传产品图' : 'Upload'}</span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-foreground-muted" />
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Sparkles className="h-4 w-4 text-primary" />
+                        <h2 className="text-xl font-display font-bold text-foreground mb-2">
+                          {language === 'zh' ? '开始创建电商视觉' : 'Start Creating E-commerce Visuals'}
+                        </h2>
+                        <p className="text-sm text-foreground-muted max-w-md mb-4">
+                          {language === 'zh' 
+                            ? '上传产品图片，AI 将自动分析并生成专业的电商 KV 设计' 
+                            : 'Upload product images, AI will analyze and generate professional e-commerce KV designs'}
+                        </p>
+                        <div className="flex items-center gap-4 text-xs text-foreground-secondary">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                              <Upload className="h-3 w-3 text-primary" />
+                            </div>
+                            <span>{language === 'zh' ? '上传' : 'Upload'}</span>
+                          </div>
+                          <ChevronRight className="h-3 w-3 text-foreground-muted" />
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                              <Sparkles className="h-3 w-3 text-primary" />
+                            </div>
+                            <span>{language === 'zh' ? 'AI 分析' : 'Analyze'}</span>
+                          </div>
+                          <ChevronRight className="h-3 w-3 text-foreground-muted" />
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                              <ImageIcon className="h-3 w-3 text-primary" />
+                            </div>
+                            <span>{language === 'zh' ? '生成' : 'Generate'}</span>
+                          </div>
                         </div>
-                        <span>{language === 'zh' ? 'AI 智能分析' : 'AI Analysis'}</span>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-foreground-muted" />
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <ImageIcon className="h-4 w-4 text-primary" />
-                        </div>
-                        <span>{language === 'zh' ? '生成 KV 设计' : 'Generate KV'}</span>
-                      </div>
+
+                      {/* Quick Tool Cards - Flyelep inspired */}
+                      <QuickToolCards 
+                        onToolSelect={(toolId) => {
+                          toast({
+                            title: language === 'zh' ? '功能即将上线' : 'Coming Soon',
+                            description: language === 'zh' 
+                              ? `${toolId} 功能正在开发中，敬请期待` 
+                              : `${toolId} feature is under development`,
+                          });
+                        }}
+                      />
+
+                      {/* Inspiration Gallery - Pixifield inspired */}
+                      <InspirationGallery 
+                        onSelectInspiration={(item) => {
+                          toast({
+                            title: language === 'zh' ? '灵感已选择' : 'Inspiration Selected',
+                            description: language === 'zh' 
+                              ? `将使用「${item.titleZh}」风格作为参考` 
+                              : `Will use "${item.title}" style as reference`,
+                          });
+                        }}
+                        maxItems={6}
+                      />
+
+                      {/* Visual Preset Cards - Enhanced */}
+                      <VisualPresetCards
+                        selectedStyle={visualStyle}
+                        onSelectStyle={(style) => {
+                          setVisualStyle(style);
+                          toast({
+                            title: language === 'zh' ? '风格已选择' : 'Style Selected',
+                            description: visualStyles.find(s => s.id === style)?.[language === 'zh' ? 'nameZh' : 'name'] || style,
+                          });
+                        }}
+                        aiRecommended={aiRecommendedStyle}
+                        showAIAuto={isAgentMode}
+                      />
                     </div>
                   </div>
                 )}
