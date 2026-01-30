@@ -2,3 +2,6 @@ project_id = "auimgdvvbmwzxchxynwb"
 
 [functions.analyze-product]
 verify_jwt = false
+
+[functions.image-tools]
+verify_jwt = false

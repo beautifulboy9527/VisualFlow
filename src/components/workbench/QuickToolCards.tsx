@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Paintbrush, 
   ImagePlus, 
@@ -10,9 +10,14 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
+import { QuickToolModal } from './QuickToolModal';
+import { toast } from '@/hooks/use-toast';
+
+type ToolType = 'inpainting' | 'upscale' | 'remove_bg' | 'scene_replace' | 'product_swap';
 
 interface QuickTool {
   id: string;
+  toolType?: ToolType;
   name: string;
   nameZh: string;
   description: string;
@@ -25,6 +30,7 @@ interface QuickTool {
 const quickTools: QuickTool[] = [
   {
     id: 'inpainting',
+    toolType: 'inpainting',
     name: 'Inpainting',
     nameZh: '局部重绘',
     description: 'Edit specific areas',
@@ -34,6 +40,7 @@ const quickTools: QuickTool[] = [
   },
   {
     id: 'scene_replace',
+    toolType: 'scene_replace',
     name: 'Scene Replace',
     nameZh: '场景替换',
     description: 'Change backgrounds',
@@ -43,6 +50,7 @@ const quickTools: QuickTool[] = [
   },
   {
     id: 'ai_upscale',
+    toolType: 'upscale',
     name: 'AI Upscale',
     nameZh: 'AI超清',
     description: 'Enhance resolution',
@@ -52,6 +60,7 @@ const quickTools: QuickTool[] = [
   },
   {
     id: 'product_swap',
+    toolType: 'product_swap',
     name: 'Product Swap',
     nameZh: '商品替换',
     description: 'Replace products',
@@ -61,6 +70,7 @@ const quickTools: QuickTool[] = [
   },
   {
     id: 'remove_bg',
+    toolType: 'remove_bg',
     name: 'Remove BG',
     nameZh: '抠图',
     description: 'Remove background',
@@ -90,9 +100,23 @@ export const QuickToolCards: React.FC<QuickToolCardsProps> = ({
   compact = false,
 }) => {
   const { language } = useLanguage();
+  const [activeToolModal, setActiveToolModal] = useState<ToolType | null>(null);
 
   const handleToolClick = (tool: QuickTool) => {
-    if (tool.comingSoon) return;
+    if (tool.comingSoon) {
+      toast({
+        title: language === 'zh' ? '功能即将上线' : 'Coming Soon',
+        description: language === 'zh' 
+          ? `${tool.nameZh} 功能正在开发中` 
+          : `${tool.name} feature is under development`,
+      });
+      return;
+    }
+    
+    if (tool.toolType) {
+      setActiveToolModal(tool.toolType);
+    }
+    
     onToolSelect?.(tool.id);
   };
 
@@ -190,6 +214,14 @@ export const QuickToolCards: React.FC<QuickToolCardsProps> = ({
           );
         })}
       </div>
+      {/* Tool Modal */}
+      {activeToolModal && (
+        <QuickToolModal
+          isOpen={!!activeToolModal}
+          onClose={() => setActiveToolModal(null)}
+          toolId={activeToolModal}
+        />
+      )}
     </div>
   );
 };
