@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { 
   Upload, 
   Loader2, 
@@ -33,6 +34,7 @@ interface QuickToolModalProps {
   isOpen: boolean;
   onClose: () => void;
   toolId: ToolType;
+  initialImage?: string;
 }
 
 const toolConfig: Record<ToolType, {
@@ -111,13 +113,24 @@ const toolConfig: Record<ToolType, {
   },
 };
 
+// Quick prompts for inpainting
+const quickPrompts = [
+  { zh: '替换颜色', en: 'Change color' },
+  { zh: '模糊处理', en: 'Blur effect' },
+  { zh: '移除对象', en: 'Remove object' },
+  { zh: '添加倒影', en: 'Add reflection' },
+  { zh: '改变材质', en: 'Change texture' },
+  { zh: '调整光影', en: 'Adjust lighting' },
+];
+
 export const QuickToolModal: React.FC<QuickToolModalProps> = ({
   isOpen,
   onClose,
   toolId,
+  initialImage,
 }) => {
   const { language } = useLanguage();
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(initialImage || null);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [prompt, setPrompt] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -127,6 +140,13 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
   const config = toolConfig[toolId];
   const Icon = config.icon;
   const isInpainting = toolId === 'inpainting';
+
+  // Handle initial image when modal opens
+  React.useEffect(() => {
+    if (initialImage && isOpen) {
+      setUploadedImage(initialImage);
+    }
+  }, [initialImage, isOpen]);
 
   const handleFileSelect = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -166,6 +186,15 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
   const handleMaskComplete = useCallback((mask: string, combined: string) => {
     setMaskData(mask);
   }, []);
+
+  const handleQuickPromptClick = (promptText: string) => {
+    setPrompt(prev => {
+      if (prev.trim()) {
+        return `${prev}, ${promptText}`;
+      }
+      return promptText;
+    });
+  };
 
   const handleProcess = async () => {
     if (!uploadedImage) {
@@ -294,7 +323,7 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
                     <p className="text-sm font-medium text-foreground">
                       {language === 'zh' ? '拖拽图片到此处' : 'Drop image here'}
                     </p>
-                    <p className="text-xs text-foreground-muted mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {language === 'zh' ? '或点击选择文件' : 'or click to select'}
                     </p>
                   </div>
@@ -317,7 +346,7 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
                     variant="ghost"
                     size="sm"
                     onClick={() => setUploadedImage(null)}
-                    className="text-foreground-muted"
+                    className="text-muted-foreground"
                   >
                     <X className="h-4 w-4 mr-1" />
                     {language === 'zh' ? '重新选择图片' : 'Choose different image'}
@@ -329,16 +358,31 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
                   onMaskComplete={handleMaskComplete}
                 />
 
-                {/* Prompt Input */}
-                <div className="space-y-2">
-                  <Label>
+                {/* Enhanced Prompt Section with Quick Tags */}
+                <div className="space-y-3 p-4 bg-muted/20 rounded-xl border border-border/30">
+                  <Label className="text-sm font-medium">
                     {language === 'zh' ? config.promptLabelZh : config.promptLabel}
                   </Label>
+                  
+                  {/* Quick Prompt Tags */}
+                  <div className="flex flex-wrap gap-2">
+                    {quickPrompts.map((qp, index) => (
+                      <Badge
+                        key={index}
+                        variant="secondary"
+                        className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                        onClick={() => handleQuickPromptClick(language === 'zh' ? qp.zh : qp.en)}
+                      >
+                        {language === 'zh' ? qp.zh : qp.en}
+                      </Badge>
+                    ))}
+                  </div>
+
                   <Textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     placeholder={language === 'zh' ? config.promptPlaceholderZh : config.promptPlaceholder}
-                    className="min-h-[80px] resize-none"
+                    className="min-h-[80px] resize-none bg-background"
                   />
                 </div>
 
@@ -372,7 +416,7 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
                     variant="ghost"
                     size="sm"
                     onClick={handleReset}
-                    className="text-foreground-muted"
+                    className="text-muted-foreground"
                   >
                     <X className="h-4 w-4 mr-1" />
                     {language === 'zh' ? '处理新图片' : 'Process new image'}
@@ -473,7 +517,7 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
                     <p className="text-sm font-medium text-foreground">
                       {language === 'zh' ? '拖拽图片到此处' : 'Drop image here'}
                     </p>
-                    <p className="text-xs text-foreground-muted mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {language === 'zh' ? '或点击选择文件' : 'or click to select'}
                     </p>
                   </div>
@@ -554,9 +598,9 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
               ) : (
                 <div className="text-center p-8">
                   <div className="p-4 rounded-full bg-muted/50 mx-auto w-fit mb-3">
-                    <Icon className="h-8 w-8 text-foreground-muted" />
+                    <Icon className="h-8 w-8 text-muted-foreground" />
                   </div>
-                  <p className="text-sm text-foreground-muted">
+                  <p className="text-sm text-muted-foreground">
                     {language === 'zh' ? '处理后的图片将显示在这里' : 'Processed image will appear here'}
                   </p>
                 </div>
@@ -587,19 +631,19 @@ export const QuickToolModal: React.FC<QuickToolModalProps> = ({
 
             {/* Tips */}
             <div className="p-3 rounded-lg bg-muted/30 border border-border/30">
-              <p className="text-xs text-foreground-muted">
+              <p className="text-xs text-muted-foreground">
                 {toolId === 'upscale' && (language === 'zh' 
-                  ? '💡 AI 将自动提升图片清晰度和细节' 
-                  : '💡 AI will automatically enhance image clarity and details')}
+                  ? 'AI 将自动提升图片清晰度和细节' 
+                  : 'AI will automatically enhance image clarity and details')}
                 {toolId === 'remove_bg' && (language === 'zh' 
-                  ? '💡 AI 将自动识别主体并移除背景' 
-                  : '💡 AI will automatically detect subject and remove background')}
+                  ? 'AI 将自动识别主体并移除背景' 
+                  : 'AI will automatically detect subject and remove background')}
                 {toolId === 'scene_replace' && (language === 'zh' 
-                  ? '💡 描述您想要的新场景或背景' 
-                  : '💡 Describe the new scene or background you want')}
+                  ? '描述您想要的新场景或背景' 
+                  : 'Describe the new scene or background you want')}
                 {toolId === 'product_swap' && (language === 'zh' 
-                  ? '💡 描述您想要对产品做的修改' 
-                  : '💡 Describe the changes you want to make to the product')}
+                  ? '描述您想要对产品做的修改' 
+                  : 'Describe the changes you want to make to the product')}
               </p>
             </div>
           </div>

@@ -6,7 +6,10 @@ import {
   Copy, 
   Pencil, 
   Check,
-  MoreHorizontal
+  MoreHorizontal,
+  Paintbrush,
+  Wand2,
+  Eraser as EraserIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -15,9 +18,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface EnhancedResultCardProps {
   id: string;
@@ -30,6 +37,7 @@ interface EnhancedResultCardProps {
   onSelect: (id: string) => void;
   onCopy?: (id: string) => void;
   onEdit?: (id: string) => void;
+  onQuickTool?: (id: string, toolId: 'inpainting' | 'upscale' | 'remove_bg' | 'scene_replace') => void;
 }
 
 export const EnhancedResultCard: React.FC<EnhancedResultCardProps> = ({
@@ -43,7 +51,9 @@ export const EnhancedResultCard: React.FC<EnhancedResultCardProps> = ({
   onSelect,
   onCopy,
   onEdit,
+  onQuickTool,
 }) => {
+  const { language } = useLanguage();
   const [isHovering, setIsHovering] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
@@ -56,12 +66,12 @@ export const EnhancedResultCard: React.FC<EnhancedResultCardProps> = ({
       await navigator.clipboard.write([
         new ClipboardItem({ [blob.type]: blob })
       ]);
-      toast({ title: "Copied to clipboard" });
+      toast({ title: language === 'zh' ? '已复制到剪贴板' : 'Copied to clipboard' });
       onCopy?.(id);
     } catch (error) {
       // Fallback: copy URL
       await navigator.clipboard.writeText(url);
-      toast({ title: "Image URL copied" });
+      toast({ title: language === 'zh' ? '图片链接已复制' : 'Image URL copied' });
     } finally {
       setIsCopying(false);
     }
@@ -78,7 +88,7 @@ export const EnhancedResultCard: React.FC<EnhancedResultCardProps> = ({
     <div
       className={cn(
         'group relative rounded-xl overflow-hidden border transition-all duration-300',
-        'bg-card hover:shadow-precision-lg',
+        'bg-card hover:shadow-lg',
         isSelected 
           ? 'border-primary ring-2 ring-primary/20' 
           : 'border-border/50 hover:border-primary/30'
@@ -160,7 +170,7 @@ export const EnhancedResultCard: React.FC<EnhancedResultCardProps> = ({
             </Button>
           </div>
 
-          {/* More Actions */}
+          {/* More Actions with Quick Tools */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -171,19 +181,53 @@ export const EnhancedResultCard: React.FC<EnhancedResultCardProps> = ({
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={handleCopy} disabled={isCopying}>
                 <Copy className="h-4 w-4 mr-2" />
-                {isCopying ? 'Copying...' : 'Copy Image'}
+                {isCopying 
+                  ? (language === 'zh' ? '复制中...' : 'Copying...') 
+                  : (language === 'zh' ? '复制图片' : 'Copy Image')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onEdit?.(id)}>
                 <Pencil className="h-4 w-4 mr-2" />
-                Edit Image
+                {language === 'zh' ? '编辑图片' : 'Edit Image'}
               </DropdownMenuItem>
+              
               <DropdownMenuSeparator />
+              
+              {/* Quick Tools Submenu */}
+              {onQuickTool && (
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <Wand2 className="h-4 w-4 mr-2" />
+                    {language === 'zh' ? '快速编辑' : 'Quick Edit'}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="w-44">
+                    <DropdownMenuItem onClick={() => onQuickTool(id, 'inpainting')}>
+                      <Paintbrush className="h-4 w-4 mr-2" />
+                      {language === 'zh' ? '局部重绘' : 'Inpainting'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onQuickTool(id, 'upscale')}>
+                      <ZoomIn className="h-4 w-4 mr-2" />
+                      {language === 'zh' ? 'AI 超清' : 'AI Upscale'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onQuickTool(id, 'remove_bg')}>
+                      <EraserIcon className="h-4 w-4 mr-2" />
+                      {language === 'zh' ? '智能抠图' : 'Remove BG'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onQuickTool(id, 'scene_replace')}>
+                      <Wand2 className="h-4 w-4 mr-2" />
+                      {language === 'zh' ? '场景替换' : 'Scene Replace'}
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              )}
+              
+              <DropdownMenuSeparator />
+              
               <DropdownMenuItem onClick={() => onDownload(id)}>
                 <Download className="h-4 w-4 mr-2" />
-                Download HD
+                {language === 'zh' ? '下载高清图' : 'Download HD'}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
