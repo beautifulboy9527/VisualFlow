@@ -44,6 +44,48 @@ export type Database = {
         }
         Relationships: []
       }
+      user_preferences: {
+        Row: {
+          created_at: string
+          custom_presets: Json | null
+          frequent_platforms: Json | null
+          frequent_scenes: Json | null
+          frequent_visual_styles: Json | null
+          id: string
+          last_modules: Json | null
+          last_platform: string | null
+          updated_at: string
+          usage_count: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_presets?: Json | null
+          frequent_platforms?: Json | null
+          frequent_scenes?: Json | null
+          frequent_visual_styles?: Json | null
+          id?: string
+          last_modules?: Json | null
+          last_platform?: string | null
+          updated_at?: string
+          usage_count?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_presets?: Json | null
+          frequent_platforms?: Json | null
+          frequent_scenes?: Json | null
+          frequent_visual_styles?: Json | null
+          id?: string
+          last_modules?: Json | null
+          last_platform?: string | null
+          updated_at?: string
+          usage_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

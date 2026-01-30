@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Header } from '@/components/layout/Header';
 import { MultiImageUpload, UploadedImage } from '@/components/workbench/MultiImageUpload';
-import { PlatformConfig, platformsConfig } from '@/components/workbench/PlatformConfig';
+import { PlatformConfigSimplified } from '@/components/workbench/PlatformConfigSimplified';
+import { platformsConfig } from '@/components/workbench/PlatformConfig';
 import { LanguageSettings, Language } from '@/components/workbench/LanguageSettings';
 import { VisualStylePicker, VisualStyleId, LayoutStyleId, visualStyles } from '@/components/workbench/VisualStylePicker';
 import { ScenePlanning, SceneType, Scene, defaultScenes } from '@/components/workbench/ScenePlanning';
@@ -522,7 +523,7 @@ const WorkbenchContent: React.FC = () => {
                       isComplete={selectedModules.length > 0}
                       isAgentMode={isAgentMode}
                     >
-                      <PlatformConfig
+                      <PlatformConfigSimplified
                         selectedPlatform={selectedPlatform}
                         onSelectPlatform={setSelectedPlatform}
                         selectedModules={selectedModules}
