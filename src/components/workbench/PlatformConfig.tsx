@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Check, ChevronDown, Sparkles, Settings2, ShoppingBag, ShoppingCart, Music, Camera, BookOpen, Box } from 'lucide-react';
+import { Check, ChevronDown, Sparkles, Settings2, ShoppingBag, ShoppingCart, Music, Camera, BookOpen, Box, Package, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -9,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 // Platform with sub-categories (e.g., Amazon Listing vs A+)
 export interface PlatformCategory {
@@ -198,8 +200,98 @@ export const PlatformConfig: React.FC<PlatformConfigProps> = ({
       }, {} as Record<string, PlatformModule[]>)
     : { default: currentPlatform?.modules || [] };
 
+  // One-click suite: select platform and all its modules
+  const handleOneClickSuite = (platformId: string) => {
+    onSelectPlatform(platformId);
+    const platform = platformsConfig.find(p => p.id === platformId);
+    if (platform) {
+      const allModules = platform.modules.map(m => ({
+        id: m.id,
+        name: language === 'zh' ? m.nameZh : m.name,
+        aspectRatio: m.aspectRatio,
+      }));
+      onUpdateModules(allModules);
+      toast.success(
+        language === 'zh' 
+          ? `已选择「${platform.nameZh}」全套 ${allModules.length} 个模块` 
+          : `Selected all ${allModules.length} modules for ${platform.name}`,
+        { duration: 2000 }
+      );
+    }
+  };
+
   return (
     <div className="space-y-4">
+      {/* One-Click Suite Section */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Layers className="h-4 w-4 text-primary" />
+          <span className="text-xs font-medium text-foreground-secondary">
+            {language === 'zh' ? '一键套图' : 'Quick Suite'}
+          </span>
+          <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+            {language === 'zh' ? '推荐' : 'Recommended'}
+          </span>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-2">
+          {platformsConfig.slice(0, 6).map((platform) => (
+            <button
+              key={platform.id}
+              onClick={() => handleOneClickSuite(platform.id)}
+              className={cn(
+                "flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all duration-300 border text-sm group",
+                "bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20",
+                "hover:border-primary/40 hover:from-primary/10 hover:to-primary/20 hover:shadow-md"
+              )}
+            >
+              <span className="text-foreground-muted group-hover:text-primary transition-colors">
+                {platform.icon}
+              </span>
+              <div className="flex flex-col items-start min-w-0">
+                <span className="font-medium text-foreground whitespace-nowrap text-xs">
+                  {language === 'zh' ? platform.nameZh : platform.name}
+                </span>
+                <span className="text-[10px] text-foreground-muted">
+                  {platform.modules.length} {language === 'zh' ? '图' : 'imgs'}
+                </span>
+              </div>
+              <Package className="h-3.5 w-3.5 text-primary/60 ml-auto shrink-0" />
+            </button>
+          ))}
+        </div>
+        
+        {/* Show more platforms toggle */}
+        {platformsConfig.length > 6 && (
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {platformsConfig.slice(6).map((platform) => (
+              <button
+                key={platform.id}
+                onClick={() => handleOneClickSuite(platform.id)}
+                className={cn(
+                  "flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-all duration-200 border text-xs",
+                  "bg-card/50 border-border/30 text-foreground-secondary",
+                  "hover:border-primary/30 hover:bg-primary/5"
+                )}
+              >
+                <span>{platform.icon}</span>
+                <span>{language === 'zh' ? platform.nameZh : platform.name}</span>
+                <span className="text-[10px] text-foreground-muted">({platform.modules.length})</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Divider */}
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-border/50"></div>
+        <span className="text-[10px] text-foreground-muted">
+          {language === 'zh' ? '或自定义选择' : 'or customize'}
+        </span>
+        <div className="h-px flex-1 bg-border/50"></div>
+      </div>
+
       {/* Platform Selection */}
       <div className="space-y-2">
         <span className="text-xs font-medium text-foreground-secondary">
