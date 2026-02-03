@@ -103,8 +103,7 @@ export const VisualPresetCards: React.FC<VisualPresetCardsProps> = ({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-semibold text-foreground">
           {language === 'zh' ? '视觉风格预设' : 'Visual Style Presets'}
         </h3>
         {aiRecommended && (

@@ -873,31 +873,9 @@ const WorkbenchContent: React.FC = () => {
                     {/* Scrollable Galleries Area */}
                     <div className="flex-1 overflow-y-auto">
                       <div className="max-w-5xl mx-auto space-y-5 pb-6">
-                        {/* Inspiration Gallery - Horizontal scroll with complete images */}
+                        {/* Inspiration Gallery - Show community works with details */}
                         <InspirationGallery 
-                          onSelectInspiration={(item) => {
-                            toast({
-                              title: language === 'zh' ? '灵感已选择' : 'Inspiration Selected',
-                              description: language === 'zh' 
-                                ? `将使用「${item.titleZh}」风格作为参考` 
-                                : `Will use "${item.title}" style as reference`,
-                            });
-                          }}
                           maxItems={8}
-                        />
-
-                        {/* Visual Preset Cards - Horizontal scroll with complete images */}
-                        <VisualPresetCards
-                          selectedStyle={visualStyle}
-                          onSelectStyle={(style) => {
-                            setVisualStyle(style);
-                            toast({
-                              title: language === 'zh' ? '风格已选择' : 'Style Selected',
-                              description: visualStyles.find(s => s.id === style)?.[language === 'zh' ? 'nameZh' : 'name'] || style,
-                            });
-                          }}
-                          aiRecommended={aiRecommendedStyle}
-                          showAIAuto={isAgentMode}
                         />
                       </div>
                     </div>
