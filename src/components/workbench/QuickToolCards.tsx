@@ -161,7 +161,7 @@ export const QuickToolCards: React.FC<QuickToolCardsProps> = ({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-foreground">
           {language === 'zh' ? '快捷工具' : 'Quick Tools'}
@@ -171,8 +171,8 @@ export const QuickToolCards: React.FC<QuickToolCardsProps> = ({
         </span>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {quickTools.map((tool) => {
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {quickTools.map((tool, index) => {
           const Icon = tool.icon;
           return (
             <button
@@ -180,12 +180,13 @@ export const QuickToolCards: React.FC<QuickToolCardsProps> = ({
               onClick={() => handleToolClick(tool)}
               disabled={tool.comingSoon}
               className={cn(
-                "relative flex items-center gap-3 p-3 rounded-xl transition-all duration-300",
+                "relative flex items-center gap-2.5 p-2.5 rounded-xl transition-all duration-300",
                 "bg-card/50 border border-border/30",
-                "hover:border-primary/40 hover:bg-card/80 hover:shadow-lg hover:shadow-primary/5",
-                "group text-left",
+                "hover:border-primary/40 hover:bg-card/80 hover:shadow-md hover:shadow-primary/5",
+                "group text-left animate-fade-in-scale",
                 tool.comingSoon && "opacity-60 cursor-not-allowed"
               )}
+              style={{ animationDelay: `${index * 50}ms` }}
             >
               <div className={cn(
                 "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all",

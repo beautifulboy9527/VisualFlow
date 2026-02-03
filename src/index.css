@@ -555,4 +555,50 @@
     break-inside: avoid;
     page-break-inside: avoid;
   }
+
+  /* Soft pulse animation for icons */
+  @keyframes pulseSoft {
+    0%, 100% { 
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% { 
+      opacity: 0.8;
+      transform: scale(1.02);
+    }
+  }
+
+  .animate-pulse-soft {
+    animation: pulseSoft 2s ease-in-out infinite;
+  }
+
+  /* Subtle bounce for guide steps */
+  @keyframes bounceSlow {
+    0%, 100% { 
+      transform: translateY(0);
+    }
+    50% { 
+      transform: translateY(-2px);
+    }
+  }
+
+  .animate-bounce-slow {
+    animation: bounceSlow 1.5s ease-in-out infinite;
+  }
+
+  /* Fade in scale for cards */
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-fade-in-scale {
+    animation: fadeInScale 0.4s ease-out forwards;
+  }
 }

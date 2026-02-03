@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { TrendingUp, ChevronRight, Heart, Eye, ExternalLink } from 'lucide-react';
+import { TrendingUp, ChevronRight, Heart, Eye, ExternalLink, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useShowcase, ShowcaseItem } from '@/hooks/useShowcase';
 
 interface InspirationItem {
   id: string;
@@ -14,7 +15,8 @@ interface InspirationItem {
   views: number;
 }
 
-const inspirationData: InspirationItem[] = [
+// Fallback mock data when database is empty
+const fallbackData: InspirationItem[] = [
   {
     id: '1',
     imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=500&fit=crop',
@@ -77,6 +79,15 @@ const inspirationData: InspirationItem[] = [
   },
 ];
 
+// Category mapping for display
+const categoryMap: Record<string, { en: string; zh: string }> = {
+  'beauty': { en: 'Beauty', zh: '美妆' },
+  'fashion': { en: 'Fashion', zh: '时尚' },
+  'tech': { en: 'Tech', zh: '科技' },
+  'food': { en: 'Food', zh: '食品' },
+  'lifestyle': { en: 'Lifestyle', zh: '生活' },
+};
+
 interface InspirationGalleryProps {
   onSelectInspiration?: (item: InspirationItem) => void;
   compact?: boolean;
@@ -89,9 +100,22 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
   maxItems = 6,
 }) => {
   const { language } = useLanguage();
+  const { items: showcaseItems, loading } = useShowcase(maxItems);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  const displayItems = inspirationData.slice(0, maxItems);
+  // Transform showcase items to inspiration items, or use fallback if empty
+  const displayItems: InspirationItem[] = showcaseItems.length > 0 
+    ? showcaseItems.map(item => ({
+        id: item.id,
+        imageUrl: item.imageUrl,
+        title: item.title,
+        titleZh: item.titleZh,
+        category: categoryMap[item.category?.toLowerCase() || 'lifestyle']?.en || item.category || 'Lifestyle',
+        categoryZh: categoryMap[item.category?.toLowerCase() || 'lifestyle']?.zh || '生活',
+        likes: item.likes,
+        views: item.views,
+      }))
+    : fallbackData.slice(0, maxItems);
 
   const formatNumber = (num: number) => {
     if (num >= 1000) {
@@ -143,7 +167,7 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-foreground">
           {language === 'zh' ? '灵感案例' : 'Inspiration Gallery'}
@@ -154,7 +178,7 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
         </button>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[280px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
         {displayItems.map((item) => (
           <button
             key={item.id}
@@ -162,10 +186,11 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
             onMouseEnter={() => setHoveredId(item.id)}
             onMouseLeave={() => setHoveredId(null)}
             className={cn(
-              "relative group rounded-xl overflow-hidden aspect-[3/4]",
+              "relative group rounded-xl overflow-hidden aspect-[4/5]",
               "ring-2 ring-transparent hover:ring-primary/50 transition-all duration-300",
-              "hover:shadow-xl hover:shadow-primary/10"
+              "hover:shadow-lg hover:shadow-primary/10 animate-fade-in-scale"
             )}
+            style={{ animationDelay: `${parseInt(item.id) * 50}ms` }}
           >
             <img
               src={item.imageUrl}
