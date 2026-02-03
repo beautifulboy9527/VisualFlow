@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
+import { SEOHead } from '@/components/SEOHead';
 import { User, Bell, CreditCard, Shield, Palette, ChevronRight, ArrowLeft, Globe, LogOut } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -67,8 +68,17 @@ const Settings: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-mesh">
-      <Header credits={100} />
+    <>
+      <SEOHead
+        title={language === 'zh' ? '设置 - VisualFlow' : 'Settings - VisualFlow'}
+        description={language === 'zh' 
+          ? '管理您的VisualFlow账户设置、偏好和订阅。' 
+          : 'Manage your VisualFlow account settings, preferences, and subscription.'}
+        lang={language}
+        noIndex={true}
+      />
+      <div className="min-h-screen bg-mesh">
+        <Header credits={100} />
       
       <div className="max-w-2xl mx-auto px-6 py-8">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-6 gap-2">
@@ -163,6 +173,7 @@ const Settings: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

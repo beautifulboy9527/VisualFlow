@@ -1,8 +1,14 @@
+# VisualFlow Robots.txt
+
 User-agent: Googlebot
 Allow: /
+Disallow: /settings
+Disallow: /auth
 
 User-agent: Bingbot
 Allow: /
+Disallow: /settings
+Disallow: /auth
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +18,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /settings
+Disallow: /auth
+
+# Sitemap
+Sitemap: https://visualflow.app/sitemap.xml
