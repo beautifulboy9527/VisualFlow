@@ -101,7 +101,7 @@ export const VisualPresetCards: React.FC<VisualPresetCardsProps> = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
@@ -115,8 +115,9 @@ export const VisualPresetCards: React.FC<VisualPresetCardsProps> = ({
         )}
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {displayStyles.map((style) => {
+      {/* Horizontal scroll container - show complete images */}
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
+        {displayStyles.map((style, index) => {
           const isSelected = selectedStyle === style.id;
           const isRecommended = aiRecommended === style.id;
           const isHovered = hoveredStyle === style.id;
@@ -128,12 +129,14 @@ export const VisualPresetCards: React.FC<VisualPresetCardsProps> = ({
               onMouseEnter={() => setHoveredStyle(style.id)}
               onMouseLeave={() => setHoveredStyle(null)}
               className={cn(
-                "relative rounded-xl overflow-hidden aspect-[4/3] transition-all duration-300 group",
+                "relative rounded-xl overflow-hidden shrink-0 transition-all duration-300 group",
+                "w-[160px] sm:w-[180px] lg:w-[200px] aspect-[4/3]",
                 "ring-2",
                 isSelected 
                   ? "ring-primary shadow-xl shadow-primary/20 scale-[1.02]" 
                   : "ring-transparent hover:ring-primary/50 hover:shadow-lg"
               )}
+              style={{ animationDelay: `${index * 30}ms` }}
             >
               {/* Preview image */}
               <img
@@ -157,15 +160,15 @@ export const VisualPresetCards: React.FC<VisualPresetCardsProps> = ({
               )}
               
               {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 p-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg">{style.icon}</span>
-                  <span className="text-sm font-medium text-white">
+              <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-base">{style.icon}</span>
+                  <span className="text-xs font-medium text-white line-clamp-1">
                     {language === 'zh' ? style.nameZh : style.name}
                   </span>
                 </div>
                 <p className={cn(
-                  "text-[10px] text-white/70 transition-all",
+                  "text-[9px] text-white/70 transition-all line-clamp-1",
                   isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
                 )}>
                   {language === 'zh' ? style.descriptionZh : style.description}
@@ -174,19 +177,19 @@ export const VisualPresetCards: React.FC<VisualPresetCardsProps> = ({
               
               {/* Selected indicator */}
               {isSelected && (
-                <div className="absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center shadow-lg">
-                  <Check className="h-3.5 w-3.5 text-primary-foreground" />
+                <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center shadow-lg">
+                  <Check className="h-3 w-3 text-primary-foreground" />
                 </div>
               )}
               
               {/* AI recommended badge */}
               {isRecommended && (
                 <div className={cn(
-                  "absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-medium",
+                  "absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-medium",
                   "bg-amber-500/90 text-white shadow-lg"
                 )}>
-                  <Wand2 className="h-2.5 w-2.5" />
-                  {language === 'zh' ? 'AI推荐' : 'Recommended'}
+                  <Wand2 className="h-2 w-2" />
+                  {language === 'zh' ? 'AI推荐' : 'AI'}
                 </div>
               )}
             </button>

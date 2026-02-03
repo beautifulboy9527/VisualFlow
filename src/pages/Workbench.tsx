@@ -814,84 +814,92 @@ const WorkbenchContent: React.FC = () => {
                 "p-6 lg:p-8",
                 isAgentMode && uploadedImages.length > 0 && selectedPlatform && generatedImages.length === 0 && !isGenerating ? "hidden" : ""
               )}>
-                {/* Empty State - Optimized for single screen view */}
+                {/* Empty State - Optimized for single screen view with sticky Quick Tools */}
                 {uploadedImages.length === 0 && generatedImages.length === 0 && !isGenerating && (
-                  <div className="h-full overflow-y-auto animate-fade-in">
-                    <div className="max-w-5xl mx-auto space-y-5 pb-6">
-                      {/* Compact Hero Section with animated guidance */}
-                      <div className="flex items-center justify-between px-2 pt-2">
-                        <div className="flex items-center gap-4">
-                          <div className="relative">
-                            <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 animate-pulse-soft">
-                              <Package className="h-8 w-8 text-primary" />
+                  <div className="h-full flex flex-col animate-fade-in">
+                    {/* Sticky Header with Quick Tools */}
+                    <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-3 pt-2">
+                      <div className="max-w-5xl mx-auto space-y-4">
+                        {/* Compact Hero Section with animated guidance */}
+                        <div className="flex items-center justify-between px-2">
+                          <div className="flex items-center gap-3">
+                            <div className="relative">
+                              <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 animate-pulse-soft">
+                                <Package className="h-6 w-6 text-primary" />
+                              </div>
+                            </div>
+                            <div>
+                              <h2 className="text-base font-display font-bold text-foreground">
+                                {language === 'zh' ? '开始创建电商视觉' : 'Create E-commerce Visuals'}
+                              </h2>
+                              <p className="text-[11px] text-foreground-muted">
+                                {language === 'zh' ? 'AI 智能生成专业产品图' : 'AI-powered professional product images'}
+                              </p>
                             </div>
                           </div>
-                          <div>
-                            <h2 className="text-lg font-display font-bold text-foreground">
-                              {language === 'zh' ? '开始创建电商视觉' : 'Create E-commerce Visuals'}
-                            </h2>
-                            <p className="text-xs text-foreground-muted">
-                              {language === 'zh' ? 'AI 智能生成专业产品图' : 'AI-powered professional product images'}
-                            </p>
+                          {/* Animated workflow steps */}
+                          <div className="hidden md:flex items-center gap-2 text-[11px] text-foreground-secondary bg-secondary/30 px-2.5 py-1 rounded-full">
+                            <div className="flex items-center gap-1 animate-bounce-slow" style={{ animationDelay: '0ms' }}>
+                              <Upload className="h-3 w-3 text-primary" />
+                              <span>{language === 'zh' ? '上传' : 'Upload'}</span>
+                            </div>
+                            <ChevronRight className="h-2.5 w-2.5 text-foreground-muted" />
+                            <div className="flex items-center gap-1 animate-bounce-slow" style={{ animationDelay: '200ms' }}>
+                              <Sparkles className="h-3 w-3 text-primary" />
+                              <span>{language === 'zh' ? '分析' : 'Analyze'}</span>
+                            </div>
+                            <ChevronRight className="h-2.5 w-2.5 text-foreground-muted" />
+                            <div className="flex items-center gap-1 animate-bounce-slow" style={{ animationDelay: '400ms' }}>
+                              <ImageIcon className="h-3 w-3 text-primary" />
+                              <span>{language === 'zh' ? '生成' : 'Generate'}</span>
+                            </div>
                           </div>
                         </div>
-                        {/* Animated workflow steps */}
-                        <div className="hidden md:flex items-center gap-2 text-xs text-foreground-secondary bg-secondary/30 px-3 py-1.5 rounded-full">
-                          <div className="flex items-center gap-1 animate-bounce-slow" style={{ animationDelay: '0ms' }}>
-                            <Upload className="h-3 w-3 text-primary" />
-                            <span>{language === 'zh' ? '上传' : 'Upload'}</span>
-                          </div>
-                          <ChevronRight className="h-3 w-3 text-foreground-muted" />
-                          <div className="flex items-center gap-1 animate-bounce-slow" style={{ animationDelay: '200ms' }}>
-                            <Sparkles className="h-3 w-3 text-primary" />
-                            <span>{language === 'zh' ? '分析' : 'Analyze'}</span>
-                          </div>
-                          <ChevronRight className="h-3 w-3 text-foreground-muted" />
-                          <div className="flex items-center gap-1 animate-bounce-slow" style={{ animationDelay: '400ms' }}>
-                            <ImageIcon className="h-3 w-3 text-primary" />
-                            <span>{language === 'zh' ? '生成' : 'Generate'}</span>
-                          </div>
-                        </div>
+
+                        {/* Quick Tool Cards - Sticky */}
+                        <QuickToolCards 
+                          onToolSelect={(toolId) => {
+                            toast({
+                              title: language === 'zh' ? '功能即将上线' : 'Coming Soon',
+                              description: language === 'zh' 
+                                ? `${toolId} 功能正在开发中，敬请期待` 
+                                : `${toolId} feature is under development`,
+                            });
+                          }}
+                        />
                       </div>
+                    </div>
 
-                      {/* Quick Tool Cards - Compact layout */}
-                      <QuickToolCards 
-                        onToolSelect={(toolId) => {
-                          toast({
-                            title: language === 'zh' ? '功能即将上线' : 'Coming Soon',
-                            description: language === 'zh' 
-                              ? `${toolId} 功能正在开发中，敬请期待` 
-                              : `${toolId} feature is under development`,
-                          });
-                        }}
-                      />
+                    {/* Scrollable Galleries Area */}
+                    <div className="flex-1 overflow-y-auto">
+                      <div className="max-w-5xl mx-auto space-y-5 pb-6">
+                        {/* Inspiration Gallery - Horizontal scroll with complete images */}
+                        <InspirationGallery 
+                          onSelectInspiration={(item) => {
+                            toast({
+                              title: language === 'zh' ? '灵感已选择' : 'Inspiration Selected',
+                              description: language === 'zh' 
+                                ? `将使用「${item.titleZh}」风格作为参考` 
+                                : `Will use "${item.title}" style as reference`,
+                            });
+                          }}
+                          maxItems={8}
+                        />
 
-                      {/* Inspiration Gallery - Show more items in view */}
-                      <InspirationGallery 
-                        onSelectInspiration={(item) => {
-                          toast({
-                            title: language === 'zh' ? '灵感已选择' : 'Inspiration Selected',
-                            description: language === 'zh' 
-                              ? `将使用「${item.titleZh}」风格作为参考` 
-                              : `Will use "${item.title}" style as reference`,
-                          });
-                        }}
-                        maxItems={6}
-                      />
-
-                      {/* Visual Preset Cards - Enhanced */}
-                      <VisualPresetCards
-                        selectedStyle={visualStyle}
-                        onSelectStyle={(style) => {
-                          setVisualStyle(style);
-                          toast({
-                            title: language === 'zh' ? '风格已选择' : 'Style Selected',
-                            description: visualStyles.find(s => s.id === style)?.[language === 'zh' ? 'nameZh' : 'name'] || style,
-                          });
-                        }}
-                        aiRecommended={aiRecommendedStyle}
-                        showAIAuto={isAgentMode}
-                      />
+                        {/* Visual Preset Cards - Horizontal scroll with complete images */}
+                        <VisualPresetCards
+                          selectedStyle={visualStyle}
+                          onSelectStyle={(style) => {
+                            setVisualStyle(style);
+                            toast({
+                              title: language === 'zh' ? '风格已选择' : 'Style Selected',
+                              description: visualStyles.find(s => s.id === style)?.[language === 'zh' ? 'nameZh' : 'name'] || style,
+                            });
+                          }}
+                          aiRecommended={aiRecommendedStyle}
+                          showAIAuto={isAgentMode}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
