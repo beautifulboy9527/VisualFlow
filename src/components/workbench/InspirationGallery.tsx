@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { TrendingUp, ChevronRight, Heart, Eye, ExternalLink, Loader2 } from 'lucide-react';
+import { TrendingUp, ChevronRight, Heart, Eye, ExternalLink, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useShowcase, ShowcaseItem } from '@/hooks/useShowcase';
+import { InspirationDetailModal, InspirationDetail } from './InspirationDetailModal';
 
 interface InspirationItem {
   id: string;
@@ -13,6 +14,14 @@ interface InspirationItem {
   categoryZh: string;
   likes: number;
   views: number;
+  // Additional config details
+  visualStyle?: string;
+  visualStyleZh?: string;
+  layoutStyle?: string;
+  layoutStyleZh?: string;
+  platform?: string;
+  scenes?: string[];
+  scenesZh?: string[];
 }
 
 // Fallback mock data when database is empty
@@ -26,6 +35,13 @@ const fallbackData: InspirationItem[] = [
     categoryZh: '美妆',
     likes: 1240,
     views: 8500,
+    visualStyle: 'Magazine Editorial',
+    visualStyleZh: '杂志编辑风格',
+    layoutStyle: 'Glassmorphism',
+    layoutStyleZh: '玻璃拟态',
+    platform: 'Amazon',
+    scenes: ['Main KV', 'Lifestyle', 'Detail', 'White BG'],
+    scenesZh: ['主视觉', '场景图', '细节图', '白底图'],
   },
   {
     id: '2',
@@ -36,6 +52,13 @@ const fallbackData: InspirationItem[] = [
     categoryZh: '时尚',
     likes: 980,
     views: 6200,
+    visualStyle: 'Minimalist Nordic',
+    visualStyleZh: '极简北欧风格',
+    layoutStyle: 'Ultra Minimal',
+    layoutStyleZh: '极简布局',
+    platform: 'Shopify',
+    scenes: ['Hero', 'Product', 'Detail'],
+    scenesZh: ['主图', '产品图', '细节图'],
   },
   {
     id: '3',
@@ -46,6 +69,13 @@ const fallbackData: InspirationItem[] = [
     categoryZh: '科技',
     likes: 1560,
     views: 12000,
+    visualStyle: 'Tech Futuristic',
+    visualStyleZh: '科技未来风格',
+    layoutStyle: 'Neon Glow',
+    layoutStyleZh: '霓虹发光',
+    platform: 'TikTok Shop',
+    scenes: ['Main', 'Features', 'Lifestyle', 'Specs'],
+    scenesZh: ['主图', '功能图', '场景图', '参数图'],
   },
   {
     id: '4',
@@ -56,6 +86,13 @@ const fallbackData: InspirationItem[] = [
     categoryZh: '美妆',
     likes: 850,
     views: 5400,
+    visualStyle: 'Natural Organic',
+    visualStyleZh: '自然有机风格',
+    layoutStyle: 'Glassmorphism',
+    layoutStyleZh: '玻璃拟态',
+    platform: 'Xiaohongshu',
+    scenes: ['Cover', 'Ingredients', 'Usage'],
+    scenesZh: ['封面', '成分图', '使用图'],
   },
   {
     id: '5',
@@ -66,6 +103,13 @@ const fallbackData: InspirationItem[] = [
     categoryZh: '食品',
     likes: 720,
     views: 4800,
+    visualStyle: 'Vintage Film',
+    visualStyleZh: '复古胶片风格',
+    layoutStyle: 'Handwritten',
+    layoutStyleZh: '手写风格',
+    platform: 'Shopify',
+    scenes: ['Hero', 'Product', 'Lifestyle'],
+    scenesZh: ['主图', '产品图', '场景图'],
   },
   {
     id: '6',
@@ -76,6 +120,13 @@ const fallbackData: InspirationItem[] = [
     categoryZh: '时尚',
     likes: 1100,
     views: 7300,
+    visualStyle: 'Magazine Editorial',
+    visualStyleZh: '杂志编辑风格',
+    layoutStyle: 'Magazine Grid',
+    layoutStyleZh: '杂志网格',
+    platform: 'Amazon',
+    scenes: ['Main', 'Detail', 'Lifestyle', 'Set'],
+    scenesZh: ['主图', '细节图', '场景图', '套装图'],
   },
 ];
 
@@ -89,19 +140,19 @@ const categoryMap: Record<string, { en: string; zh: string }> = {
 };
 
 interface InspirationGalleryProps {
-  onSelectInspiration?: (item: InspirationItem) => void;
   compact?: boolean;
   maxItems?: number;
 }
 
 export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
-  onSelectInspiration,
   compact = false,
   maxItems = 6,
 }) => {
   const { language } = useLanguage();
   const { items: showcaseItems, loading } = useShowcase(maxItems);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<InspirationItem | null>(null);
+  const [showGalleryModal, setShowGalleryModal] = useState(false);
 
   // Transform showcase items to inspiration items, or use fallback if empty
   const displayItems: InspirationItem[] = showcaseItems.length > 0 
@@ -117,11 +168,17 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
       }))
     : fallbackData.slice(0, maxItems);
 
+  const allItems = fallbackData; // For the full gallery modal
+
   const formatNumber = (num: number) => {
     if (num >= 1000) {
       return (num / 1000).toFixed(1) + 'k';
     }
     return num.toString();
+  };
+
+  const handleItemClick = (item: InspirationItem) => {
+    setSelectedItem(item);
   };
 
   if (compact) {
@@ -144,7 +201,7 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
           {displayItems.slice(0, 4).map((item) => (
             <button
               key={item.id}
-              onClick={() => onSelectInspiration?.(item)}
+              onClick={() => handleItemClick(item)}
               className={cn(
                 "relative shrink-0 w-16 h-20 rounded-lg overflow-hidden",
                 "ring-2 ring-transparent hover:ring-primary/50 transition-all"
@@ -167,87 +224,156 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">
-          {language === 'zh' ? '灵感案例' : 'Inspiration Gallery'}
-        </h3>
-        <button className="text-xs text-primary hover:text-primary-hover flex items-center gap-1 transition-colors">
-          {language === 'zh' ? '查看更多' : 'View More'}
-          <ChevronRight className="h-3.5 w-3.5" />
-        </button>
-      </div>
-      
-      {/* Horizontal scroll container - show complete images */}
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
-        {displayItems.map((item, index) => (
-          <button
-            key={item.id}
-            onClick={() => onSelectInspiration?.(item)}
-            onMouseEnter={() => setHoveredId(item.id)}
-            onMouseLeave={() => setHoveredId(null)}
-            className={cn(
-              "relative group rounded-xl overflow-hidden shrink-0",
-              "w-[180px] sm:w-[200px] lg:w-[220px] aspect-[3/4]",
-              "ring-2 ring-transparent hover:ring-primary/50 transition-all duration-300",
-              "hover:shadow-lg hover:shadow-primary/10 animate-fade-in-scale"
-            )}
-            style={{ animationDelay: `${index * 50}ms` }}
+    <>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-foreground">
+            {language === 'zh' ? '灵感案例' : 'Inspiration Gallery'}
+          </h3>
+          <button 
+            onClick={() => setShowGalleryModal(true)}
+            className="text-xs text-primary hover:text-primary-hover flex items-center gap-1 transition-colors"
           >
-            <img
-              src={item.imageUrl}
-              alt={language === 'zh' ? item.titleZh : item.title}
+            {language === 'zh' ? '查看更多' : 'View More'}
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        
+        {/* Horizontal scroll container - show complete images */}
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
+          {displayItems.map((item, index) => (
+            <button
+              key={item.id}
+              onClick={() => handleItemClick(item)}
+              onMouseEnter={() => setHoveredId(item.id)}
+              onMouseLeave={() => setHoveredId(null)}
               className={cn(
-                "w-full h-full object-cover transition-transform duration-500",
-                hoveredId === item.id && "scale-105"
+                "relative group rounded-xl overflow-hidden shrink-0",
+                "w-[180px] sm:w-[200px] lg:w-[220px] aspect-[3/4]",
+                "ring-2 ring-transparent hover:ring-primary/50 transition-all duration-300",
+                "hover:shadow-lg hover:shadow-primary/10 animate-fade-in-scale"
               )}
-            />
-            
-            {/* Gradient overlay */}
-            <div className={cn(
-              "absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent transition-opacity",
-              hoveredId === item.id ? "opacity-100" : "opacity-60"
-            )} />
-            
-            {/* Category badge */}
-            <div className="absolute top-2.5 left-2.5">
-              <span className="text-[10px] bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded-full font-medium">
-                {language === 'zh' ? item.categoryZh : item.category}
-              </span>
-            </div>
-            
-            {/* Stats */}
-            <div className={cn(
-              "absolute top-2.5 right-2.5 flex items-center gap-2 transition-opacity",
-              hoveredId === item.id ? "opacity-100" : "opacity-0"
-            )}>
-              <span className="flex items-center gap-1 text-[10px] text-white/90 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded">
-                <Heart className="h-3 w-3" />
-                {formatNumber(item.likes)}
-              </span>
-              <span className="flex items-center gap-1 text-[10px] text-white/90 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded">
-                <Eye className="h-3 w-3" />
-                {formatNumber(item.views)}
-              </span>
-            </div>
-            
-            {/* Title and action */}
-            <div className="absolute bottom-0 left-0 right-0 p-3">
-              <p className="text-sm font-semibold text-white mb-1 drop-shadow-md line-clamp-1">
-                {language === 'zh' ? item.titleZh : item.title}
-              </p>
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <img
+                src={item.imageUrl}
+                alt={language === 'zh' ? item.titleZh : item.title}
+                className={cn(
+                  "w-full h-full object-cover transition-transform duration-500",
+                  hoveredId === item.id && "scale-105"
+                )}
+              />
+              
+              {/* Gradient overlay */}
               <div className={cn(
-                "flex items-center gap-1.5 text-[11px] text-white/90 transition-all",
-                hoveredId === item.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-              )}>
-                <ExternalLink className="h-3.5 w-3.5" />
-                {language === 'zh' ? '使用此风格' : 'Use this style'}
+                "absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent transition-opacity",
+                hoveredId === item.id ? "opacity-100" : "opacity-60"
+              )} />
+              
+              {/* Category badge */}
+              <div className="absolute top-2.5 left-2.5">
+                <span className="text-[10px] bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded-full font-medium">
+                  {language === 'zh' ? item.categoryZh : item.category}
+                </span>
+              </div>
+              
+              {/* Stats - Always visible */}
+              <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+                <span className="flex items-center gap-0.5 text-[9px] text-white/80 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded">
+                  <Heart className="h-2.5 w-2.5" />
+                  {formatNumber(item.likes)}
+                </span>
+              </div>
+              
+              {/* Title and action */}
+              <div className="absolute bottom-0 left-0 right-0 p-3">
+                <p className="text-sm font-semibold text-white mb-1 drop-shadow-md line-clamp-1">
+                  {language === 'zh' ? item.titleZh : item.title}
+                </p>
+                <div className={cn(
+                  "flex items-center gap-1.5 text-[11px] text-white/90 transition-all",
+                  hoveredId === item.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+                )}>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  {language === 'zh' ? '查看详情' : 'View Details'}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Detail Modal */}
+      <InspirationDetailModal
+        item={selectedItem as InspirationDetail}
+        isOpen={!!selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
+
+      {/* Full Gallery Modal */}
+      {showGalleryModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+          onClick={() => setShowGalleryModal(false)}
+        >
+          <div 
+            className="bg-card rounded-2xl shadow-2xl max-w-5xl w-full max-h-[85vh] overflow-hidden animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-border/30">
+              <h2 className="text-lg font-bold text-foreground">
+                {language === 'zh' ? '灵感案例库' : 'Inspiration Gallery'}
+              </h2>
+              <button
+                onClick={() => setShowGalleryModal(false)}
+                className="p-2 rounded-lg hover:bg-secondary/50 transition-colors"
+              >
+                <X className="h-5 w-5 text-foreground-muted" />
+              </button>
+            </div>
+            
+            <div className="p-4 overflow-y-auto max-h-[calc(85vh-60px)]">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {allItems.map((item, index) => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setSelectedItem(item);
+                      setShowGalleryModal(false);
+                    }}
+                    className={cn(
+                      "relative group rounded-xl overflow-hidden aspect-[3/4]",
+                      "ring-2 ring-transparent hover:ring-primary/50 transition-all duration-300",
+                      "hover:shadow-lg hover:shadow-primary/10"
+                    )}
+                  >
+                    <img
+                      src={item.imageUrl}
+                      alt={language === 'zh' ? item.titleZh : item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                    <div className="absolute top-2 left-2">
+                      <span className="text-[9px] bg-white/20 backdrop-blur-sm text-white px-1.5 py-0.5 rounded-full">
+                        {language === 'zh' ? item.categoryZh : item.category}
+                      </span>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                      <p className="text-xs font-semibold text-white drop-shadow-md line-clamp-1">
+                        {language === 'zh' ? item.titleZh : item.title}
+                      </p>
+                      <p className="text-[10px] text-white/70 mt-0.5">
+                        {language === 'zh' ? item.visualStyleZh : item.visualStyle}
+                      </p>
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
-          </button>
-        ))}
-      </div>
-    </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
