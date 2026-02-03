@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      generations: {
+        Row: {
+          ai_analysis: Json | null
+          completed_at: string | null
+          created_at: string
+          credits_used: number
+          id: string
+          input_images: Json
+          layout_style: string | null
+          modules: Json | null
+          output_images: Json
+          platform: string | null
+          scenes: Json | null
+          status: string
+          user_id: string
+          visual_style: string | null
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          credits_used?: number
+          id?: string
+          input_images?: Json
+          layout_style?: string | null
+          modules?: Json | null
+          output_images?: Json
+          platform?: string | null
+          scenes?: Json | null
+          status?: string
+          user_id: string
+          visual_style?: string | null
+        }
+        Update: {
+          ai_analysis?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          credits_used?: number
+          id?: string
+          input_images?: Json
+          layout_style?: string | null
+          modules?: Json | null
+          output_images?: Json
+          platform?: string | null
+          scenes?: Json | null
+          status?: string
+          user_id?: string
+          visual_style?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -41,6 +92,134 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      showcase: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          description_zh: string | null
+          generation_id: string | null
+          id: string
+          image_url: string
+          is_approved: boolean
+          is_featured: boolean
+          likes_count: number
+          tags: Json | null
+          title: string | null
+          title_zh: string | null
+          user_id: string
+          views_count: number
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          description_zh?: string | null
+          generation_id?: string | null
+          id?: string
+          image_url: string
+          is_approved?: boolean
+          is_featured?: boolean
+          likes_count?: number
+          tags?: Json | null
+          title?: string | null
+          title_zh?: string | null
+          user_id: string
+          views_count?: number
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          description_zh?: string | null
+          generation_id?: string | null
+          id?: string
+          image_url?: string
+          is_approved?: boolean
+          is_featured?: boolean
+          likes_count?: number
+          tags?: Json | null
+          title?: string | null
+          title_zh?: string | null
+          user_id?: string
+          views_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "showcase_generation_id_fkey"
+            columns: ["generation_id"]
+            isOneToOne: false
+            referencedRelation: "generations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      templates: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          description_zh: string | null
+          id: string
+          is_featured: boolean
+          is_public: boolean
+          layout_style: string | null
+          modules: Json | null
+          name: string
+          name_zh: string | null
+          platform: string | null
+          scenes: Json | null
+          tags: Json | null
+          thumbnail_url: string | null
+          updated_at: string
+          use_count: number
+          user_id: string | null
+          visual_style: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          description_zh?: string | null
+          id?: string
+          is_featured?: boolean
+          is_public?: boolean
+          layout_style?: string | null
+          modules?: Json | null
+          name: string
+          name_zh?: string | null
+          platform?: string | null
+          scenes?: Json | null
+          tags?: Json | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          use_count?: number
+          user_id?: string | null
+          visual_style?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          description_zh?: string | null
+          id?: string
+          is_featured?: boolean
+          is_public?: boolean
+          layout_style?: string | null
+          modules?: Json | null
+          name?: string
+          name_zh?: string | null
+          platform?: string | null
+          scenes?: Json | null
+          tags?: Json | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          use_count?: number
+          user_id?: string | null
+          visual_style?: string | null
         }
         Relationships: []
       }

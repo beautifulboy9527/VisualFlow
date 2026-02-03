@@ -1,152 +1,145 @@
+# VisualFlow 竞品分析与开发路线图
 
-# Inpainting工具优化与功能同步计划
+## 竞品分析总结 (2026-02-03)
 
-## 问题分析
+### 1. Flyelep飞象 (flyelep.cn)
 
-根据截图和反馈，需要解决以下问题：
+**核心优势：**
+- 首页快捷工具卡片直接可见（局部重绘、商品替换、场景替换、AI超清、无损放大）
+- 平台标签一键切换（跨境设计、中文电商）
+- Agent案例展示区，用户可参考真实案例
+- 暗色主题，专业感强
 
-1. **工具栏布局问题**
-   - 当前工具栏按钮分布不合理，不符合常用的图像编辑软件习惯
-   - 笔刷大小使用Slider组件但显示为开关样式（截图中显示Size后面是toggle开关样式）
-   - 缩放控制位置需要调整
+**可借鉴：**
+- 工具入口视觉化，降低使用门槛
+- 案例/灵感展示区增强信任感
 
-2. **提示词控制未实现**
-   - 虽然QuickToolModal中有prompt输入，但实际发送到API时prompt处理不够完善
-   - 用户涂抹完成后应该有明确的提示词输入区域
+### 2. LinkFox千象 (linkfox.com)
 
-3. **其他页面功能同步**
-   - Quick Tools功能应该在其他地方也能访问
-   - 整体UI组件风格需要统一
+**核心优势：**
+- 左侧固定导航（创建设计、我的设计、我的模板、团队空间）
+- 示例图片可直接点击试用，零门槛体验
+- 模板分类过滤器（类型、品类、版式）
+- 客服支持入口明显
+- 批量生图功能
 
----
+**可借鉴：**
+- 侧边栏导航结构
+- 模板分类筛选
+- 快速试用入口
 
-## 实现方案
+### 3. Pixifield (pixifield.com)
 
-### 第一部分：InpaintingCanvas工具栏优化
+**核心优势：**
+- 首页风格预设卡片，选择即开始（一键使用）
+- All Tools工具网格清晰
+- Trending Creations社区灵感墙
+- 极简UI设计
+- 良好的SEO结构
 
-重新设计工具栏布局，遵循专业图像编辑软件的操作习惯：
-
-**新布局结构（从左到右）：**
-
-```text
-+-------------------------------------------------------------------------+
-| [画笔][橡皮][平移]  |  Size [==滑块==] 80  |  [-] 100% [+]  |  重置 | 清除 |
-+-------------------------------------------------------------------------+
-```
-
-**具体改动：**
-- 工具选择按钮组放在最左侧（画笔、橡皮擦、平移）
-- 笔刷大小控制紧随其后，使用更明显的滑块样式
-- 缩放控制居中显示百分比
-- 重置视图和清除涂抹放在右侧
-- 按钮尺寸统一为h-9 w-9，图标为h-4.5 w-4.5
-- 添加工具提示(tooltip)增强可用性
-
-### 第二部分：提示词控制功能完善
-
-当前流程中prompt输入已存在于QuickToolModal，但需要：
-
-1. **增强可见性**：在InpaintingCanvas下方明确显示提示词输入区
-2. **API调用优化**：确保maskData和prompt正确组合发送
-3. **提示词模板**：添加快捷提示词建议（如"替换为蓝色"、"模糊处理"等）
-
-**QuickToolModal改进：**
-- Prompt输入区域放置在canvas组件下方
-- 添加快捷提示词标签供用户快速选择
-- 处理按钮与提示词区域视觉关联更清晰
-
-### 第三部分：其他页面功能同步
-
-**1. 主工作台集成：**
-- 在Workbench页面的生成结果卡片上添加快捷编辑按钮
-- 当有生成结果时，点击可直接进入对应Quick Tool进行二次编辑
-
-**2. 统一访问入口：**
-- Quick Tools在工作台初始状态显示（已实现）
-- 在结果展示区域添加"快速编辑"入口
+**可借鉴：**
+- 预设卡片快速入口
+- 社区灵感墙
+- SEO最佳实践
 
 ---
 
-## 技术实现细节
+## 当前项目状态
 
-### 文件修改清单
+| 功能模块 | 状态 | 备注 |
+|---------|------|------|
+| 用户认证 | ✅ 已完成 | Supabase Auth |
+| 用户配置持久化 | ✅ 已完成 | user_preferences表 |
+| 生成历史持久化 | ✅ 已完成 | generations表 + useGenerations hook |
+| 模板系统持久化 | ✅ 已完成 | templates表 |
+| 社区灵感墙 | ✅ 已完成 | showcase表 |
+| SEO基础 | ✅ 已完成 | SEOHead组件 + react-helmet-async |
+| Quick Tools | ✅ 已完成 | Inpainting, Upscale, Remove BG等 |
+| AI产品分析 | ✅ 已完成 | Lovable AI集成 |
 
-| 文件 | 修改内容 |
-|------|----------|
-| `src/components/workbench/InpaintingCanvas.tsx` | 重构工具栏布局，优化按钮组织，统一尺寸 |
-| `src/components/workbench/QuickToolModal.tsx` | 增强提示词输入区域，添加快捷提示词标签 |
-| `src/components/workbench/EnhancedResultCard.tsx` | 添加快速编辑按钮入口 |
+---
 
-### InpaintingCanvas工具栏新结构
+## 开发路线图（优先级排序）
 
-```tsx
-{/* 优化后的工具栏 */}
-<div className="flex items-center gap-4 p-3 bg-muted/30 rounded-xl border border-border/30">
-  {/* 左侧：工具选择组 */}
-  <div className="flex items-center gap-1 p-1 bg-background rounded-lg border border-border/50">
-    <ToolButton tool="brush" icon={Brush} />
-    <ToolButton tool="eraser" icon={Eraser} />
-    <ToolButton tool="pan" icon={Move} />
-  </div>
+### Phase 1: 数据持久化集成 ⏳ 进行中
 
-  {/* 分隔线 */}
-  <div className="h-6 w-px bg-border/50" />
+**目标：** 将现有UI与数据库连接，实现真正的数据持久化
 
-  {/* 笔刷大小 */}
-  <div className="flex items-center gap-3">
-    <span className="text-sm text-foreground-muted">Size</span>
-    <Slider value={[brushSize]} min={5} max={100} className="w-24" />
-    <span className="text-sm font-medium w-8">{brushSize}</span>
-  </div>
+| 任务 | 优先级 | 复杂度 | 状态 |
+|------|--------|--------|------|
+| 生成结果自动保存到generations表 | 🔴 高 | 中 | 待开始 |
+| 历史面板读取真实数据 | 🔴 高 | 低 | 待开始 |
+| 模板保存/加载功能 | 🟡 中 | 中 | 待开始 |
+| 用户偏好自动同步 | 🟡 中 | 低 | 待开始 |
 
-  {/* 分隔线 */}
-  <div className="h-6 w-px bg-border/50" />
+### Phase 2: 用户体验优化 ⏸ 待开始
 
-  {/* 缩放控制 */}
-  <div className="flex items-center gap-1">
-    <Button variant="ghost" size="icon-sm" onClick={handleZoomOut}>
-      <Minus className="h-4 w-4" />
-    </Button>
-    <span className="text-sm w-14 text-center">{Math.round(zoom * 100)}%</span>
-    <Button variant="ghost" size="icon-sm" onClick={handleZoomIn}>
-      <Plus className="h-4 w-4" />
-    </Button>
-  </div>
+**目标：** 简化操作流程，降低使用门槛
 
-  {/* 右侧：操作按钮 */}
-  <div className="flex items-center gap-2 ml-auto">
-    <Button variant="outline" size="sm" onClick={resetView}>
-      <RotateCcw className="h-4 w-4 mr-1.5" />
-      Reset View
-    </Button>
-    <Button variant="outline" size="sm" onClick={clearMask} disabled={!hasMask}>
-      <Eraser className="h-4 w-4 mr-1.5" />
-      Clear Mask
-    </Button>
-  </div>
-</div>
-```
+| 任务 | 优先级 | 复杂度 |
+|------|--------|--------|
+| 首页添加示例图片快速试用 | 🔴 高 | 低 |
+| 工作台简化，移除冗余步骤 | 🔴 高 | 中 |
+| Quick Tools入口更明显 | 🟡 中 | 低 |
+| 模板分类筛选器 | 🟡 中 | 中 |
 
-### 快捷提示词标签
+### Phase 3: 社区功能 ⏸ 待开始
 
-为Inpainting添加常用编辑提示词：
+**目标：** 增强用户粘性和信任感
 
-```tsx
-const quickPrompts = [
-  { zh: '替换颜色', en: 'Change color' },
-  { zh: '模糊处理', en: 'Add blur' },
-  { zh: '移除对象', en: 'Remove object' },
-  { zh: '添加倒影', en: 'Add reflection' },
-  { zh: '改变材质', en: 'Change texture' },
-];
+| 任务 | 优先级 | 复杂度 |
+|------|--------|--------|
+| 灵感墙接入真实showcase数据 | 🟡 中 | 中 |
+| 用户可提交作品到showcase | 🟢 低 | 中 |
+| 作品点赞/浏览统计 | 🟢 低 | 低 |
+
+### Phase 4: SEO与营销 ⏸ 待开始
+
+**目标：** 为产品上线做好SEO准备
+
+| 任务 | 优先级 | 复杂度 |
+|------|--------|--------|
+| 所有页面添加SEO组件 | 🟡 中 | 低 |
+| 创建sitemap.xml | 🟡 中 | 低 |
+| 优化首页加载速度 | 🟡 中 | 中 |
+| 添加OG图片 | 🟢 低 | 低 |
+
+---
+
+## 技术债务清单
+
+| 问题 | 影响 | 建议处理时间 |
+|------|------|-------------|
+| Workbench.tsx文件过大(1114行) | 维护困难 | Phase 2 |
+| InspirationGallery使用硬编码数据 | 功能受限 | Phase 3 |
+| 缺少错误边界组件 | 用户体验 | Phase 2 |
+| 缺少离线状态处理 | 用户体验 | Phase 4 |
+
+---
+
+## 轻量化原则
+
+遵循"少输入降低使用阻力"的核心理念：
+
+1. **一键操作优先** - 能自动化的不让用户手动
+2. **智能默认值** - AI推荐的配置作为默认
+3. **渐进式披露** - 高级选项隐藏，需要时展开
+4. **快速预览** - 操作结果即时可见
+5. **模板复用** - 保存配置，一键应用
+
+---
+
+## 数据库表结构
+
+```sql
+-- 已创建的表
+generations     -- 生成历史
+templates       -- 模板/预设
+showcase        -- 社区作品展示
+profiles        -- 用户配置文件
+user_preferences -- 用户偏好设置
 ```
 
 ---
 
-## 预期效果
-
-1. **工具栏更直观**：按钮分组清晰，操作逻辑符合用户习惯
-2. **提示词功能完整**：用户可以输入详细的编辑指令或使用快捷标签
-3. **功能入口统一**：从工作台任何位置都能方便访问Quick Tools
-4. **视觉一致性**：按钮尺寸、间距、样式遵循设计规范
-
+*最后更新: 2026-02-03*

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { SEOHead } from '@/components/SEOHead';
 import { 
   Sparkles, 
   ArrowRight, 
@@ -81,7 +82,14 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Enhanced Liquid Glass Background Effect */}
+      <SEOHead 
+        title={language === 'zh' ? 'VisualFlow - AI电商设计平台' : 'VisualFlow - AI E-commerce Design Platform'}
+        description={language === 'zh' 
+          ? '一键生成专业电商产品图、主图、详情页。支持亚马逊、Shopify、TikTok等多平台，AI智能分析产品自动推荐最佳设计方案。'
+          : 'Generate professional e-commerce product images with one click. Supports Amazon, Shopify, TikTok and more. AI-powered product analysis for optimal design recommendations.'
+        }
+        lang={language}
+      />
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         {/* Main gradient orb following mouse - Enhanced Cyan/Teal with more visible gradients */}
         <div 
