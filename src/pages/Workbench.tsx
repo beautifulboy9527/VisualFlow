@@ -23,6 +23,7 @@ import { VisualPresetCards } from '@/components/workbench/VisualPresetCards';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { LanguageProvider, useLanguage } from '@/hooks/useLanguage';
+import { useGenerations, Generation } from '@/hooks/useGenerations';
 import { analyzeProduct, mapAIStyleToId, ProductAnalysis } from '@/lib/aiAnalysis';
 import { 
   Zap, 
@@ -58,11 +59,22 @@ const sampleImages = [
 
 const WorkbenchContent: React.FC = () => {
   const { language, t } = useLanguage();
+  const { 
+    generations, 
+    loading: generationsLoading, 
+    createGeneration, 
+    updateGeneration, 
+    deleteGeneration,
+    refetch: refetchGenerations 
+  } = useGenerations();
+  
   const [activeView, setActiveView] = useState<'workbench' | 'history' | 'templates'>('workbench');
   const [isAgentMode, setIsAgentMode] = useState(true);
   const [isAIProcessing, setIsAIProcessing] = useState(false);
   const [isRefreshingPlan, setIsRefreshingPlan] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<ProductAnalysis | null>(null);
+  const [currentGenerationId, setCurrentGenerationId] = useState<string | null>(null);
+  const [historySearchQuery, setHistorySearchQuery] = useState('');
   
   // Config history for undo functionality
   const [configHistory, setConfigHistory] = useState<Array<{
@@ -367,22 +379,49 @@ const WorkbenchContent: React.FC = () => {
   // FIXED: Additive calculation (modules + scenes), not multiplicative
   const totalImages = selectedModules.length + selectedScenes.length;
 
-  const handleGenerate = useCallback(() => {
+  const handleGenerate = useCallback(async () => {
     setShowConfirmModal(false);
     setIsGenerating(true);
     setProgress(0);
     setGeneratedImages([]);
     
+    // Create generation record in database
+    const inputImageUrls = uploadedImages.map(img => img.previewUrl).filter(Boolean) as string[];
+    const generation = await createGeneration({
+      input_images: inputImageUrls,
+      platform: selectedPlatform || undefined,
+      modules: selectedModules,
+      visual_style: visualStyle,
+      layout_style: layoutStyle,
+      scenes: selectedScenes,
+      ai_analysis: aiAnalysis ? (aiAnalysis as unknown as Record<string, unknown>) : undefined,
+    });
+    
+    if (generation) {
+      setCurrentGenerationId(generation.id);
+    }
+    
     const interval = setInterval(() => setProgress(prev => prev >= 100 ? 100 : prev + Math.random() * 15), 500);
     
-    setTimeout(() => {
+    setTimeout(async () => {
       clearInterval(interval);
       setProgress(100);
-      setGeneratedImages(sampleImages.slice(0, Math.min(4, totalImages || 4)));
+      
+      const outputImages = sampleImages.slice(0, Math.min(4, totalImages || 4));
+      setGeneratedImages(outputImages);
       setIsGenerating(false);
       setShowCelebration(true);
+      
+      // Update generation with output images
+      if (generation) {
+        await updateGeneration(generation.id, {
+          output_images: outputImages,
+          status: 'completed',
+          credits_used: outputImages.length,
+        });
+      }
     }, 4000);
-  }, [totalImages]);
+  }, [totalImages, uploadedImages, selectedPlatform, selectedModules, visualStyle, layoutStyle, selectedScenes, aiAnalysis, createGeneration, updateGeneration]);
 
   const handleDownload = (id: string) => toast({ title: language === 'zh' ? '下载中...' : 'Downloading...' });
   const handleZoom = (id: string) => {
@@ -775,51 +814,47 @@ const WorkbenchContent: React.FC = () => {
                 "p-6 lg:p-8",
                 isAgentMode && uploadedImages.length > 0 && selectedPlatform && generatedImages.length === 0 && !isGenerating ? "hidden" : ""
               )}>
-                {/* Empty State */}
+                {/* Empty State - Optimized for single screen view */}
                 {uploadedImages.length === 0 && generatedImages.length === 0 && !isGenerating && (
                   <div className="h-full overflow-y-auto animate-fade-in">
-                    <div className="max-w-5xl mx-auto space-y-8 pb-8">
-                      {/* Hero Section */}
-                      <div className="flex flex-col items-center text-center pt-8 pb-4">
-                        <div className="relative mb-4">
-                          <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20">
-                            <Package className="h-14 w-14 text-primary" />
-                          </div>
-                          <div className="absolute -inset-4 bg-primary/5 rounded-[2rem] blur-2xl -z-10" />
-                        </div>
-                        <h2 className="text-xl font-display font-bold text-foreground mb-2">
-                          {language === 'zh' ? '开始创建电商视觉' : 'Start Creating E-commerce Visuals'}
-                        </h2>
-                        <p className="text-sm text-foreground-muted max-w-md mb-4">
-                          {language === 'zh' 
-                            ? '上传产品图片，AI 将自动分析并生成专业的电商 KV 设计' 
-                            : 'Upload product images, AI will analyze and generate professional e-commerce KV designs'}
-                        </p>
-                        <div className="flex items-center gap-4 text-xs text-foreground-secondary">
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                              <Upload className="h-3 w-3 text-primary" />
+                    <div className="max-w-5xl mx-auto space-y-5 pb-6">
+                      {/* Compact Hero Section with animated guidance */}
+                      <div className="flex items-center justify-between px-2 pt-2">
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 animate-pulse-soft">
+                              <Package className="h-8 w-8 text-primary" />
                             </div>
+                          </div>
+                          <div>
+                            <h2 className="text-lg font-display font-bold text-foreground">
+                              {language === 'zh' ? '开始创建电商视觉' : 'Create E-commerce Visuals'}
+                            </h2>
+                            <p className="text-xs text-foreground-muted">
+                              {language === 'zh' ? 'AI 智能生成专业产品图' : 'AI-powered professional product images'}
+                            </p>
+                          </div>
+                        </div>
+                        {/* Animated workflow steps */}
+                        <div className="hidden md:flex items-center gap-2 text-xs text-foreground-secondary bg-secondary/30 px-3 py-1.5 rounded-full">
+                          <div className="flex items-center gap-1 animate-bounce-slow" style={{ animationDelay: '0ms' }}>
+                            <Upload className="h-3 w-3 text-primary" />
                             <span>{language === 'zh' ? '上传' : 'Upload'}</span>
                           </div>
                           <ChevronRight className="h-3 w-3 text-foreground-muted" />
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                              <Sparkles className="h-3 w-3 text-primary" />
-                            </div>
-                            <span>{language === 'zh' ? 'AI 分析' : 'Analyze'}</span>
+                          <div className="flex items-center gap-1 animate-bounce-slow" style={{ animationDelay: '200ms' }}>
+                            <Sparkles className="h-3 w-3 text-primary" />
+                            <span>{language === 'zh' ? '分析' : 'Analyze'}</span>
                           </div>
                           <ChevronRight className="h-3 w-3 text-foreground-muted" />
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                              <ImageIcon className="h-3 w-3 text-primary" />
-                            </div>
+                          <div className="flex items-center gap-1 animate-bounce-slow" style={{ animationDelay: '400ms' }}>
+                            <ImageIcon className="h-3 w-3 text-primary" />
                             <span>{language === 'zh' ? '生成' : 'Generate'}</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Quick Tool Cards - Flyelep inspired */}
+                      {/* Quick Tool Cards - Compact layout */}
                       <QuickToolCards 
                         onToolSelect={(toolId) => {
                           toast({
@@ -831,7 +866,7 @@ const WorkbenchContent: React.FC = () => {
                         }}
                       />
 
-                      {/* Inspiration Gallery - Pixifield inspired */}
+                      {/* Inspiration Gallery - Show more items in view */}
                       <InspirationGallery 
                         onSelectInspiration={(item) => {
                           toast({
@@ -958,12 +993,35 @@ const WorkbenchContent: React.FC = () => {
         {activeView === 'history' && (
           <main className="flex-1 overflow-hidden bg-card/30">
             <HistoryPanel 
-              historyItems={[]} 
-              onViewItem={() => {}} 
-              onDownloadItem={() => {}} 
-              onDeleteItem={() => {}} 
-              searchQuery="" 
-              onSearchChange={() => {}} 
+              historyItems={generations.map(g => ({
+                id: g.id,
+                images: g.output_images.map(img => img.url),
+                createdAt: new Date(g.created_at),
+                prompt: g.platform ? `${g.platform} - ${g.visual_style || 'auto'}` : undefined,
+                creditsUsed: g.credits_used,
+              }))} 
+              onViewItem={(item) => {
+                const gen = generations.find(g => g.id === item.id);
+                if (gen && gen.output_images.length > 0) {
+                  setGeneratedImages(gen.output_images.map(img => ({
+                    id: img.id,
+                    url: img.url,
+                    label: img.label,
+                  })));
+                  setActiveView('workbench');
+                  toast({
+                    title: language === 'zh' ? '已加载历史记录' : 'History loaded',
+                  });
+                }
+              }} 
+              onDownloadItem={(item) => {
+                toast({ title: language === 'zh' ? '下载中...' : 'Downloading...' });
+              }} 
+              onDeleteItem={async (itemId) => {
+                await deleteGeneration(itemId);
+              }} 
+              searchQuery={historySearchQuery} 
+              onSearchChange={setHistorySearchQuery} 
             />
           </main>
         )}

@@ -298,6 +298,80 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Quick Try Section - Sample Products */}
+        <section className="py-16 px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-3">
+                {language === 'zh' ? '快速体验' : 'Quick Try'}
+              </h2>
+              <p className="text-foreground-muted">
+                {language === 'zh' ? '点击示例产品，立即体验 AI 设计' : 'Click a sample product to experience AI design'}
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { 
+                  id: 'skincare', 
+                  image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop',
+                  nameZh: '护肤品', 
+                  nameEn: 'Skincare' 
+                },
+                { 
+                  id: 'watch', 
+                  image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop',
+                  nameZh: '腕表', 
+                  nameEn: 'Watch' 
+                },
+                { 
+                  id: 'headphones', 
+                  image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+                  nameZh: '耳机', 
+                  nameEn: 'Headphones' 
+                },
+                { 
+                  id: 'coffee', 
+                  image: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&h=400&fit=crop',
+                  nameZh: '咖啡', 
+                  nameEn: 'Coffee' 
+                },
+              ].map((product, index) => (
+                <button
+                  key={product.id}
+                  onClick={() => {
+                    // Navigate to workbench with sample product
+                    navigate('/workbench', { state: { sampleProduct: product } });
+                  }}
+                  className={cn(
+                    "group relative aspect-square rounded-2xl overflow-hidden",
+                    "border border-border/30 hover:border-primary/50",
+                    "transition-all duration-300 hover:shadow-lg hover:shadow-primary/10",
+                    "animate-fade-in-scale"
+                  )}
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <img 
+                    src={product.image} 
+                    alt={language === 'zh' ? product.nameZh : product.nameEn}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                    <span className="text-white text-sm font-medium">
+                      {language === 'zh' ? product.nameZh : product.nameEn}
+                    </span>
+                    <div className="flex items-center gap-1 text-white/80 text-xs mt-1">
+                      <Sparkles className="h-3 w-3" />
+                      {language === 'zh' ? '点击试用' : 'Click to try'}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Stats Section - Enhanced with gradient text */}
         <section className="py-24 px-6 relative">
           {/* Subtle gradient background */}
