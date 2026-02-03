@@ -178,19 +178,21 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
         </button>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[280px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-        {displayItems.map((item) => (
+      {/* Horizontal scroll container - show complete images */}
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
+        {displayItems.map((item, index) => (
           <button
             key={item.id}
             onClick={() => onSelectInspiration?.(item)}
             onMouseEnter={() => setHoveredId(item.id)}
             onMouseLeave={() => setHoveredId(null)}
             className={cn(
-              "relative group rounded-xl overflow-hidden aspect-[4/5]",
+              "relative group rounded-xl overflow-hidden shrink-0",
+              "w-[180px] sm:w-[200px] lg:w-[220px] aspect-[3/4]",
               "ring-2 ring-transparent hover:ring-primary/50 transition-all duration-300",
               "hover:shadow-lg hover:shadow-primary/10 animate-fade-in-scale"
             )}
-            style={{ animationDelay: `${parseInt(item.id) * 50}ms` }}
+            style={{ animationDelay: `${index * 50}ms` }}
           >
             <img
               src={item.imageUrl}
@@ -231,7 +233,7 @@ export const InspirationGallery: React.FC<InspirationGalleryProps> = ({
             
             {/* Title and action */}
             <div className="absolute bottom-0 left-0 right-0 p-3">
-              <p className="text-sm font-semibold text-white mb-1.5 drop-shadow-md">
+              <p className="text-sm font-semibold text-white mb-1 drop-shadow-md line-clamp-1">
                 {language === 'zh' ? item.titleZh : item.title}
               </p>
               <div className={cn(
