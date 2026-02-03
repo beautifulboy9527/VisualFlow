@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { SEOHead } from '@/components/SEOHead';
 import { Logo, LogoIcon } from '@/components/layout/Logo';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
@@ -123,7 +124,19 @@ const Pricing: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <>
+      <SEOHead
+        title={language === 'zh' ? '价格方案 - VisualFlow' : 'Pricing - VisualFlow'}
+        description={language === 'zh' 
+          ? '选择适合您的AI电商设计方案。免费版、专业版、企业版，满足不同规模需求。' 
+          : 'Choose the right AI e-commerce design plan for you. Free, Pro, and Enterprise plans for every need.'}
+        keywords={language === 'zh' 
+          ? 'VisualFlow价格, AI设计定价, 电商设计套餐, 订阅方案' 
+          : 'VisualFlow pricing, AI design plans, e-commerce design packages, subscription plans'}
+        lang={language}
+        canonicalUrl="https://visualflow.app/pricing"
+      />
+      <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background effects */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div 
@@ -353,7 +366,8 @@ const Pricing: React.FC = () => {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 };
 

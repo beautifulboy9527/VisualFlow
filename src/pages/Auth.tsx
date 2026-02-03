@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/layout/Logo';
+import { SEOHead } from '@/components/SEOHead';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -140,7 +141,21 @@ const Auth: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-mesh flex items-center justify-center px-4">
+    <>
+      <SEOHead
+        title={isLogin 
+          ? (language === 'zh' ? '登录 - VisualFlow' : 'Sign In - VisualFlow')
+          : (language === 'zh' ? '注册 - VisualFlow' : 'Sign Up - VisualFlow')}
+        description={language === 'zh' 
+          ? '登录或注册VisualFlow，开始使用AI生成专业电商产品图。' 
+          : 'Sign in or sign up for VisualFlow to start creating professional e-commerce product images with AI.'}
+        keywords={language === 'zh' 
+          ? 'VisualFlow登录, 注册账户, AI设计平台' 
+          : 'VisualFlow login, create account, AI design platform'}
+        lang={language}
+        noIndex={true}
+      />
+      <div className="min-h-screen bg-mesh flex items-center justify-center px-4">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-liquid" />
@@ -350,6 +365,7 @@ const Auth: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
