@@ -1,15 +1,35 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, X, Plus, Image as ImageIcon, Camera, Layers, Star } from 'lucide-react';
+import { Upload, X, Plus, Image as ImageIcon, Camera, Layers, Star, User, Package, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+export type ImageType = 'main' | 'angle' | 'detail' | 'lifestyle' | 'model' | 'packaging';
 
 export interface UploadedImage {
   id: string;
   file: File;
   previewUrl: string;
-  type: 'main' | 'angle' | 'detail' | 'lifestyle';
+  type: ImageType;
   label?: string;
 }
+
+const IMAGE_TYPE_CONFIG: { type: ImageType; labelKey: string; icon: React.ElementType }[] = [
+  { type: 'main', labelKey: 'upload.mainImage', icon: Star },
+  { type: 'angle', labelKey: 'upload.angleImage', icon: Camera },
+  { type: 'detail', labelKey: 'upload.detailImage', icon: Layers },
+  { type: 'lifestyle', labelKey: 'upload.lifestyleImage', icon: ImageIcon },
+  { type: 'model', labelKey: 'upload.modelImage', icon: User },
+  { type: 'packaging', labelKey: 'upload.packagingImage', icon: Package },
+];
+
+// Smart sequential assignment order (after main is taken)
+const AUTO_ASSIGN_ORDER: ImageType[] = ['angle', 'detail', 'lifestyle', 'model', 'packaging'];
 
 interface MultiImageUploadProps {
   images: UploadedImage[];
@@ -24,19 +44,21 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
 }) => {
   const { t } = useLanguage();
   const [isDragging, setIsDragging] = useState(false);
-  const [activeDropZone, setActiveDropZone] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const imageTypes = [
-    { type: 'main' as const, labelKey: 'upload.mainImage', icon: Star, descKey: 'upload.mainImage' },
-    { type: 'angle' as const, labelKey: 'upload.angleImage', icon: Camera, descKey: 'upload.angleImage' },
-    { type: 'detail' as const, labelKey: 'upload.detailImage', icon: Layers, descKey: 'upload.detailImage' },
-    { type: 'lifestyle' as const, labelKey: 'upload.lifestyleImage', icon: ImageIcon, descKey: 'upload.lifestyleImage' },
-  ];
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
-  const handleFileSelect = useCallback((files: FileList, type: UploadedImage['type'] = 'main') => {
+  /** Find the next best type to assign based on what's already used */
+  const getNextAutoType = useCallback((currentImages: UploadedImage[]): ImageType => {
+    const usedTypes = new Set(currentImages.map(img => img.type));
+    for (const type of AUTO_ASSIGN_ORDER) {
+      if (!usedTypes.has(type)) return type;
+    }
+    // All unique types used, default to angle (allows duplicates)
+    return 'angle';
+  }, []);
+
+  const handleFileSelect = useCallback((files: FileList, forceType?: ImageType) => {
     const newImages: UploadedImage[] = [];
     const hasMain = images.some(img => img.type === 'main');
     
@@ -44,8 +66,14 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
       if (!file.type.startsWith('image/')) return;
       if (images.length + newImages.length >= maxImages) return;
       
-      // If main already exists and type is 'main', auto-assign 'angle'
-      const assignedType = (type === 'main' && (hasMain || newImages.some(i => i.type === 'main'))) ? 'angle' : type;
+      let assignedType: ImageType;
+      if (forceType) {
+        assignedType = forceType;
+      } else if (!hasMain && !newImages.some(i => i.type === 'main')) {
+        assignedType = 'main';
+      } else {
+        assignedType = getNextAutoType([...images, ...newImages]);
+      }
       
       newImages.push({
         id: generateId(),
@@ -56,14 +84,16 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
     });
     
     onImagesChange([...images, ...newImages]);
-  }, [images, maxImages, onImagesChange]);
+  }, [images, maxImages, onImagesChange, getNextAutoType]);
 
   const handleRemove = (id: string) => {
     const image = images.find(img => img.id === id);
-    if (image) {
-      URL.revokeObjectURL(image.previewUrl);
-    }
+    if (image) URL.revokeObjectURL(image.previewUrl);
     onImagesChange(images.filter(img => img.id !== id));
+  };
+
+  const handleChangeType = (id: string, newType: ImageType) => {
+    onImagesChange(images.map(img => img.id === id ? { ...img, type: newType } : img));
   };
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -76,23 +106,53 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    setActiveDropZone(null);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent, type: UploadedImage['type'] = 'main') => {
+  const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    setActiveDropZone(null);
-
     const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      handleFileSelect(files, type);
-    }
+    if (files.length > 0) handleFileSelect(files);
   }, [handleFileSelect]);
 
   const mainImage = images.find(img => img.type === 'main');
   const otherImages = images.filter(img => img.type !== 'main');
+
+  const TypeBadge: React.FC<{ image: UploadedImage; size?: 'sm' | 'md' }> = ({ image, size = 'sm' }) => {
+    const config = IMAGE_TYPE_CONFIG.find(c => c.type === image.type);
+    const Icon = config?.icon || ImageIcon;
+    
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className={cn(
+            "flex items-center gap-1 rounded bg-foreground/70 text-background font-medium cursor-pointer hover:bg-foreground/90 transition-colors",
+            size === 'sm' ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-xs"
+          )}>
+            <Icon className={size === 'sm' ? "h-2.5 w-2.5" : "h-3 w-3"} />
+            {t(config?.labelKey || 'upload.angleImage')}
+            <ChevronDown className={size === 'sm' ? "h-2 w-2" : "h-2.5 w-2.5"} />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="min-w-[120px]">
+          {IMAGE_TYPE_CONFIG.map(({ type, labelKey, icon: ItemIcon }) => (
+            <DropdownMenuItem
+              key={type}
+              onClick={() => handleChangeType(image.id, type)}
+              className={cn(
+                "flex items-center gap-2 text-xs",
+                image.type === type && "bg-accent"
+              )}
+            >
+              <ItemIcon className="h-3 w-3" />
+              {t(labelKey)}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -107,7 +167,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        onDrop={(e) => handleDrop(e, 'main')}
+        onDrop={handleDrop}
       >
         <input
           ref={fileInputRef}
@@ -116,8 +176,8 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
           multiple
           className="hidden"
           onChange={(e) => {
-            if (e.target.files) handleFileSelect(e.target.files, 'main');
-            e.target.value = ''; // Reset so same file can be re-selected
+            if (e.target.files) handleFileSelect(e.target.files);
+            e.target.value = '';
           }}
         />
 
@@ -128,21 +188,15 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
               alt={t('upload.mainImage')}
               className="w-full aspect-square object-cover rounded-xl"
             />
-            {/* Liquid overlay effect */}
             <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
-            
-            {/* Remove button */}
             <button
               onClick={() => handleRemove(mainImage.id)}
               className="absolute top-2 right-2 p-1.5 rounded-lg bg-foreground/80 text-background hover:bg-destructive transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
-
-            {/* Type badge */}
-            <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-primary/90 text-primary-foreground text-xs font-medium flex items-center gap-1.5">
-              <Star className="h-3 w-3" />
-              {t('upload.mainImage')}
+            <div className="absolute bottom-2 left-2">
+              <TypeBadge image={mainImage} size="md" />
             </div>
           </div>
         ) : (
@@ -150,7 +204,6 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
             className="flex flex-col items-center gap-4 cursor-pointer"
             onClick={() => fileInputRef.current?.click()}
           >
-            {/* Animated icon */}
             <div className={cn(
               "relative p-4 rounded-2xl transition-all duration-300",
               isDragging ? "bg-primary/20 scale-110" : "bg-secondary"
@@ -163,7 +216,6 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
                 <div className="absolute inset-0 rounded-2xl bg-primary/20 animate-ping" />
               )}
             </div>
-            
             <div className="text-center">
               <p className="text-sm font-medium text-foreground">
                 {isDragging ? t('upload.dropHere') : t('upload.dropOrClick')}
@@ -199,13 +251,12 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
                 >
                   <X className="h-3 w-3" />
                 </button>
-                <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-foreground/70 text-background text-[10px] font-medium">
-                  {t(`upload.${image.type}Image`)}
+                <div className="absolute bottom-1 left-1">
+                  <TypeBadge image={image} />
                 </div>
               </div>
             ))}
             
-            {/* Add more button */}
             {images.length < maxImages && (
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -218,10 +269,10 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
         </div>
       )}
 
-      {/* Quick type selectors for next upload */}
+      {/* Quick type upload buttons */}
       {images.length > 0 && images.length < maxImages && (
         <div className="flex flex-wrap gap-2">
-          {imageTypes.slice(1).map(({ type, labelKey, icon: Icon }) => (
+          {IMAGE_TYPE_CONFIG.filter(c => c.type !== 'main').map(({ type, labelKey, icon: Icon }) => (
             <button
               key={type}
               onClick={() => {
