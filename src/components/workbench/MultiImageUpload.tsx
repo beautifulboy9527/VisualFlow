@@ -38,16 +38,20 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
 
   const handleFileSelect = useCallback((files: FileList, type: UploadedImage['type'] = 'main') => {
     const newImages: UploadedImage[] = [];
+    const hasMain = images.some(img => img.type === 'main');
     
     Array.from(files).forEach((file) => {
       if (!file.type.startsWith('image/')) return;
       if (images.length + newImages.length >= maxImages) return;
       
+      // If main already exists and type is 'main', auto-assign 'angle'
+      const assignedType = (type === 'main' && (hasMain || newImages.some(i => i.type === 'main'))) ? 'angle' : type;
+      
       newImages.push({
         id: generateId(),
         file,
         previewUrl: URL.createObjectURL(file),
-        type,
+        type: assignedType,
       });
     });
     
@@ -111,7 +115,10 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
           accept="image/*"
           multiple
           className="hidden"
-          onChange={(e) => e.target.files && handleFileSelect(e.target.files, 'main')}
+          onChange={(e) => {
+            if (e.target.files) handleFileSelect(e.target.files, 'main');
+            e.target.value = ''; // Reset so same file can be re-selected
+          }}
         />
 
         {mainImage ? (

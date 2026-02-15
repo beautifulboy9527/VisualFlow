@@ -556,10 +556,48 @@ const WorkbenchContent: React.FC = () => {
                     />
                   </ConfigSection>
 
-                  {/* 02 - Platform Selection (Both modes - user must choose) */}
+                  {/* Product Info - always visible after upload */}
+                  {uploadedImages.length > 0 && (
+                    <ConfigSection
+                      number="02"
+                      title={language === 'zh' ? '商品信息' : 'Product Info'}
+                      icon={<Package className="h-3.5 w-3.5" />}
+                      isComplete={!!productName}
+                      isAgentMode={isAgentMode}
+                    >
+                      <div className="space-y-2">
+                        <div>
+                          <label className="text-[10px] text-foreground-muted mb-1 block">
+                            {language === 'zh' ? '产品名称' : 'Product Name'}
+                          </label>
+                          <input
+                            type="text"
+                            value={productName}
+                            onChange={(e) => setProductName(e.target.value)}
+                            placeholder={language === 'zh' ? '例如：玻尿酸精华液' : 'e.g. Hyaluronic Acid Serum'}
+                            className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-foreground-muted mb-1 block">
+                            {language === 'zh' ? '核心卖点 / 关键词' : 'Key Selling Points'}
+                          </label>
+                          <textarea
+                            value={productKeywords}
+                            onChange={(e) => setProductKeywords(e.target.value)}
+                            placeholder={language === 'zh' ? '例如：深层补水、抗衰老、天然成分' : 'e.g. deep hydration, anti-aging, natural'}
+                            rows={2}
+                            className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors resize-none"
+                          />
+                        </div>
+                      </div>
+                    </ConfigSection>
+                  )}
+
+                  {/* 03 - Platform Selection (Both modes - user must choose) */}
                   {uploadedImages.length > 0 && (
                     <ConfigSection 
-                      number="02" 
+                      number="03" 
                       title={language === 'zh' ? '平台配置' : 'Platform'}
                       icon={<Layers className="h-3.5 w-3.5" />}
                       isComplete={selectedModules.length > 0}
@@ -592,44 +630,6 @@ const WorkbenchContent: React.FC = () => {
                   {/* Manual Mode: Show all config sections step by step */}
                   {!isAgentMode && (
                     <>
-                      {/* 03 - Product Info (Manual) */}
-                      {uploadedImages.length > 0 && selectedPlatform && (
-                        <ConfigSection 
-                          number="03" 
-                          title={language === 'zh' ? '商品信息' : 'Product Info'}
-                          icon={<Package className="h-3.5 w-3.5" />}
-                          isComplete={!!productName}
-                          isAgentMode={isAgentMode}
-                        >
-                          <div className="space-y-2">
-                            <div>
-                              <label className="text-[10px] text-foreground-muted mb-1 block">
-                                {language === 'zh' ? '产品名称' : 'Product Name'}
-                              </label>
-                              <input
-                                type="text"
-                                value={productName}
-                                onChange={(e) => setProductName(e.target.value)}
-                                placeholder={language === 'zh' ? '输入产品名称' : 'Enter product name'}
-                                className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-[10px] text-foreground-muted mb-1 block">
-                                {language === 'zh' ? '核心卖点' : 'Key Points'}
-                              </label>
-                              <textarea
-                                value={productKeywords}
-                                onChange={(e) => setProductKeywords(e.target.value)}
-                                placeholder={language === 'zh' ? '输入产品关键词' : 'Enter keywords'}
-                                rows={2}
-                                className="w-full px-3 py-2 rounded-lg bg-card border border-border/50 text-sm focus:border-primary/50 focus:outline-none transition-colors resize-none"
-                              />
-                            </div>
-                          </div>
-                        </ConfigSection>
-                      )}
-
                       {/* 04 - Scene Planning (Manual) */}
                       {selectedPlatform && (
                         <ConfigSection 
