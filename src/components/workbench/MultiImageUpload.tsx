@@ -1,7 +1,8 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, X, Plus, Image as ImageIcon, Camera, Layers, Star, User, Package, ChevronDown } from 'lucide-react';
+import { Upload, X, Plus, Image as ImageIcon, Camera, Layers, Star, User, Package, ChevronDown, Sparkles, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
+import { classifyImages } from '@/lib/imageClassifier';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +45,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
 }) => {
   const { t } = useLanguage();
   const [isDragging, setIsDragging] = useState(false);
+  const [isClassifying, setIsClassifying] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -58,32 +60,58 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
     return 'angle';
   }, []);
 
-  const handleFileSelect = useCallback((files: FileList, forceType?: ImageType) => {
-    const newImages: UploadedImage[] = [];
-    const hasMain = images.some(img => img.type === 'main');
+  const handleFileSelect = useCallback(async (files: FileList, forceType?: ImageType) => {
+    const validFiles: File[] = [];
     
     Array.from(files).forEach((file) => {
       if (!file.type.startsWith('image/')) return;
-      if (images.length + newImages.length >= maxImages) return;
-      
-      let assignedType: ImageType;
+      if (images.length + validFiles.length >= maxImages) return;
+      validFiles.push(file);
+    });
+
+    if (validFiles.length === 0) return;
+
+    // Create images with temporary types first (show immediately)
+    const newImages: UploadedImage[] = validFiles.map((file, i) => {
+      let tempType: ImageType;
       if (forceType) {
-        assignedType = forceType;
-      } else if (!hasMain && !newImages.some(i => i.type === 'main')) {
-        assignedType = 'main';
+        tempType = forceType;
+      } else if (!images.some(img => img.type === 'main') && i === 0) {
+        tempType = 'main';
       } else {
-        assignedType = getNextAutoType([...images, ...newImages]);
+        tempType = getNextAutoType([...images, ...validFiles.slice(0, i).map((_, j) => ({ type: 'main' as ImageType, id: '', file: validFiles[j], previewUrl: '' }))]);
       }
-      
-      newImages.push({
+      return {
         id: generateId(),
         file,
         previewUrl: URL.createObjectURL(file),
-        type: assignedType,
-      });
+        type: tempType,
+      };
     });
-    
-    onImagesChange([...images, ...newImages]);
+
+    const allImages = [...images, ...newImages];
+    onImagesChange(allImages);
+
+    // If forceType was specified, skip AI classification
+    if (forceType) return;
+
+    // Run AI classification in background
+    setIsClassifying(true);
+    try {
+      const allFiles = allImages.map(img => img.file);
+      const categories = await classifyImages(allFiles);
+      
+      // Update all images with AI-classified types
+      const updated = allImages.map((img, i) => ({
+        ...img,
+        type: categories[i] || img.type,
+      }));
+      onImagesChange(updated);
+    } catch (err) {
+      console.error('AI classification failed, keeping defaults:', err);
+    } finally {
+      setIsClassifying(false);
+    }
   }, [images, maxImages, onImagesChange, getNextAutoType]);
 
   const handleRemove = (id: string) => {
@@ -235,6 +263,12 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
             <p className="text-xs font-medium text-foreground-muted">
               {t('upload.additional')} ({otherImages.length}/{maxImages - 1})
             </p>
+            {isClassifying && (
+              <span className="flex items-center gap-1.5 text-xs text-primary animate-pulse">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                {t('upload.classifying')}
+              </span>
+            )}
           </div>
           
           <div className="grid grid-cols-4 gap-2">

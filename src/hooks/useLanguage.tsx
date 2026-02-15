@@ -244,6 +244,7 @@ export const translations: Translations = {
   'upload.lifestyleImage': { zh: '场景图', en: 'Lifestyle' },
   'upload.modelImage': { zh: '模特图', en: 'Model' },
   'upload.packagingImage': { zh: '包装图', en: 'Packaging' },
+  'upload.classifying': { zh: 'AI 智能分类中...', en: 'AI classifying...' },
   'upload.supportedFormats': { zh: '支持 JPG、PNG，最大 10MB', en: 'JPG, PNG up to 10MB' },
   'upload.aiAnalyzing': { zh: 'AI 正在分析产品...', en: 'AI analyzing product...' },
   'upload.dropImage': { zh: '拖放图片或点击上传', en: 'Drop image or click to upload' },
